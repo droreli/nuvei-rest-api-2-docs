@@ -1,0 +1,119 @@
+---
+title: "Transaction Types"
+description: "Understanding Sale, Auth, and other transaction types"
+---
+
+# Transaction Types
+
+Choose the right transaction type based on your business flow.
+
+## Available Types
+
+| Type | Description | Captures Funds |
+|------|-------------|----------------|
+| `Sale` | Authorize and capture in one step | Yes, immediately |
+| `Auth` | Authorization only | No, requires settle |
+
+## Sale vs Auth
+
+<Tabs>
+  <Tab title="Sale (Recommended)">
+    **Use when:** You can fulfill the order immediately
+    
+    - Single API call
+    - Funds captured immediately
+    - Simpler integration
+    
+    ```json
+    {
+      "transactionType": "Sale",
+      "amount": 100,
+      "currency": "USD"
+    }
+    ```
+    
+    **Best for:**
+    - Digital goods
+    - Immediate delivery
+    - Services
+  </Tab>
+  <Tab title="Auth + Settle">
+    **Use when:** You need to verify inventory or delay capture
+    
+    - Two API calls (Auth → Settle)
+    - Funds held but not captured
+    - Can void if needed
+    
+    ```json
+    // Step 1: Authorize
+    {
+      "transactionType": "Auth",
+      "amount": 100,
+      "currency": "USD"
+    }
+    
+    // Step 2: Settle (later)
+    POST /payments/{paymentId}/settles
+    {
+      "processingEntityId": "pe_12345"
+    }
+    ```
+    
+    **Best for:**
+    - Physical goods (ship then capture)
+    - Reservations
+    - Pre-orders
+  </Tab>
+</Tabs>
+
+## Transaction Flow Diagram
+
+```mermaid
+flowchart TD
+    A[Customer Checkout] --> B{Transaction Type}
+    
+    B -->|Sale| C[Authorize + Capture]
+    C --> D[Funds Captured ✓]
+    
+    B -->|Auth| E[Authorize Only]
+    E --> F{Fulfill Order?}
+    F -->|Yes| G[Settle]
+    G --> D
+    F -->|No| H[Void]
+    H --> I[Funds Released]
+    
+    style D fill:#00D09C,stroke:#00B88A
+    style I fill:#FF6B6B,stroke:#EE5A5A
+```
+
+## 3DS Transaction Types
+
+During 3DS authentication, you'll see these internal types:
+
+| Type | Description |
+|------|-------------|
+| `InitAuth3D` | Initial 3DS authentication request |
+| `Auth3D` | 3DS challenge authentication |
+
+These are handled automatically—you still specify `Sale` or `Auth` in your request.
+
+## Choosing the Right Type
+
+<CardGroup cols={2}>
+  <Card title="Use Sale" icon="bolt">
+    - Digital products
+    - Subscriptions
+    - Immediate fulfillment
+    - Simplicity preferred
+  </Card>
+  <Card title="Use Auth" icon="clock">
+    - Physical goods
+    - Travel bookings
+    - Pre-orders
+    - Inventory verification needed
+  </Card>
+</CardGroup>
+
+<Warning>
+  Authorizations expire after 7-30 days (varies by card network). Settle within this window or the auth will be released.
+</Warning>

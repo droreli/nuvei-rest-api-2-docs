@@ -1,0 +1,122 @@
+---
+title: "RESTful Structure"
+description: "Understanding the REST 2.0 API design patterns"
+---
+
+# RESTful Structure
+
+REST API 2.0 follows true RESTful conventions, making it intuitive and predictable.
+
+## HTTP Methods
+
+| Method | Purpose | Example |
+|--------|---------|---------|
+| `POST` | Create a resource | Create a payment |
+| `GET` | Retrieve a resource | Get payment details |
+| `PUT` | Replace a resource | Update full record |
+| `PATCH` | Partial update | Update specific fields |
+| `DELETE` | Remove a resource | Cancel a pending operation |
+
+## URL Patterns
+
+### Resource Creation
+
+```
+POST https://api.nuvei.com/payment-api/{resource}
+```
+
+**Examples:**
+- `POST /payment-api/payments` — Create a new payment
+- `POST /payment-api/orders` — Create a new order
+
+### Resource Operations
+
+```
+POST https://api.nuvei.com/payment-api/{resource}/{id}/{operation}
+```
+
+**Examples:**
+- `POST /payment-api/payments/abc123/refunds` — Refund a payment
+- `POST /payment-api/payments/abc123/voids` — Void a payment
+- `POST /payment-api/payments/abc123/settles` — Settle a payment
+
+### Resource Retrieval
+
+```
+GET https://api.nuvei.com/payment-api/{resource}/{id}
+```
+
+**Examples:**
+- `GET /payment-api/payments/abc123` — Get payment details
+- `GET /payment-api/buyers/buyer123/payment-tokens` — Get stored tokens
+
+## Request Format
+
+All requests use JSON:
+
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "processingEntityId": "pe_12345",
+    "transactionType": "Sale",
+    "amount": 100,
+    "currency": "USD",
+    ...
+  }'
+```
+
+## Response Format
+
+All responses return JSON with consistent structure:
+
+<Tabs>
+  <Tab title="Success">
+```json
+{
+  "paymentId": "375011",
+  "transactionId": "2110000000010964089",
+  "amount": 100,
+  "currency": "USD",
+  "transactionType": "Sale",
+  "result": {
+    "status": "approved"
+  },
+  "authCode": "300250"
+}
+```
+  </Tab>
+  <Tab title="Error">
+```json
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "Validation failed",
+    "details": [
+      {
+        "field": "amount",
+        "reason": "required",
+        "message": "Amount is required"
+      }
+    ]
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+## Comparison with REST 1.0
+
+| Aspect | REST 1.0 | REST 2.0 |
+|--------|----------|----------|
+| Base URL | `ppp-test.nuvei.com/ppp/api/v1/` | `api.nuvei.com/payment-api/` |
+| Create payment | `POST /payment` | `POST /payments` |
+| Refund | `POST /refundTransaction` | `POST /payments/{id}/refunds` |
+| Auth method | Checksum in body | API key in header |
+| Resource naming | Action-based | Resource-based |
+
+<Card title="Next: Environments" icon="server" href="/concepts/environments">
+  Learn about sandbox and production environments
+</Card>

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Nuvei REST API 2.0",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#00D09C",
+    "light": "#00E5AC",
+    "dark": "#00B88A",
+    "anchors": {
+      "from": "#00D09C",
+      "to": "#0066FF"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "https://support.nuvei.com"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Control Panel",
+    "url": "https://portal.nuvei.com"
+  },
+  "tabs": [
+    {
+      "name": "Guides",
+      "url": "guides"
+    },
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "API Status",
+      "icon": "signal",
+      "url": "https://status.nuvei.com"
+    },
+    {
+      "name": "Changelog",
+      "icon": "list",
+      "url": "/changelog"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "whats-new",
+        "quickstart",
+        "authentication"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "concepts/restful-structure",
+        "concepts/environments",
+        "concepts/record-ids",
+        "concepts/transaction-types"
+      ]
+    },
+    {
+      "group": "Payment Guides",
+      "pages": [
+        "guides/overview",
+        {
+          "group": "Card Payments",
+          "pages": [
+            "guides/cards/non-3ds",
+            "guides/cards/3ds-flow",
+            "guides/cards/tokenization"
+          ]
+        },
+        {
+          "group": "Digital Wallets",
+          "pages": [
+            "guides/wallets/apple-pay",
+            "guides/wallets/google-pay"
+          ]
+        },
+        {
+          "group": "Bank Transfers",
+          "pages": [
+            "guides/bank/ach"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Operations",
+      "pages": [
+        "guides/operations/refunds",
+        "guides/operations/voids",
+        "guides/operations/settlements"
+      ]
+    },
+    {
+      "group": "Webhooks",
+      "pages": [
+        "guides/webhooks/overview",
+        "guides/webhooks/handling"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/overview"
+      ]
+    },
+    {
+      "group": "Payments",
+      "pages": [
+        "api-reference/payments/create-payment",
+        "api-reference/payments/fingerprint",
+        "api-reference/payments/challenge",
+        "api-reference/payments/refund",
+        "api-reference/payments/void",
+        "api-reference/payments/settle"
+      ]
+    },
+    {
+      "group": "Accounts",
+      "pages": [
+        "api-reference/accounts/get-payment-tokens"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "testing",
+        "error-codes",
+        "changelog"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "linkedin": "https://www.linkedin.com/company/nuvei",
+    "twitter": "https://twitter.com/Global_Nuvei"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true
+  },
+  "api": {
+    "baseUrl": "https://api-sandbox.nuvei.com",
+    "auth": {
+      "method": "key",
+      "name": "x-api-key"
+    }
+  }
+}

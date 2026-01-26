@@ -1,0 +1,93 @@
+---
+title: "Void Payment"
+api: "POST https://api-sandbox.nuvei.com/payment-api/payments/{paymentId}/voids"
+description: "Void an authorized payment"
+---
+
+# Void Payment
+
+Cancel an authorized payment before settlement.
+
+## Path Parameters
+
+<ParamField path="paymentId" type="string" required>
+  The payment ID to void
+</ParamField>
+
+## Request Body
+
+<ParamField body="processingEntityId" type="string" required>
+  Your merchant processing entity ID
+</ParamField>
+
+<ParamField body="amount" type="number" required>
+  Amount to void
+</ParamField>
+
+<ParamField body="currency" type="string" required>
+  Currency code (must match original)
+</ParamField>
+
+<ParamField body="comment" type="string">
+  Internal note for the void
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments/375011/voids \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "processingEntityId": "1234567890",
+    "amount": 100,
+    "currency": "USD",
+    "comment": "Customer cancelled order"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api-sandbox.nuvei.com/payment-api/payments/375011/voids',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'YOUR_API_KEY'
+    },
+    body: JSON.stringify({
+      processingEntityId: '1234567890',
+      amount: 100,
+      currency: 'USD',
+      comment: 'Customer cancelled order'
+    })
+  }
+);
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "paymentId": "375011",
+  "transactionId": "2110000000010964091",
+  "amount": 100,
+  "currency": "USD",
+  "transactionType": "Void",
+  "result": {
+    "status": "approved"
+  }
+}
+```
+
+## Notes
+
+<Warning>
+  Voids are only available for:
+  - Auth transactions before settlement
+  - Same-day Sale transactions before batch close
+  
+  Use [refund](/api-reference/payments/refund) for settled transactions.
+</Warning>

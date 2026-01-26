@@ -1,0 +1,160 @@
+---
+title: "Authentication"
+description: "Secure your API requests with API key authentication"
+---
+
+# Authentication
+
+REST API 2.0 uses API key authentication—simple, secure, and developer-friendly.
+
+## How It Works
+
+Include your API key in the `x-api-key` header of every request:
+
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: sk_test_abc123def456" \
+  -d '{ ... }'
+```
+
+<Warning>
+  **Never expose your API key in client-side code.** API keys should only be used in server-to-server requests.
+</Warning>
+
+## Getting Your API Key
+
+<Steps>
+  <Step title="Access Control Panel">
+    Log in to [portal.nuvei.com](https://portal.nuvei.com)
+  </Step>
+  <Step title="Navigate to API Settings">
+    Go to **Settings** → **REST 2.0 API Credentials**
+  </Step>
+  <Step title="Generate or View Keys">
+    - **Sandbox Key**: For testing (`sk_test_...`)
+    - **Production Key**: For live transactions (`sk_live_...`)
+  </Step>
+</Steps>
+
+## Environments
+
+| Environment | Base URL | API Key Prefix |
+|-------------|----------|----------------|
+| Sandbox | `https://api-sandbox.nuvei.com` | `sk_test_` |
+| Production | `https://api.nuvei.com` | `sk_live_` |
+
+## Request Headers
+
+Every API request requires these headers:
+
+| Header | Value | Required |
+|--------|-------|----------|
+| `Content-Type` | `application/json` | Yes |
+| `x-api-key` | Your API key | Yes |
+| `Accept` | `application/json` | Recommended |
+
+## Example Request
+
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "x-api-key: sk_test_abc123def456" \
+  -d '{
+    "processingEntityId": "pe_12345",
+    "transactionType": "Sale",
+    "amount": 100,
+    "currency": "USD",
+    ...
+  }'
+```
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Store keys securely" icon="lock">
+    - Use environment variables, not hardcoded strings
+    - Use a secrets manager (AWS Secrets Manager, HashiCorp Vault)
+    - Never commit keys to version control
+    
+    ```bash
+    # Good: Environment variable
+    export NUVEI_API_KEY="sk_test_abc123"
+    
+    # In your code
+    apiKey = process.env.NUVEI_API_KEY
+    ```
+  </Accordion>
+  
+  <Accordion title="Rotate keys regularly" icon="rotate">
+    - Generate new keys periodically
+    - Rotate immediately if a key is compromised
+    - Update your systems before deactivating old keys
+  </Accordion>
+  
+  <Accordion title="Use separate keys per environment" icon="layer-group">
+    - Sandbox key for development/testing
+    - Production key for live transactions
+    - Consider separate keys per application
+  </Accordion>
+  
+  <Accordion title="Monitor API usage" icon="chart-line">
+    - Review API logs in Control Panel
+    - Set up alerts for unusual activity
+    - Track failed authentication attempts
+  </Accordion>
+</AccordionGroup>
+
+## Authentication Errors
+
+| Error Code | Description | Solution |
+|------------|-------------|----------|
+| `401` | Missing or invalid API key | Check `x-api-key` header |
+| `403` | Key doesn't have permission | Verify key permissions in Control Panel |
+| `429` | Rate limit exceeded | Implement backoff and retry |
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key provided",
+    "details": "The x-api-key header is missing or contains an invalid key"
+  }
+}
+```
+
+## Comparison with REST 1.0
+
+<Tabs>
+  <Tab title="REST 2.0 (New)">
+```bash
+# Simple API key header
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "x-api-key: sk_test_abc123" \
+  -d '{ ... }'
+```
+  </Tab>
+  <Tab title="REST 1.0 (Old)">
+```bash
+# Required checksum calculation
+checksum = SHA256(
+  merchantId + 
+  merchantSiteId + 
+  clientRequestId + 
+  amount + 
+  currency + 
+  timestamp + 
+  secretKey
+)
+
+curl -X POST https://ppp-test.nuvei.com/ppp/api/v1/payment \
+  -d '{
+    "merchantId": "...",
+    "merchantSiteId": "...",
+    "checksum": "a1b2c3d4...",
+    ...
+  }'
+```
+  </Tab>
+</Tabs>

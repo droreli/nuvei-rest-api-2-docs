@@ -1,0 +1,99 @@
+---
+title: "Payment Methods"
+description: "Overview of supported payment methods"
+---
+
+# Payment Methods
+
+Nuvei REST API 2.0 supports a wide range of payment methods to maximize your conversion.
+
+## Cards
+
+<CardGroup cols={2}>
+  <Card title="Non-3DS Cards" icon="credit-card" href="/guides/cards/non-3ds">
+    Simple card payments without additional authentication
+  </Card>
+  <Card title="3DS Cards" icon="shield-check" href="/guides/cards/3ds-flow">
+    Secure card payments with 3D Secure authentication
+  </Card>
+  <Card title="Tokenization" icon="database" href="/guides/cards/tokenization">
+    Store cards securely for returning customers
+  </Card>
+</CardGroup>
+
+### Supported Card Networks
+
+| Network | Payments | Refunds | 3DS |
+|---------|----------|---------|-----|
+| Visa | ✓ | ✓ | ✓ |
+| Mastercard | ✓ | ✓ | ✓ |
+| American Express | ✓ | ✓ | ✓ |
+| Discover | ✓ | ✓ | ✓ |
+| JCB | ✓ | ✓ | ✓ |
+| Diners Club | ✓ | ✓ | ✓ |
+
+## Digital Wallets
+
+<CardGroup cols={2}>
+  <Card title="Apple Pay" icon="apple" href="/guides/wallets/apple-pay">
+    One-tap payments on Apple devices
+  </Card>
+  <Card title="Google Pay" icon="google" href="/guides/wallets/google-pay">
+    Fast checkout on Android and web
+  </Card>
+</CardGroup>
+
+### Wallet Comparison
+
+| Feature | Apple Pay | Google Pay |
+|---------|-----------|------------|
+| Payments | ✓ | ✓ |
+| Refunds | ✓ | ✓ |
+| Recurring | ✗ | ✗ |
+| 3DS Support | Optional | Optional |
+
+## Bank Transfers
+
+<Card title="ACH" icon="building-columns" href="/guides/bank/ach">
+  US bank account payments
+</Card>
+
+### ACH Details
+
+| Feature | Support |
+|---------|---------|
+| Countries | United States |
+| Currency | USD |
+| Payments | ✓ |
+| Refunds | ✓ |
+| Settlement | 2-5 business days |
+
+## Choosing a Payment Method
+
+<AccordionGroup>
+  <Accordion title="E-commerce checkout" icon="cart-shopping">
+    **Recommended:** Cards (3DS) + Apple Pay + Google Pay
+    
+    Offer multiple options to maximize conversion:
+    - Cards for traditional checkout
+    - Wallets for one-tap mobile payments
+  </Accordion>
+  
+  <Accordion title="Subscription billing" icon="rotate">
+    **Recommended:** Cards with tokenization
+    
+    Store payment credentials securely for recurring charges without re-entering card details.
+  </Accordion>
+  
+  <Accordion title="High-value transactions" icon="gem">
+    **Recommended:** ACH bank transfer
+    
+    Lower fees for large amounts; ideal for B2B or high-ticket items.
+  </Accordion>
+  
+  <Accordion title="Mobile-first" icon="mobile">
+    **Recommended:** Apple Pay + Google Pay
+    
+    Fastest checkout experience on mobile devices.
+  </Accordion>
+</AccordionGroup>

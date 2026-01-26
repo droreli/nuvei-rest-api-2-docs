@@ -1,0 +1,103 @@
+---
+title: "Settle Payment"
+api: "POST https://api-sandbox.nuvei.com/payment-api/payments/{paymentId}/settles"
+description: "Capture funds from an authorized payment"
+---
+
+# Settle Payment
+
+Capture funds from a previously authorized (Auth) payment.
+
+## Path Parameters
+
+<ParamField path="paymentId" type="string" required>
+  The Auth payment ID to settle
+</ParamField>
+
+## Request Body
+
+<ParamField body="processingEntityId" type="string" required>
+  Your merchant processing entity ID
+</ParamField>
+
+<ParamField body="amount" type="number">
+  Settlement amount (defaults to full auth amount, can be less for partial capture)
+</ParamField>
+
+<ParamField body="currency" type="string">
+  Currency code (must match original)
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments/375011/settles \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "processingEntityId": "1234567890",
+    "amount": 100,
+    "currency": "USD"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api-sandbox.nuvei.com/payment-api/payments/375011/settles',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'YOUR_API_KEY'
+    },
+    body: JSON.stringify({
+      processingEntityId: '1234567890',
+      amount: 100,
+      currency: 'USD'
+    })
+  }
+);
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "paymentId": "375011",
+  "transactionId": "2110000000010964092",
+  "amount": 100,
+  "currency": "USD",
+  "transactionType": "Settle",
+  "result": {
+    "status": "approved"
+  },
+  "authCode": "300251"
+}
+```
+
+## Partial Settlement
+
+Capture less than the authorized amount:
+
+```json
+{
+  "processingEntityId": "1234567890",
+  "amount": 75,
+  "currency": "USD"
+}
+```
+
+<Note>
+  The remaining authorized amount ($25 in this example) will be automatically released.
+</Note>
+
+## Notes
+
+<Warning>
+  - Only Auth transactions can be settled
+  - Sale transactions capture automatically
+  - Settle within auth expiration (7-30 days)
+  - Only one settlement per authorization
+</Warning>

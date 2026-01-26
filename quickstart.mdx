@@ -1,0 +1,213 @@
+---
+title: "Quickstart"
+description: "Process your first payment in 5 minutes"
+---
+
+# Quickstart
+
+Get up and running with Nuvei REST API 2.0 in just a few minutes.
+
+## Prerequisites
+
+<Check>Nuvei merchant account ([Sign up](https://portal.nuvei.com))</Check>
+<Check>API key from Control Panel</Check>
+<Check>Your `processingEntityId`</Check>
+
+## Step 1: Get Your Credentials
+
+<Steps>
+  <Step title="Log in to Control Panel">
+    Navigate to [portal.nuvei.com](https://portal.nuvei.com) and sign in.
+  </Step>
+  <Step title="Find API Credentials">
+    Go to **Settings** → **REST 2.0 API Credentials**
+  </Step>
+  <Step title="Copy Your Keys">
+    Note your:
+    - **API Key** (for the `x-api-key` header)
+    - **Processing Entity ID** (for requests)
+  </Step>
+</Steps>
+
+## Step 2: Make Your First Payment
+
+<Tabs>
+  <Tab title="cURL">
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "processingEntityId": "YOUR_PROCESSING_ENTITY_ID",
+    "transactionType": "Sale",
+    "amount": 10.50,
+    "currency": "USD",
+    "paymentOption": {
+      "card": {
+        "cardNumber": "4761344136141390",
+        "cardHolderName": "John Smith",
+        "expirationMonth": "12",
+        "expirationYear": "2027",
+        "cvv": "123"
+      }
+    },
+    "buyerDetails": {
+      "buyerId": "buyer_123",
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "john@example.com"
+    },
+    "deviceDetails": {
+      "ipAddress": "192.168.1.1"
+    }
+  }'
+```
+  </Tab>
+  <Tab title="JavaScript">
+```javascript
+const response = await fetch('https://api-sandbox.nuvei.com/payment-api/payments', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    processingEntityId: 'YOUR_PROCESSING_ENTITY_ID',
+    transactionType: 'Sale',
+    amount: 10.50,
+    currency: 'USD',
+    paymentOption: {
+      card: {
+        cardNumber: '4761344136141390',
+        cardHolderName: 'John Smith',
+        expirationMonth: '12',
+        expirationYear: '2027',
+        cvv: '123'
+      }
+    },
+    buyerDetails: {
+      buyerId: 'buyer_123',
+      firstName: 'John',
+      lastName: 'Smith',
+      email: 'john@example.com'
+    },
+    deviceDetails: {
+      ipAddress: '192.168.1.1'
+    }
+  })
+});
+
+const result = await response.json();
+console.log(result);
+```
+  </Tab>
+  <Tab title="Python">
+```python
+import requests
+
+response = requests.post(
+    'https://api-sandbox.nuvei.com/payment-api/payments',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'processingEntityId': 'YOUR_PROCESSING_ENTITY_ID',
+        'transactionType': 'Sale',
+        'amount': 10.50,
+        'currency': 'USD',
+        'paymentOption': {
+            'card': {
+                'cardNumber': '4761344136141390',
+                'cardHolderName': 'John Smith',
+                'expirationMonth': '12',
+                'expirationYear': '2027',
+                'cvv': '123'
+            }
+        },
+        'buyerDetails': {
+            'buyerId': 'buyer_123',
+            'firstName': 'John',
+            'lastName': 'Smith',
+            'email': 'john@example.com'
+        },
+        'deviceDetails': {
+            'ipAddress': '192.168.1.1'
+        }
+    }
+)
+
+print(response.json())
+```
+  </Tab>
+</Tabs>
+
+## Step 3: Check the Response
+
+A successful payment returns:
+
+```json
+{
+  "paymentId": "375011",
+  "transactionId": "2110000000010964089",
+  "externalTransactionId": "211010964089",
+  "amount": 10.5,
+  "currency": "USD",
+  "transactionType": "Sale",
+  "result": {
+    "status": "approved"
+  },
+  "authCode": "300250"
+}
+```
+
+<Tip>
+  Save the `paymentId` — you'll need it for refunds, voids, or any follow-up operations.
+</Tip>
+
+## Step 4: Try a Refund
+
+Use the `paymentId` from the previous response:
+
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments/375011/refunds \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "processingEntityId": "YOUR_PROCESSING_ENTITY_ID",
+    "amount": 5.00,
+    "currency": "USD"
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "paymentId": "375011",
+  "transactionId": "2110000000010964090",
+  "amount": 5.00,
+  "currency": "USD",
+  "transactionType": "Refund",
+  "result": {
+    "status": "approved"
+  }
+}
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="3DS Payments" icon="shield-check" href="/guides/cards/3ds-flow">
+    Add secure authentication
+  </Card>
+  <Card title="Apple Pay" icon="apple" href="/guides/wallets/apple-pay">
+    Enable mobile wallets
+  </Card>
+  <Card title="Tokenization" icon="database" href="/guides/cards/tokenization">
+    Store cards securely
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/guides/webhooks/overview">
+    Get real-time notifications
+  </Card>
+</CardGroup>

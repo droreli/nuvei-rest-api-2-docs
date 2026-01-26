@@ -1,0 +1,145 @@
+---
+title: "What's New in REST 2.0"
+description: "Key improvements over REST 1.0"
+---
+
+# What's New in REST 2.0
+
+REST API 2.0 represents a significant evolution in how you integrate with Nuvei. Here's what's changed.
+
+## At a Glance
+
+| Feature | REST 1.0 | REST 2.0 |
+|---------|----------|----------|
+| Authentication | Checksum calculation | Simple API key header |
+| Endpoint structure | Action-based URLs | Resource-based REST |
+| Payment lifecycle | Separate IDs per call | Single `paymentId` links all |
+| HTTP methods | Mostly POST | Proper GET/POST/PUT/PATCH |
+| API specification | Custom docs | OpenAPI/YAML |
+
+## Key Improvements
+
+<AccordionGroup>
+  <Accordion title="Simplified Authentication" icon="key">
+    **Before (REST 1.0):**
+    ```
+    checksum = SHA256(merchantId + merchantSiteId + clientRequestId + amount + currency + timestamp + secretKey)
+    ```
+    
+    **Now (REST 2.0):**
+    ```bash
+    -H "x-api-key: YOUR_API_KEY"
+    ```
+    
+    No more checksum calculations. Just include your API key in the request header.
+  </Accordion>
+  
+  <Accordion title="True RESTful Design" icon="code">
+    **Resource-based URLs:**
+    - `POST /payments` — Create a payment
+    - `GET /payments/{id}` — Retrieve payment details
+    - `POST /payments/{id}/refunds` — Refund a payment
+    
+    **Proper HTTP methods:**
+    - `POST` for creation
+    - `GET` for retrieval
+    - `PUT/PATCH` for updates
+  </Accordion>
+  
+  <Accordion title="Unified Payment Lifecycle" icon="link">
+    Each payment returns a `paymentId` that links all subsequent operations:
+    
+    ```
+    POST /payments → paymentId: "abc123"
+    POST /payments/abc123/fingerprint
+    POST /payments/abc123/challenge
+    POST /payments/abc123/refunds
+    ```
+    
+    No need to repeat merchant credentials or transaction details in follow-up calls.
+  </Accordion>
+  
+  <Accordion title="Better Developer Experience" icon="laptop-code">
+    - **OpenAPI/YAML specs** — Generate SDKs, use Postman collections
+    - **Consistent responses** — Predictable JSON structure
+    - **Clear error messages** — Actionable error codes and descriptions
+    - **Sandbox parity** — Test environment mirrors production exactly
+  </Accordion>
+</AccordionGroup>
+
+## Migration Considerations
+
+<Warning>
+  REST 2.0 is a new API, not a version upgrade. You'll need to update your integration code, but the concepts remain familiar.
+</Warning>
+
+### What Stays the Same
+- Same Nuvei account and credentials portal
+- Same payment processing capabilities
+- Same settlement and reporting
+
+### What Changes
+- New base URLs (`api.nuvei.com/payment-api/`)
+- New authentication method (API key)
+- New request/response formats
+- New endpoint paths
+
+## Side-by-Side Comparison
+
+<Tabs>
+  <Tab title="REST 2.0 (New)">
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: sk_test_abc123" \
+  -d '{
+    "processingEntityId": "pe_12345",
+    "transactionType": "Sale",
+    "amount": 100,
+    "currency": "USD",
+    "paymentOption": {
+      "card": {
+        "cardNumber": "4761344136141390",
+        "cardHolderName": "John Smith",
+        "expirationMonth": "12",
+        "expirationYear": "2027",
+        "cvv": "123"
+      }
+    },
+    "deviceDetails": {
+      "ipAddress": "192.168.1.1"
+    }
+  }'
+```
+  </Tab>
+  <Tab title="REST 1.0 (Old)">
+```bash
+curl -X POST https://ppp-test.nuvei.com/ppp/api/v1/payment \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantId": "1234567890",
+    "merchantSiteId": "123456",
+    "clientRequestId": "req_001",
+    "amount": "100",
+    "currency": "USD",
+    "timeStamp": "20260126120000",
+    "checksum": "a1b2c3d4e5f6...",
+    "transactionType": "Sale",
+    "cardData": {
+      "cardNumber": "4761344136141390",
+      "cardHolderName": "John Smith",
+      "expirationMonth": "12",
+      "expirationYear": "27",
+      "CVV": "123"
+    },
+    "deviceDetails": {
+      "ipAddress": "192.168.1.1"
+    }
+  }'
+```
+  </Tab>
+</Tabs>
+
+<Card title="Ready to start?" icon="rocket" href="/quickstart">
+  Jump into the Quickstart guide
+</Card>

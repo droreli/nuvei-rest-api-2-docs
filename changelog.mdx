@@ -1,0 +1,87 @@
+---
+title: "Changelog"
+description: "REST API 2.0 version history"
+---
+
+# Changelog
+
+Track updates, new features, and changes to the REST API 2.0.
+
+## 2024
+
+### January 2024
+
+<Update label="2024-01-15">
+  **Initial Release**
+  
+  REST API 2.0 is now available in beta!
+  
+  <AccordionGroup>
+    <Accordion title="New Features" icon="sparkles">
+      - Simplified API key authentication
+      - Unified `paymentId` for all operations
+      - RESTful resource-based URLs
+      - Improved error responses
+      - Webhook support
+    </Accordion>
+    
+    <Accordion title="Supported Payment Methods" icon="credit-card">
+      - Credit/Debit cards
+      - 3D Secure authentication
+      - Apple Pay
+      - Google Pay
+      - ACH bank transfers
+    </Accordion>
+    
+    <Accordion title="Operations" icon="arrows-rotate">
+      - Sale (auth + capture)
+      - Auth (hold funds)
+      - Settle (capture)
+      - Refund (full/partial)
+      - Void (cancel auth)
+    </Accordion>
+  </AccordionGroup>
+</Update>
+
+---
+
+## Migration from REST 1.0
+
+If you're migrating from REST API 1.0, here are the key changes:
+
+| Aspect | REST 1.0 | REST 2.0 |
+|--------|----------|----------|
+| Authentication | Checksum in body | API key header |
+| Session | Required for every call | Optional |
+| Refund endpoint | `/refundTransaction` | `/payments/{id}/refunds` |
+| Void endpoint | `/voidTransaction` | `/payments/{id}/voids` |
+| Settle endpoint | `/settleTransaction` | `/payments/{id}/settles` |
+| Transaction linking | Multiple IDs | Single `paymentId` |
+
+<Card title="Migration Guide" icon="right-to-bracket" href="/whats-new">
+  See the full comparison between REST 1.0 and REST 2.0
+</Card>
+
+---
+
+## Upcoming
+
+<Note>
+  **Coming Soon**
+  
+  - Additional payment methods
+  - Enhanced reporting APIs
+  - Subscription/recurring billing
+  - Batch operations
+  
+  Subscribe to our developer newsletter for updates.
+</Note>
+
+---
+
+## Feedback
+
+Have feedback on the API? We'd love to hear from you:
+
+- **Email**: [api-feedback@nuvei.com](mailto:api-feedback@nuvei.com)
+- **Developer Portal**: Submit feedback in the Control Panel

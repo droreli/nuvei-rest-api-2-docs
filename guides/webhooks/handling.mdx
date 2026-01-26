@@ -1,0 +1,260 @@
+---
+title: "Handling Webhooks"
+description: "Securely receive and process webhook events"
+---
+
+# Handling Webhooks
+
+Implement a secure, reliable webhook handler for Nuvei events.
+
+## Basic Handler
+
+<Tabs>
+  <Tab title="Node.js (Express)">
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhooks/nuvei', async (req, res) => {
+  const event = req.body;
+  
+  // Respond immediately
+  res.status(200).send('OK');
+  
+  // Process asynchronously
+  try {
+    await processWebhookEvent(event);
+  } catch (error) {
+    console.error('Webhook processing failed:', error);
+  }
+});
+
+async function processWebhookEvent(event) {
+  switch (event.eventType) {
+    case 'payment.completed':
+      await handlePaymentCompleted(event.data);
+      break;
+    case 'payment.failed':
+      await handlePaymentFailed(event.data);
+      break;
+    case 'refund.completed':
+      await handleRefundCompleted(event.data);
+      break;
+    default:
+      console.log('Unhandled event type:', event.eventType);
+  }
+}
+
+async function handlePaymentCompleted(data) {
+  const { paymentId, amount, currency } = data;
+  
+  // Update your database
+  await db.orders.update({
+    where: { paymentId },
+    data: { status: 'paid', paidAt: new Date() }
+  });
+  
+  // Send confirmation email
+  await sendConfirmationEmail(data);
+}
+```
+  </Tab>
+  <Tab title="Python (Flask)">
+```python
+from flask import Flask, request, jsonify
+import threading
+
+app = Flask(__name__)
+
+@app.route('/webhooks/nuvei', methods=['POST'])
+def webhook_handler():
+    event = request.json
+    
+    # Respond immediately
+    response = jsonify({'status': 'received'})
+    
+    # Process asynchronously
+    thread = threading.Thread(target=process_webhook_event, args=(event,))
+    thread.start()
+    
+    return response, 200
+
+def process_webhook_event(event):
+    event_type = event.get('eventType')
+    data = event.get('data')
+    
+    handlers = {
+        'payment.completed': handle_payment_completed,
+        'payment.failed': handle_payment_failed,
+        'refund.completed': handle_refund_completed,
+    }
+    
+    handler = handlers.get(event_type)
+    if handler:
+        handler(data)
+    else:
+        print(f'Unhandled event type: {event_type}')
+
+def handle_payment_completed(data):
+    payment_id = data['paymentId']
+    
+    # Update your database
+    db.orders.update(payment_id, status='paid')
+    
+    # Send confirmation
+    send_confirmation_email(data)
+```
+  </Tab>
+</Tabs>
+
+## Signature Verification
+
+Verify webhook authenticity using the signature header:
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(payload))
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+app.post('/webhooks/nuvei', (req, res) => {
+  const signature = req.headers['x-nuvei-signature'];
+  const webhookSecret = process.env.NUVEI_WEBHOOK_SECRET;
+  
+  if (!verifyWebhookSignature(req.body, signature, webhookSecret)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process verified webhook
+  res.status(200).send('OK');
+});
+```
+
+## Idempotency
+
+Handle duplicate webhook deliveries:
+
+```javascript
+const processedEvents = new Set(); // Use Redis in production
+
+app.post('/webhooks/nuvei', async (req, res) => {
+  const { eventId } = req.body;
+  
+  // Check if already processed
+  if (processedEvents.has(eventId)) {
+    console.log('Duplicate event ignored:', eventId);
+    return res.status(200).send('OK');
+  }
+  
+  // Mark as processing
+  processedEvents.add(eventId);
+  
+  // Process event
+  await processWebhookEvent(req.body);
+  
+  res.status(200).send('OK');
+});
+```
+
+## Event Handling Examples
+
+<AccordionGroup>
+  <Accordion title="Payment Completed" icon="check">
+```javascript
+async function handlePaymentCompleted(data) {
+  const { paymentId, amount, currency, paymentMethod } = data;
+  
+  // 1. Update order status
+  const order = await db.orders.findByPaymentId(paymentId);
+  await db.orders.update(order.id, { status: 'paid' });
+  
+  // 2. Trigger fulfillment
+  await fulfillmentService.processOrder(order.id);
+  
+  // 3. Send receipt
+  await emailService.sendReceipt({
+    orderId: order.id,
+    amount,
+    currency,
+    last4: paymentMethod.card?.last4Digits
+  });
+}
+```
+  </Accordion>
+  
+  <Accordion title="Payment Failed" icon="xmark">
+```javascript
+async function handlePaymentFailed(data) {
+  const { paymentId, result } = data;
+  
+  // 1. Update order status
+  const order = await db.orders.findByPaymentId(paymentId);
+  await db.orders.update(order.id, { 
+    status: 'payment_failed',
+    failureReason: result.reason?.message
+  });
+  
+  // 2. Notify customer
+  await emailService.sendPaymentFailed({
+    orderId: order.id,
+    reason: result.reason?.message
+  });
+  
+  // 3. Restore inventory
+  await inventoryService.releaseReservation(order.id);
+}
+```
+  </Accordion>
+  
+  <Accordion title="Refund Completed" icon="rotate-left">
+```javascript
+async function handleRefundCompleted(data) {
+  const { paymentId, amount, currency } = data;
+  
+  // 1. Update refund record
+  const order = await db.orders.findByPaymentId(paymentId);
+  await db.refunds.create({
+    orderId: order.id,
+    amount,
+    currency,
+    status: 'completed'
+  });
+  
+  // 2. Notify customer
+  await emailService.sendRefundConfirmation({
+    orderId: order.id,
+    amount,
+    currency
+  });
+}
+```
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Respond Fast" icon="bolt">
+    Return 200 immediately, process async
+  </Card>
+  <Card title="Be Idempotent" icon="repeat">
+    Handle duplicate events gracefully
+  </Card>
+  <Card title="Log Everything" icon="file-lines">
+    Log events for debugging
+  </Card>
+  <Card title="Use Queues" icon="bars-staggered">
+    Queue events for reliable processing
+  </Card>
+</CardGroup>

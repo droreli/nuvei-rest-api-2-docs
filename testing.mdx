@@ -1,0 +1,170 @@
+---
+title: "Testing"
+description: "Test cards and sandbox environment guide"
+---
+
+# Testing
+
+Use the sandbox environment and test cards to validate your integration.
+
+## Sandbox Environment
+
+| Setting | Value |
+|---------|-------|
+| Base URL | `https://api-sandbox.nuvei.com/payment-api` |
+| API Key | Use your sandbox API key |
+| Real charges | No |
+
+## Test Cards
+
+### Successful Payments
+
+| Card Number | Brand | Description |
+|-------------|-------|-------------|
+| `4000027891380961` | Visa | Approved (3DS optional) |
+| `5100052384536818` | Mastercard | Approved (3DS optional) |
+| `375510288656924` | Amex | Approved |
+| `6011000180331112` | Discover | Approved |
+
+### 3DS Test Cards
+
+| Card Number | Brand | 3DS Result |
+|-------------|-------|------------|
+| `4000027891380961` | Visa | Frictionless approved |
+| `4012001036983332` | Visa | Challenge required |
+| `4012001037167778` | Visa | 3DS authentication failed |
+
+### Declined Cards
+
+| Card Number | Decline Reason |
+|-------------|----------------|
+| `4000025891380973` | Insufficient funds |
+| `4000027891380987` | Card expired |
+| `4000023491380979` | Do not honor |
+| `4000024091380972` | Invalid card |
+
+## Test Card Details
+
+For all test cards, use:
+
+| Field | Value |
+|-------|-------|
+| Expiration Month | Any future month (`12`) |
+| Expiration Year | Any future year (`2030`) |
+| CVV | Any 3 digits (`217`) |
+| Cardholder Name | Any name (`John Smith`) |
+
+## Test Amounts
+
+Use specific amounts to trigger behaviors:
+
+| Amount | Result |
+|--------|--------|
+| Any | Approved (with approved card) |
+| `666` | Declined |
+| `777` | Error response |
+
+## Sample Test Flow
+
+<Steps>
+  <Step title="Create a Sale payment">
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_SANDBOX_KEY" \
+  -d '{
+    "processingEntityId": "1234567890",
+    "transactionType": "Sale",
+    "amount": 100,
+    "currency": "USD",
+    "paymentMethod": {
+      "type": "card",
+      "card": {
+        "cardNumber": "4000027891380961",
+        "expirationMonth": "12",
+        "expirationYear": "2030",
+        "cvv": "217"
+      }
+    }
+  }'
+```
+  </Step>
+  
+  <Step title="Verify response">
+```json
+{
+  "paymentId": "375011",
+  "result": {
+    "status": "approved"
+  },
+  "authCode": "300250"
+}
+```
+  </Step>
+  
+  <Step title="Test refund">
+```bash
+curl -X POST https://api-sandbox.nuvei.com/payment-api/payments/375011/refunds \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_SANDBOX_KEY" \
+  -d '{
+    "processingEntityId": "1234567890",
+    "amount": 50,
+    "currency": "USD"
+  }'
+```
+  </Step>
+</Steps>
+
+## Testing Checklist
+
+<AccordionGroup>
+  <Accordion title="Payment Flows" icon="credit-card">
+    - [ ] Successful card payment (Sale)
+    - [ ] Auth + Settle flow
+    - [ ] 3DS frictionless flow
+    - [ ] 3DS challenge flow
+    - [ ] Declined payment handling
+    - [ ] Apple Pay (if applicable)
+    - [ ] Google Pay (if applicable)
+    - [ ] ACH payment (if applicable)
+  </Accordion>
+  
+  <Accordion title="Operations" icon="arrows-rotate">
+    - [ ] Full refund
+    - [ ] Partial refund
+    - [ ] Void before settlement
+    - [ ] Multiple partial refunds
+  </Accordion>
+  
+  <Accordion title="Tokenization" icon="database">
+    - [ ] Save card during payment
+    - [ ] Pay with saved token
+    - [ ] Retrieve saved cards
+  </Accordion>
+  
+  <Accordion title="Webhooks" icon="webhook">
+    - [ ] Receive payment.completed
+    - [ ] Receive payment.failed
+    - [ ] Handle duplicate events
+    - [ ] Verify signatures
+  </Accordion>
+  
+  <Accordion title="Error Handling" icon="triangle-exclamation">
+    - [ ] Invalid API key
+    - [ ] Invalid card number
+    - [ ] Expired card
+    - [ ] Insufficient funds
+    - [ ] Network timeout
+  </Accordion>
+</AccordionGroup>
+
+## Sandbox Limitations
+
+<Warning>
+  Sandbox environment limitations:
+  - No real money movement
+  - Test cards only (real cards will fail)
+  - Webhooks may have slight delays
+  - Some edge cases may behave differently
+</Warning>

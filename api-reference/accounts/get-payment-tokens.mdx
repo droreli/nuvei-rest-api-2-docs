@@ -1,0 +1,121 @@
+---
+title: "Get Payment Tokens"
+api: "GET https://api-sandbox.nuvei.com/account-api/buyers/{buyerId}/payment-tokens"
+description: "Retrieve saved payment tokens for a customer"
+---
+
+# Get Payment Tokens
+
+Retrieve all saved payment tokens (cards) for a customer.
+
+## Path Parameters
+
+<ParamField path="buyerId" type="string" required>
+  The customer's buyer ID
+</ParamField>
+
+## Headers
+
+<ParamField header="x-api-key" type="string" required>
+  Your API key
+</ParamField>
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api-sandbox.nuvei.com/account-api/buyers/customer_12345/payment-tokens \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api-sandbox.nuvei.com/account-api/buyers/customer_12345/payment-tokens',
+  {
+    method: 'GET',
+    headers: {
+      'x-api-key': 'YOUR_API_KEY'
+    }
+  }
+);
+
+const result = await response.json();
+```
+</CodeGroup>
+
+## Response
+
+<ResponseField name="paymentTokens" type="array">
+  Array of saved payment tokens
+  
+  <Expandable title="paymentToken properties">
+    <ResponseField name="paymentTokenId" type="string">
+      Token ID for payments
+    </ResponseField>
+    <ResponseField name="paymentMethod" type="object">
+      Payment method details
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      Token creation date
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "paymentTokens": [
+    {
+      "paymentTokenId": "tok_abc123xyz",
+      "paymentMethod": {
+        "type": "card",
+        "card": {
+          "bin": "400002",
+          "last4Digits": "0961",
+          "cardBrand": "VISA",
+          "cardType": "Credit",
+          "expirationMonth": "12",
+          "expirationYear": "2030"
+        }
+      },
+      "createdAt": "2024-01-15T10:30:00Z"
+    },
+    {
+      "paymentTokenId": "tok_def456abc",
+      "paymentMethod": {
+        "type": "card",
+        "card": {
+          "bin": "510510",
+          "last4Digits": "5100",
+          "cardBrand": "MASTERCARD",
+          "cardType": "Credit",
+          "expirationMonth": "06",
+          "expirationYear": "2025"
+        }
+      },
+      "createdAt": "2024-02-20T14:15:00Z"
+    }
+  ]
+}
+```
+
+## Usage
+
+Use the `paymentTokenId` to process payments without re-entering card details:
+
+```json
+{
+  "processingEntityId": "1234567890",
+  "transactionType": "Sale",
+  "amount": 100,
+  "currency": "USD",
+  "paymentMethod": {
+    "type": "paymentToken",
+    "paymentTokenId": "tok_abc123xyz"
+  },
+  "buyerDetails": {
+    "buyerId": "customer_12345"
+  }
+}
+```

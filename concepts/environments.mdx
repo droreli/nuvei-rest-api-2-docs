@@ -1,0 +1,89 @@
+---
+title: "Environments"
+description: "Sandbox and production API environments"
+---
+
+# Environments
+
+Nuvei provides separate environments for testing and production.
+
+## Base URLs
+
+### Sandbox (Testing)
+
+| API | Base URL |
+|-----|----------|
+| Payment | `https://api-sandbox.nuvei.com/payment-api/` |
+| Order | `https://api-sandbox.nuvei.com/sdk-api/` |
+| Accounts | `https://api-sandbox.nuvei.com/account-api/` |
+| Data | `https://api-sandbox.nuvei.com/data-api/` |
+
+### Production (Live)
+
+| API | Base URL |
+|-----|----------|
+| Payment | `https://api.nuvei.com/payment-api/` |
+| Order | `https://api.nuvei.com/sdk-api/` |
+| Accounts | `https://api.nuvei.com/account-api/` |
+| Data | `https://api.nuvei.com/data-api/` |
+
+## Environment Differences
+
+<CardGroup cols={2}>
+  <Card title="Sandbox" icon="flask">
+    - Test API keys (`sk_test_...`)
+    - No real money movement
+    - Test card numbers only
+    - Full feature parity
+    - Unlimited testing
+  </Card>
+  <Card title="Production" icon="rocket">
+    - Live API keys (`sk_live_...`)
+    - Real transactions processed
+    - Real card numbers
+    - Subject to rate limits
+    - PCI compliance required
+  </Card>
+</CardGroup>
+
+## Configuration Example
+
+```javascript
+const config = {
+  development: {
+    baseUrl: 'https://api-sandbox.nuvei.com/payment-api',
+    apiKey: process.env.NUVEI_TEST_API_KEY
+  },
+  production: {
+    baseUrl: 'https://api.nuvei.com/payment-api',
+    apiKey: process.env.NUVEI_LIVE_API_KEY
+  }
+};
+
+const env = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const { baseUrl, apiKey } = config[env];
+```
+
+## Going Live Checklist
+
+<Steps>
+  <Step title="Complete sandbox testing">
+    Test all payment flows, error handling, and edge cases
+  </Step>
+  <Step title="Security review">
+    Ensure PCI compliance and secure key storage
+  </Step>
+  <Step title="Get production credentials">
+    Request live API key from Control Panel
+  </Step>
+  <Step title="Update configuration">
+    Switch base URL and API key for production
+  </Step>
+  <Step title="Monitor transactions">
+    Watch initial live transactions closely
+  </Step>
+</Steps>
+
+<Warning>
+  Never use sandbox credentials in production or production credentials in development.
+</Warning>
