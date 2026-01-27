@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Nuvei Developer Documentation",
+  "name": "Nuvei Documentation",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -41,14 +41,14 @@
   ],
   "anchors": [
     {
-      "name": "API Status",
-      "icon": "signal",
-      "url": "https://status.nuvei.com"
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/droreli/nuvei-rest-api-2-docs"
     },
     {
       "name": "Changelog",
       "icon": "list",
-      "url": "/changelog"
+      "url": "/rest-2/changelog"
     }
   ],
   "navigation": [
