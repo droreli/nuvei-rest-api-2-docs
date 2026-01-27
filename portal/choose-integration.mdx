@@ -1,0 +1,82 @@
+---
+title: "Choose an Integration Method"
+description: "Pick the right Nuvei integration for your use case"
+---
+
+# Choose an Integration Method
+
+Nuvei offers multiple integration options. Choose based on your technical requirements, PCI compliance scope, and development resources.
+
+## Integration Options
+
+<AccordionGroup>
+  <Accordion title="REST API 2.0 (Recommended)" icon="rocket">
+    **Best for:** Full control, modern server-to-server integrations
+    
+    **Pros:**
+    - Complete control over payment flow
+    - Modern RESTful design
+    - Simple API key authentication
+    - Unified `paymentId` lifecycle
+    
+    **Cons:**
+    - Higher PCI compliance scope if handling raw card data
+    - More development effort than hosted solutions
+    
+    **Get started:** [REST API 2.0 Introduction](/rest-2/introduction)
+  </Accordion>
+
+  <Accordion title="REST API 1.0 (Legacy)" icon="clock">
+    **Best for:** Existing integrations maintenance
+    
+    **Note:** For new integrations, use REST API 2.0
+    
+    **Learn more:** [Legacy REST 1.0 Docs](/legacy/rest-1)
+  </Accordion>
+
+  <Accordion title="Web SDK (Legacy)" icon="browser">
+    **Best for:** Client-side checkout with JavaScript
+    
+    **Note:** Consider REST API 2.0 for new builds
+    
+    **Learn more:** [Legacy Web SDK Docs](/legacy/web-sdk)
+  </Accordion>
+
+  <Accordion title="Simply Connect (Legacy)" icon="wand-magic-sparkles">
+    **Best for:** Pre-built checkout components
+    
+    **Note:** Evaluate REST API 2.0 for flexibility
+    
+    **Learn more:** [Legacy Simply Connect Docs](/legacy/simply-connect)
+  </Accordion>
+</AccordionGroup>
+
+## Decision Matrix
+
+| Factor | REST API 2.0 | REST API 1.0 | Web SDK | Simply Connect |
+|--------|--------------|--------------|---------|----------------|
+| **Effort** | Medium | Medium-High | Medium | Low |
+| **Control** | Full | Full | High | Medium |
+| **PCI Scope** | Higher* | Higher* | Medium | Lower |
+| **Maintenance** | Active | Maintenance | Maintenance | Maintenance |
+
+<Note>
+  *Use tokenization or digital wallets to reduce PCI scope
+</Note>
+
+## Recommended Path
+
+<Steps>
+  <Step title="Start with REST API 2.0">
+    For new integrations, REST 2.0 offers the best developer experience
+  </Step>
+  <Step title="Review the quickstart">
+    [5-minute quickstart](/rest-2/quickstart) to create your first payment
+  </Step>
+  <Step title="Explore payment methods">
+    [Cards](/rest-2/guides/cards/non-3ds), [Digital Wallets](/rest-2/guides/wallets/apple-pay), [ACH](/rest-2/guides/bank/ach)
+  </Step>
+  <Step title="Implement operations">
+    [Refunds](/rest-2/guides/operations/refunds), [Voids](/rest-2/guides/operations/voids), [Settlements](/rest-2/guides/operations/settlements)
+  </Step>
+</Steps>

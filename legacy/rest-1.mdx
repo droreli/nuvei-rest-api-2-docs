@@ -1,0 +1,50 @@
+---
+title: "REST API 1.0 (Legacy)"
+description: "Legacy server-to-server integration documentation"
+---
+
+# REST API 1.0 (Legacy)
+
+REST API 1.0 is Nuvei's legacy server-to-server integration method.
+
+<Warning>
+  For new integrations, use [REST API 2.0](/rest-2/introduction) instead.
+</Warning>
+
+## Key Differences from REST 2.0
+
+| Feature | REST 1.0 | REST 2.0 |
+|---------|----------|----------|
+| **URL Style** | Action-based (`/payment`) | Resource-based (`/payments`) |
+| **Authentication** | Session + checksum | API key header |
+| **Payment Lifecycle** | Multiple IDs | Single `paymentId` |
+| **Operations** | `/refundTransaction` | `/payments/{id}/refunds` |
+
+## Core Endpoints
+
+- `/getSessionToken` → Session initiation
+- `/payment` → Create payment
+- `/settleTransaction` → Settle authorization
+- `/refundTransaction` → Refund payment
+- `/voidTransaction` → Void authorization
+- `/getPaymentStatus` → Query payment status
+
+## Migration Path
+
+<Steps>
+  <Step title="Review REST 2.0 benefits">
+    [What's new in REST 2.0](/rest-2/whats-new)
+  </Step>
+  <Step title="Start new builds on 2.0">
+    Keep existing REST 1.0 stable, use 2.0 for new features
+  </Step>
+  <Step title="Migrate operations first">
+    Refunds, voids, and reporting are easier to migrate
+  </Step>
+</Steps>
+
+## Official Documentation
+
+For complete REST 1.0 documentation, visit:
+
+**https://docs.nuvei.com/api/main/indexMain_v1_0.html**

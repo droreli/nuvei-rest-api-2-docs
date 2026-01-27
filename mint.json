@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Nuvei REST API 2.0",
+  "name": "Nuvei Developer Documentation",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -27,12 +27,16 @@
   },
   "tabs": [
     {
-      "name": "Guides",
-      "url": "guides"
+      "name": "REST API 2.0",
+      "url": "rest-2"
     },
     {
       "name": "API Reference",
       "url": "api-reference"
+    },
+    {
+      "name": "Legacy Docs",
+      "url": "legacy"
     }
   ],
   "anchors": [
@@ -49,46 +53,52 @@
   ],
   "navigation": [
     {
+      "group": "Home",
+      "pages": [
+        "portal/choose-integration"
+      ]
+    },
+    {
       "group": "Getting Started",
       "pages": [
-        "introduction",
-        "whats-new",
-        "quickstart",
-        "authentication"
+        "rest-2/introduction",
+        "rest-2/whats-new",
+        "rest-2/quickstart",
+        "rest-2/authentication"
       ]
     },
     {
       "group": "Core Concepts",
       "pages": [
-        "concepts/restful-structure",
-        "concepts/environments",
-        "concepts/record-ids",
-        "concepts/transaction-types"
+        "rest-2/concepts/restful-structure",
+        "rest-2/concepts/environments",
+        "rest-2/concepts/record-ids",
+        "rest-2/concepts/transaction-types"
       ]
     },
     {
-      "group": "Payment Guides",
+      "group": "Payment Methods",
       "pages": [
-        "guides/overview",
+        "rest-2/guides/overview",
         {
           "group": "Card Payments",
           "pages": [
-            "guides/cards/non-3ds",
-            "guides/cards/3ds-flow",
-            "guides/cards/tokenization"
+            "rest-2/guides/cards/non-3ds",
+            "rest-2/guides/cards/3ds-flow",
+            "rest-2/guides/cards/tokenization"
           ]
         },
         {
           "group": "Digital Wallets",
           "pages": [
-            "guides/wallets/apple-pay",
-            "guides/wallets/google-pay"
+            "rest-2/guides/wallets/apple-pay",
+            "rest-2/guides/wallets/google-pay"
           ]
         },
         {
           "group": "Bank Transfers",
           "pages": [
-            "guides/bank/ach"
+            "rest-2/guides/bank/ach"
           ]
         }
       ]
@@ -96,16 +106,24 @@
     {
       "group": "Operations",
       "pages": [
-        "guides/operations/refunds",
-        "guides/operations/voids",
-        "guides/operations/settlements"
+        "rest-2/guides/operations/refunds",
+        "rest-2/guides/operations/voids",
+        "rest-2/guides/operations/settlements"
       ]
     },
     {
       "group": "Webhooks",
       "pages": [
-        "guides/webhooks/overview",
-        "guides/webhooks/handling"
+        "rest-2/guides/webhooks/overview",
+        "rest-2/guides/webhooks/handling"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "rest-2/testing",
+        "rest-2/error-codes",
+        "rest-2/changelog"
       ]
     },
     {
@@ -132,11 +150,11 @@
       ]
     },
     {
-      "group": "Resources",
+      "group": "Legacy Documentation",
       "pages": [
-        "testing",
-        "error-codes",
-        "changelog"
+        "legacy/rest-1",
+        "legacy/web-sdk",
+        "legacy/simply-connect"
       ]
     }
   ],
