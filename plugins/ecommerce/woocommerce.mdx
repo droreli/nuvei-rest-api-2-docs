@@ -1,0 +1,303 @@
+---
+title: "WooCommerce"
+description: "Nuvei payments plugin for WordPress WooCommerce"
+---
+
+# WooCommerce Plugin
+
+<Info>
+  **Version:** 2.x  
+  **Platform:** WordPress + WooCommerce  
+  **Requirements:** WordPress 5.6+, WooCommerce 5.0+, PHP 7.4+
+</Info>
+
+Accept payments on your WooCommerce store with the official Nuvei payment gateway. Easy setup, full feature support, and seamless checkout experience.
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Credit/Debit Cards | ✅ |
+| 3D Secure 2.0 | ✅ |
+| Alternative Payment Methods | ✅ |
+| Apple Pay | ✅ |
+| Google Pay | ✅ |
+| Saved Cards | ✅ |
+| WooCommerce Subscriptions | ✅ |
+| Refunds (Admin) | ✅ |
+| Multi-currency | ✅ |
+| Block Checkout | ✅ |
+
+## Installation
+
+### From WordPress Plugin Directory
+
+1. Go to **Plugins** → **Add New**
+2. Search for "Nuvei WooCommerce"
+3. Click **Install Now**
+4. Click **Activate**
+
+### Manual Upload
+
+1. Download the plugin ZIP from [GitHub](https://github.com/Nuvei/nuvei-plugin-woocommerce)
+2. Go to **Plugins** → **Add New** → **Upload Plugin**
+3. Choose the ZIP file
+4. Click **Install Now**
+5. Click **Activate**
+
+## Configuration
+
+Navigate to **WooCommerce** → **Settings** → **Payments** → **Nuvei**
+
+### Basic Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Enable/Disable** | Enable Nuvei payments |
+| **Title** | Payment method name at checkout |
+| **Description** | Description shown at checkout |
+| **Environment** | Sandbox or Live |
+
+### API Credentials
+
+| Setting | Description |
+|---------|-------------|
+| **Merchant ID** | Your Nuvei Merchant ID |
+| **Merchant Site ID** | Your Nuvei Site ID |
+| **Secret Key** | Your Nuvei Secret Key |
+
+### Payment Options
+
+| Setting | Description |
+|---------|-------------|
+| **Transaction Type** | Sale or Auth Only |
+| **Save Cards** | Allow customers to save cards |
+| **3D Secure** | Enable 3D Secure 2 |
+| **APMs** | Enable alternative payment methods |
+
+## Configuration Screenshot
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ NUVEI                                                   │
+│ ─────────────────────────────────────────────────────── │
+│                                                         │
+│ Enable/Disable     [✓] Enable Nuvei Payments           │
+│                                                         │
+│ Title              [Credit Card                    ]   │
+│                                                         │
+│ Description        [Pay securely with your card   ]   │
+│                                                         │
+│ ─── API CREDENTIALS ─────────────────────────────────  │
+│                                                         │
+│ Environment        (○) Sandbox  (●) Live               │
+│                                                         │
+│ Merchant ID        [1234567890                     ]   │
+│                                                         │
+│ Merchant Site ID   [123456                         ]   │
+│                                                         │
+│ Secret Key         [********************************]   │
+│                                                         │
+│ ─── PAYMENT OPTIONS ─────────────────────────────────  │
+│                                                         │
+│ Transaction Type   [Sale                         ▼]   │
+│                                                         │
+│ [✓] Allow customers to save cards                      │
+│                                                         │
+│ [✓] Enable 3D Secure                                   │
+│                                                         │
+│ [✓] Enable APMs                                        │
+│                                                         │
+│                            [ Save changes ]            │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Webhook Configuration
+
+Add the webhook URL to your Nuvei merchant portal:
+
+```
+https://yourdomain.com/wc-api/nuvei_gateway
+```
+
+Or if using WordPress REST API:
+```
+https://yourdomain.com/wp-json/nuvei/v1/webhook
+```
+
+## Testing
+
+### Test Cards
+
+| Card Number | Result | CVV |
+|-------------|--------|-----|
+| 4000000000001000 | Success | Any 3 digits |
+| 4000000000001091 | 3DS Required | Any 3 digits |
+| 4000000000001018 | Decline | Any 3 digits |
+
+### Test Workflow
+
+1. Set environment to Sandbox
+2. Place a test order
+3. Use test card credentials
+4. Complete 3DS if prompted
+5. Verify order status
+6. Test refund from WooCommerce admin
+
+## WooCommerce Subscriptions
+
+The plugin integrates with WooCommerce Subscriptions for recurring payments.
+
+### Requirements
+
+- WooCommerce Subscriptions plugin installed
+- Save Cards option enabled
+- Customer must save payment method during initial purchase
+
+### How It Works
+
+1. Customer subscribes and saves card
+2. Initial payment processed
+3. Plugin stores `userPaymentOptionId`
+4. Renewal payments charged automatically
+5. Failed renewals trigger retry logic
+
+### Subscription Events Handled
+
+- `woocommerce_scheduled_subscription_payment` - Process renewal
+- `woocommerce_subscription_cancelled` - Handle cancellation
+- `woocommerce_subscription_payment_method_updated` - Update payment method
+
+## Shortcodes
+
+### My Account - Saved Cards
+
+The plugin automatically adds saved cards management to the WooCommerce My Account page.
+
+## Hooks & Filters
+
+### Available Filters
+
+```php
+// Modify payment args before API call
+add_filter('nuvei_payment_args', function($args, $order) {
+    // Customize payment arguments
+    return $args;
+}, 10, 2);
+
+// Modify APM list
+add_filter('nuvei_available_apms', function($apms, $order) {
+    // Filter APM list based on order
+    return $apms;
+}, 10, 2);
+```
+
+### Available Actions
+
+```php
+// After successful payment
+add_action('nuvei_payment_complete', function($order, $response) {
+    // Custom logic after payment
+}, 10, 2);
+
+// After refund
+add_action('nuvei_refund_complete', function($order, $amount, $response) {
+    // Custom logic after refund
+}, 10, 3);
+```
+
+## Admin Order Actions
+
+### Capture Payment
+
+For "Auth Only" transactions:
+
+1. Open order in WooCommerce admin
+2. Change status to "Processing" or "Completed"
+3. Or use "Capture Payment" order action
+
+### Refund Payment
+
+1. Open order in WooCommerce admin
+2. Click **Refund**
+3. Enter amount to refund
+4. Click **Refund via Nuvei**
+
+## Block Checkout Support
+
+The plugin supports WooCommerce's new block-based checkout:
+
+```php
+// Automatic registration for block checkout
+add_action('woocommerce_blocks_loaded', function() {
+    // Nuvei payment method block registered
+});
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Payment not processing" icon="times-circle">
+    1. Check API credentials are correct
+    2. Verify environment setting (Sandbox vs Live)
+    3. Enable WooCommerce logging
+    4. Check `wp-content/uploads/wc-logs/` for errors
+  </Accordion>
+  
+  <Accordion title="APMs not showing" icon="eye-slash">
+    1. Verify APMs are enabled in settings
+    2. Check customer's billing country
+    3. APMs may require minimum/maximum amounts
+    4. Clear any caching plugins
+  </Accordion>
+  
+  <Accordion title="Subscription renewals failing" icon="repeat">
+    1. Verify saved card exists for customer
+    2. Check `userPaymentOptionId` is stored
+    3. Review WooCommerce subscription logs
+    4. Check card hasn't expired
+  </Accordion>
+  
+  <Accordion title="Webhook not working" icon="bell-slash">
+    1. Verify webhook URL is accessible
+    2. Check permalink settings are not "Plain"
+    3. Disable security plugins temporarily
+    4. Check server firewall
+  </Accordion>
+</AccordionGroup>
+
+## Logs
+
+WooCommerce logs location:
+```
+wp-content/uploads/wc-logs/nuvei-*.log
+```
+
+Enable logging in **WooCommerce** → **Settings** → **Advanced** → **Logs**
+
+## Performance Optimization
+
+```php
+// Disable unnecessary API calls
+add_filter('nuvei_load_payment_methods', function($load) {
+    // Only load on checkout page
+    return is_checkout();
+});
+```
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/Nuvei/nuvei-plugin-woocommerce">
+    Source code & issues
+  </Card>
+  <Card title="WordPress.org" icon="wordpress" href="https://wordpress.org/plugins/nuvei-woocommerce/">
+    Plugin page
+  </Card>
+  <Card title="Support" icon="headset" href="https://support.nuvei.com">
+    Technical support
+  </Card>
+  <Card title="WooCommerce Docs" icon="book" href="https://woocommerce.com/document/nuvei/">
+    WooCommerce guide
+  </Card>
+</CardGroup>

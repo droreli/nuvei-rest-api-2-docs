@@ -1,0 +1,465 @@
+---
+title: "APM Integration Guide"
+description: "How to integrate alternative payment methods with Nuvei"
+---
+
+# APM Integration Guide
+
+Learn how to integrate alternative payment methods (APMs) into your checkout flow using any Nuvei integration method.
+
+## APM Payment Method Names
+
+Each APM has a unique `paymentMethod` identifier:
+
+| APM | Payment Method ID |
+|-----|-------------------|
+| iDEAL | `apmgw_iDeal` |
+| Sofort | `apmgw_Sofort` |
+| PayPal | `apmgw_expresscheckout` |
+| Bancontact | `apmgw_Bancontact` |
+| giropay | `apmgw_giropay` |
+| Klarna | `apmgw_Klarna` |
+| PIX | `apmgw_PIX` |
+| OXXO | `apmgw_OXXO` |
+| Boleto | `apmgw_Boleto_Bancario` |
+| Trustly | `apmgw_Trustly` |
+
+## Get Available APMs
+
+Before showing APMs, retrieve which ones are available for the customer's country and currency:
+
+```json
+POST /ppp/api/v1/getMerchantPaymentMethods.do
+
+{
+  "sessionToken": "<sessionToken>",
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "countryCode": "NL",
+  "currencyCode": "EUR",
+  "languageCode": "en",
+  "type": "DEPOSIT",
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+### Response
+
+```json
+{
+  "sessionToken": "<sessionToken>",
+  "paymentMethods": [
+    {
+      "paymentMethod": "apmgw_iDeal",
+      "paymentMethodDisplayName": [
+        { "language": "en", "message": "iDEAL" }
+      ],
+      "logoURL": "https://secure.safecharge.com/ppp/resources/img/svg/solid-white/ideal.svg",
+      "fields": [
+        {
+          "name": "BIC",
+          "type": "list",
+          "caption": [{ "language": "en", "message": "Bank" }],
+          "listValues": [
+            { "code": "ABNANL2A", "caption": "ABN AMRO" },
+            { "code": "INGBNL2A", "caption": "ING" },
+            { "code": "RABONL2U", "caption": "Rabobank" }
+          ]
+        }
+      ]
+    },
+    {
+      "paymentMethod": "cc_card",
+      "paymentMethodDisplayName": [
+        { "language": "en", "message": "Credit Card" }
+      ]
+    }
+  ],
+  "status": "SUCCESS"
+}
+```
+
+## Payment Page Integration
+
+The simplest APM integration - APMs appear automatically.
+
+### URL Parameters
+
+```
+https://secure.nuvei.com/ppp/purchase.do?
+  merchant_id=<merchantId>&
+  merchant_site_id=<merchantSiteId>&
+  version=4.0.0&
+  encoding=UTF-8&
+  currency=EUR&
+  total_amount=100.00&
+  item_name_1=Product&
+  item_amount_1=100.00&
+  item_quantity_1=1&
+  country=NL&
+  notify_url=https://yoursite.com/webhooks/nuvei&
+  success_url=https://yoursite.com/success&
+  error_url=https://yoursite.com/error&
+  pending_url=https://yoursite.com/pending&
+  back_url=https://yoursite.com/cart&
+  checksum=<checksum>
+```
+
+APMs are automatically displayed based on `country` and `currency`.
+
+## Simply Connect Integration
+
+### Basic Setup
+
+```javascript
+checkout({
+  sessionToken: "<sessionToken>",
+  merchantId: "<merchantId>",
+  merchantSiteId: "<merchantSiteId>",
+  amount: "100.00",
+  currency: "EUR",
+  country: "NL",
+  
+  // Customer details
+  userDetails: {
+    firstName: "John",
+    lastName: "Smith",
+    email: "john@example.com"
+  },
+  billingAddress: {
+    firstName: "John",
+    lastName: "Smith",
+    email: "john@example.com",
+    country: "NL"
+  }
+});
+```
+
+### Filter Payment Methods
+
+```javascript
+checkout({
+  sessionToken: "<sessionToken>",
+  // ...
+  
+  // Show only specific APMs
+  paymentMethods: {
+    include: ["apmgw_iDeal", "apmgw_Bancontact", "cc_card"]
+  }
+  
+  // Or exclude certain methods
+  // paymentMethods: {
+  //   exclude: ["apmgw_Sofort"]
+  // }
+});
+```
+
+## REST API Integration
+
+### Step 1: Get Session Token
+
+```json
+POST /ppp/api/v1/openOrder.do
+
+{
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "amount": "100.00",
+  "currency": "EUR",
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+### Step 2: Submit APM Payment
+
+```json
+POST /ppp/api/v1/payment.do
+
+{
+  "sessionToken": "<sessionToken>",
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "clientUniqueId": "<order_id>",
+  "amount": "100.00",
+  "currency": "EUR",
+  "userTokenId": "<customer_id>",
+  
+  "paymentOption": {
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_iDeal",
+      "BIC": "INGBNL2A"
+    }
+  },
+  
+  "deviceDetails": {
+    "ipAddress": "192.168.1.1"
+  },
+  
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john@example.com",
+    "country": "NL"
+  },
+  
+  "userDetails": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john@example.com",
+    "country": "NL"
+  },
+  
+  "urlDetails": {
+    "successUrl": "https://yoursite.com/success",
+    "failureUrl": "https://yoursite.com/failure",
+    "pendingUrl": "https://yoursite.com/pending",
+    "notificationUrl": "https://yoursite.com/webhooks/nuvei"
+  },
+  
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+### Response with Redirect URL
+
+```json
+{
+  "orderId": "350728608",
+  "userTokenId": "customer_123",
+  "paymentOption": {
+    "redirectUrl": "https://gw-apm.nuvei.com/Home?PaymentToken=ABC123...",
+    "userPaymentOptionId": "86068558"
+  },
+  "transactionStatus": "REDIRECT",
+  "sessionToken": "<sessionToken>",
+  "clientUniqueId": "order_789",
+  "status": "SUCCESS"
+}
+```
+
+### Step 3: Redirect Customer
+
+Redirect the customer to the `redirectUrl` to complete payment at the APM provider.
+
+```javascript
+// Frontend
+if (response.transactionStatus === 'REDIRECT') {
+  window.location.href = response.paymentOption.redirectUrl;
+}
+```
+
+### Step 4: Handle Webhook
+
+After the customer completes (or cancels) the payment, you'll receive a DMN:
+
+```
+POST /webhooks/nuvei HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+ppp_status=OK
+&Status=APPROVED
+&TransactionID=7110000000011234567
+&PPP_TransactionID=350728608
+&totalAmount=100.00
+&currency=EUR
+&payment_method=apmgw_iDeal
+&advanceResponseChecksum=<checksum>
+```
+
+## APM-Specific Parameters
+
+Different APMs require different parameters:
+
+<Tabs>
+  <Tab title="iDEAL">
+    ```json
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_iDeal",
+      "BIC": "INGBNL2A"  // Bank code (optional for iDEAL 2.0)
+    }
+    ```
+    
+    | BIC Code | Bank Name |
+    |----------|-----------|
+    | ABNANL2A | ABN AMRO |
+    | INGBNL2A | ING |
+    | RABONL2U | Rabobank |
+    | SNSBNL2A | SNS Bank |
+    | ASNBNL21 | ASN Bank |
+    | BUNQNL2A | bunq |
+  </Tab>
+  
+  <Tab title="PayPal">
+    ```json
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_expresscheckout"
+    }
+    ```
+    
+    For recurring (Billing Agreements):
+    ```json
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_expresscheckout",
+      "submethod": "ReferenceTransaction"
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Klarna">
+    ```json
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_Klarna"
+    }
+    ```
+    
+    Klarna requires detailed order items in the `items` array.
+  </Tab>
+  
+  <Tab title="PIX">
+    ```json
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_PIX"
+    }
+    ```
+    
+    Brazilian CPF (tax ID) may be required.
+  </Tab>
+</Tabs>
+
+## Handling APM Responses
+
+### Transaction Statuses
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `REDIRECT` | Customer must complete at APM | Redirect to `redirectUrl` |
+| `PENDING` | Async APM - waiting completion | Wait for webhook |
+| `APPROVED` | Payment successful | Fulfill order |
+| `DECLINED` | Payment failed | Show error |
+| `ERROR` | Processing error | Retry or contact support |
+
+### Code Example
+
+```javascript
+async function processAPMPayment(apmData) {
+  const response = await nuveiPayment(apmData);
+  
+  switch (response.transactionStatus) {
+    case 'REDIRECT':
+      // Redirect customer to APM
+      return { redirect: response.paymentOption.redirectUrl };
+      
+    case 'PENDING':
+      // Async APM - store order as pending
+      await updateOrderStatus(apmData.clientUniqueId, 'pending');
+      return { status: 'pending', message: 'Waiting for payment confirmation' };
+      
+    case 'APPROVED':
+      // Direct approval (rare for APMs)
+      await updateOrderStatus(apmData.clientUniqueId, 'paid');
+      return { status: 'success' };
+      
+    case 'DECLINED':
+    case 'ERROR':
+      return { 
+        status: 'failed', 
+        error: response.gwErrorReason || response.paymentMethodErrorReason 
+      };
+  }
+}
+```
+
+## APM Refunds
+
+Refund APM transactions the same way as cards:
+
+```json
+POST /ppp/api/v1/refundTransaction.do
+
+{
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "relatedTransactionId": "7110000000011234567",
+  "amount": "50.00",
+  "currency": "EUR",
+  "authCode": "<original_auth_code>",
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+<Note>
+  Some APMs don't support partial refunds. Check the specific APM documentation.
+</Note>
+
+## APM Payouts
+
+Send funds to customer's APM account using their stored UPO:
+
+```json
+POST /ppp/api/v1/payout.do
+
+{
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "sessionToken": "<sessionToken>",
+  "userTokenId": "customer_123",
+  "clientUniqueId": "payout_456",
+  "amount": "50.00",
+  "currency": "EUR",
+  "paymentOption": {
+    "userPaymentOptionId": "86068558"
+  },
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always include country" icon="globe">
+    APM availability depends on customer country. Always pass accurate country information.
+  </Accordion>
+  
+  <Accordion title="Handle async properly" icon="clock">
+    Most APMs are async - payment completes after redirect. Always rely on webhooks, not return URLs.
+  </Accordion>
+  
+  <Accordion title="Store the UPO" icon="key">
+    Save `userPaymentOptionId` for payouts and displaying saved payment methods.
+  </Accordion>
+  
+  <Accordion title="Localize payment names" icon="language">
+    Use the localized names from `getMerchantPaymentMethods` response.
+  </Accordion>
+  
+  <Accordion title="Test thoroughly" icon="vial">
+    Each APM has different test credentials. See individual APM guides.
+  </Accordion>
+</AccordionGroup>
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="APM Overview" icon="globe" href="/apms/overview">
+    All available APMs
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/integrations/features/webhooks">
+    Handle APM notifications
+  </Card>
+  <Card title="Testing" icon="vial" href="/resources/testing">
+    APM test credentials
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/resources/troubleshooting">
+    Common APM issues
+  </Card>
+</CardGroup>

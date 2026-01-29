@@ -1,0 +1,281 @@
+---
+title: "Magento 2"
+description: "Nuvei payments plugin for Adobe Commerce and Magento Open Source"
+---
+
+# Magento 2 Plugin
+
+<Info>
+  **Version:** 3.x  
+  **Platforms:** Adobe Commerce, Magento Open Source  
+  **Requirements:** Magento 2.3.x+ or 2.4.x, PHP 7.4+/8.1+
+</Info>
+
+Accept payments on your Magento 2 store with the official Nuvei payment module. Supports cards, 3D Secure 2, APMs, and saved payment methods.
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Credit/Debit Cards | ✅ |
+| 3D Secure 2.0 | ✅ |
+| Alternative Payment Methods | ✅ |
+| Apple Pay | ✅ |
+| Google Pay | ✅ |
+| Saved Cards (Vault) | ✅ |
+| Subscriptions | ✅ |
+| Refunds (Admin) | ✅ |
+| Partial Capture | ✅ |
+| Multi-store | ✅ |
+| Multi-currency | ✅ |
+| Order Management | ✅ |
+
+## Installation
+
+### Via Composer (Recommended)
+
+```bash
+# Add the package
+composer require nuvei/payments-magento-2
+
+# Enable the module
+bin/magento module:enable Nuvei_Payments
+
+# Run setup upgrade
+bin/magento setup:upgrade
+
+# Compile DI (production mode)
+bin/magento setup:di:compile
+
+# Deploy static content (production mode)
+bin/magento setup:static-content:deploy
+
+# Clear cache
+bin/magento cache:flush
+```
+
+### Manual Installation
+
+1. Download the plugin from [GitHub](https://github.com/Nuvei/nuvei-plugin-magento-2)
+2. Extract to `app/code/Nuvei/Payments/`
+3. Run the Magento commands above starting from `module:enable`
+
+## Configuration
+
+Navigate to **Stores** → **Configuration** → **Sales** → **Payment Methods** → **Nuvei**
+
+### Basic Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Enabled** | Enable/disable Nuvei payments |
+| **Title** | Payment method name shown at checkout |
+| **Environment** | Sandbox or Production |
+| **Merchant ID** | Your Nuvei Merchant ID |
+| **Merchant Site ID** | Your Nuvei Site ID |
+| **Secret Key** | Your Nuvei Secret Key |
+
+### Payment Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Transaction Type** | Auth Only or Sale (Auth + Capture) |
+| **Payment Action** | Authorize or Authorize and Capture |
+| **Use Vault** | Enable saved cards |
+| **Enable 3D Secure** | Require 3D Secure authentication |
+| **Debug Mode** | Log detailed information (disable in production) |
+
+### APM Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Enable APMs** | Show alternative payment methods |
+| **APM List** | Select specific APMs or show all available |
+| **APM Filter by Country** | Filter APMs based on billing country |
+
+## Configuration Screenshot
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ NUVEI PAYMENTS                                             │
+├────────────────────────────────────────────────────────────┤
+│ ☑ Enabled                                         Yes ▼   │
+│                                                            │
+│ Title                            [Credit Card         ]   │
+│                                                            │
+│ Environment                      [Sandbox           ▼]   │
+│                                                            │
+│ Merchant ID                      [1234567890        ]   │
+│                                                            │
+│ Merchant Site ID                 [123456            ]   │
+│                                                            │
+│ Secret Key                       [••••••••••••••••  ]   │
+│                                                            │
+│ Transaction Type                 [Sale              ▼]   │
+│                                                            │
+│ ☑ Use Vault (Save Cards)                          Yes ▼   │
+│                                                            │
+│ ☑ Enable 3D Secure                                Yes ▼   │
+│                                                            │
+│ ☑ Enable APMs                                     Yes ▼   │
+│                                                            │
+│ ☑ Debug Mode                                       No ▼   │
+└────────────────────────────────────────────────────────────┘
+```
+
+## Webhook Configuration
+
+Configure DMN (webhook) URL in your Nuvei merchant portal:
+
+```
+https://yourdomain.com/nuvei/payment/dmn
+```
+
+The webhook handles:
+- Payment confirmations
+- Order status updates
+- Refund notifications
+- Subscription events
+
+## Testing
+
+### Test Cards
+
+| Card Number | Result | CVV |
+|-------------|--------|-----|
+| 4000000000001000 | Success | Any 3 digits |
+| 4000000000001091 | 3DS Challenge | Any 3 digits |
+| 4000000000001018 | Decline | Any 3 digits |
+
+### Test Workflow
+
+1. Enable Sandbox mode in configuration
+2. Place a test order with test card
+3. Verify payment in Nuvei portal
+4. Test refund from Magento admin
+5. Test saved card functionality
+6. Test APM payments
+
+## Admin Order Management
+
+### Capture Payment
+
+For "Auth Only" transactions:
+
+1. Go to **Sales** → **Orders**
+2. Open the order
+3. Click **Invoice**
+4. Select **Capture Online**
+5. Submit invoice
+
+### Refund Payment
+
+1. Go to **Sales** → **Orders**
+2. Open the order
+3. Click **Credit Memo**
+4. Enter refund amount
+5. Click **Refund** (online)
+
+### Void Authorization
+
+For uncaptured authorizations:
+
+1. Go to **Sales** → **Orders**
+2. Open the order
+3. Click **Void**
+
+## Subscriptions
+
+The Nuvei module integrates with Magento's subscription extensions.
+
+### Requirements
+
+- Customer must have saved card (Vault enabled)
+- Product must be configured as subscription
+
+### Recurring Charges
+
+Subscriptions are processed automatically using the `userPaymentOptionId` stored during initial purchase.
+
+## Multi-Store Configuration
+
+Configure different settings per store view:
+
+1. Go to **Stores** → **Configuration**
+2. Select store view from scope selector
+3. Configure Nuvei settings for that store
+4. Different credentials/settings per store supported
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Payment method not showing" icon="eye-slash">
+    1. Clear Magento cache: `bin/magento cache:flush`
+    2. Verify module is enabled: `bin/magento module:status Nuvei_Payments`
+    3. Check configuration is complete
+    4. Verify credentials are correct
+  </Accordion>
+  
+  <Accordion title="3D Secure popup not appearing" icon="shield-halved">
+    1. Check popup blocker settings
+    2. Verify return URL is accessible
+    3. Check browser console for errors
+    4. Enable debug mode and check logs
+  </Accordion>
+  
+  <Accordion title="Webhook not working" icon="bell-slash">
+    1. Verify webhook URL in Nuvei portal
+    2. Check Magento logs: `var/log/nuvei.log`
+    3. Ensure URL is publicly accessible
+    4. Check SSL certificate
+  </Accordion>
+  
+  <Accordion title="Compilation errors" icon="bug">
+    1. Remove generated files: `rm -rf generated/*`
+    2. Run setup:di:compile again
+    3. Check PHP version compatibility
+  </Accordion>
+</AccordionGroup>
+
+## Logs
+
+Debug logs location:
+```
+var/log/nuvei.log
+var/log/nuvei_debug.log
+```
+
+Enable debug mode in configuration to capture detailed API request/response data.
+
+## Upgrade
+
+```bash
+# Update via Composer
+composer update nuvei/payments-magento-2
+
+# Run upgrade scripts
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento cache:flush
+```
+
+<Warning>
+  Always backup your database before upgrading. Test in staging environment first.
+</Warning>
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="GitHub" icon="github" href="https://github.com/Nuvei/nuvei-plugin-magento-2">
+    Source code & issues
+  </Card>
+  <Card title="Changelog" icon="list" href="https://github.com/Nuvei/nuvei-plugin-magento-2/releases">
+    Version history
+  </Card>
+  <Card title="Support" icon="headset" href="https://support.nuvei.com">
+    Technical support
+  </Card>
+  <Card title="Integration Guide" icon="code" href="/integrations/simply-connect">
+    Simply Connect docs
+  </Card>
+</CardGroup>

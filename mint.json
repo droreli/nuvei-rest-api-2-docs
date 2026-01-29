@@ -216,13 +216,58 @@
     {
       "group": "Alternative Payment Methods",
       "pages": [
-        "apms/overview"
+        "apms/overview",
+        "apms/integration"
+      ]
+    },
+    {
+      "group": "Europe",
+      "pages": [
+        "apms/europe/overview",
+        "apms/europe/ideal",
+        "apms/europe/sofort",
+        "apms/europe/bancontact"
+      ]
+    },
+    {
+      "group": "Americas",
+      "pages": [
+        "apms/americas/overview",
+        "apms/americas/pix",
+        "apms/americas/oxxo"
+      ]
+    },
+    {
+      "group": "Asia-Pacific",
+      "pages": [
+        "apms/apac/overview"
+      ]
+    },
+    {
+      "group": "Wallets",
+      "pages": [
+        "apms/wallets/overview",
+        "apms/wallets/paypal"
+      ]
+    },
+    {
+      "group": "Buy Now, Pay Later",
+      "pages": [
+        "apms/bnpl/overview"
       ]
     },
     {
       "group": "Plugins & Extensions",
       "pages": [
         "plugins/overview"
+      ]
+    },
+    {
+      "group": "E-Commerce Platforms",
+      "pages": [
+        "plugins/ecommerce/magento",
+        "plugins/ecommerce/woocommerce",
+        "plugins/ecommerce/shopify"
       ]
     },
     {

@@ -1,0 +1,225 @@
+---
+title: "Europe APMs"
+description: "Alternative payment methods available in European markets"
+---
+
+# Europe APMs
+
+Europe has the most diverse APM landscape, with each country having preferred local payment methods alongside pan-European options.
+
+## Popular European APMs
+
+<CardGroup cols={3}>
+  <Card title="iDEAL" icon="bank" href="/apms/europe/ideal">
+    🇳🇱 Netherlands #1 method
+  </Card>
+  <Card title="Bancontact" icon="credit-card" href="/apms/europe/bancontact">
+    🇧🇪 Belgium's debit network
+  </Card>
+  <Card title="Sofort" icon="bank" href="/apms/europe/sofort">
+    🇩🇪 Germany bank transfer
+  </Card>
+  <Card title="giropay" icon="bank" href="/apms/europe/giropay">
+    🇩🇪 German online banking
+  </Card>
+  <Card title="EPS" icon="bank" href="/apms/europe/eps">
+    🇦🇹 Austrian bank transfer
+  </Card>
+  <Card title="Przelewy24" icon="bank" href="/apms/europe/przelewy24">
+    🇵🇱 Poland's top APM
+  </Card>
+  <Card title="Trustly" icon="bank" href="/apms/europe/trustly">
+    🇪🇺 Pan-European banking
+  </Card>
+  <Card title="Multibanco" icon="building" href="/apms/europe/multibanco">
+    🇵🇹 Portugal ATM network
+  </Card>
+  <Card title="SEPA" icon="globe" href="/apms/europe/sepa">
+    🇪🇺 Euro bank transfers
+  </Card>
+</CardGroup>
+
+## APMs by Country
+
+### Netherlands 🇳🇱
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [iDEAL](/apms/europe/ideal) | Bank Transfer | ~60% | EUR |
+| [Bancontact](/apms/europe/bancontact) | Card Network | ~10% | EUR |
+| PayPal | E-Wallet | ~15% | EUR |
+
+iDEAL dominates Dutch e-commerce with over 60% market share. It's a real-time bank transfer system supported by all major Dutch banks.
+
+### Germany 🇩🇪
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [Sofort](/apms/europe/sofort) | Bank Transfer | ~15% | EUR |
+| [giropay](/apms/europe/giropay) | Bank Transfer | ~10% | EUR |
+| PayPal | E-Wallet | ~25% | EUR |
+| [Klarna](/apms/bnpl/klarna) | BNPL | ~15% | EUR |
+
+Germany prefers invoice (BNPL) and direct bank transfer methods. Klarna's "Pay Later" is very popular.
+
+### Belgium 🇧🇪
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [Bancontact](/apms/europe/bancontact) | Card Network | ~40% | EUR |
+| PayPal | E-Wallet | ~20% | EUR |
+
+Bancontact is Belgium's domestic debit card network, processed as an APM online.
+
+### Austria 🇦🇹
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [EPS](/apms/europe/eps) | Bank Transfer | ~20% | EUR |
+| [Sofort](/apms/europe/sofort) | Bank Transfer | ~15% | EUR |
+| PayPal | E-Wallet | ~20% | EUR |
+
+### Poland 🇵🇱
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [Przelewy24](/apms/europe/przelewy24) | Aggregator | ~40% | PLN |
+| BLIK | Mobile | ~35% | PLN |
+| PayPal | E-Wallet | ~10% | PLN |
+
+Przelewy24 aggregates multiple Polish bank transfers into one integration.
+
+### Portugal 🇵🇹
+
+| APM | Type | Market Share | Currencies |
+|-----|------|--------------|------------|
+| [Multibanco](/apms/europe/multibanco) | ATM/Bank | ~50% | EUR |
+| PayPal | E-Wallet | ~15% | EUR |
+
+### Nordic Countries 🇸🇪🇳🇴🇫🇮🇩🇰
+
+| APM | Countries | Type | Currencies |
+|-----|-----------|------|------------|
+| [Trustly](/apms/europe/trustly) | All | Bank Transfer | SEK, NOK, EUR, DKK |
+| [Klarna](/apms/bnpl/klarna) | SE, NO, FI | BNPL | SEK, NOK, EUR |
+| Vipps | NO | Mobile Wallet | NOK |
+| MobilePay | DK, FI | Mobile Wallet | DKK, EUR |
+| Swish | SE | Mobile | SEK |
+
+Trustly provides pan-Nordic coverage with a single integration.
+
+## Integration Example
+
+### REST API - iDEAL Payment
+
+```json
+POST /ppp/api/v1/payment.do
+
+{
+  "sessionToken": "<sessionToken>",
+  "merchantId": "<merchantId>",
+  "merchantSiteId": "<merchantSiteId>",
+  "clientRequestId": "<unique_request_id>",
+  "clientUniqueId": "order_123",
+  "amount": "99.00",
+  "currency": "EUR",
+  
+  "paymentOption": {
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_iDeal",
+      "BIC": "INGBNL2A"
+    }
+  },
+  
+  "billingAddress": {
+    "firstName": "Jan",
+    "lastName": "de Vries",
+    "email": "jan@example.nl",
+    "country": "NL"
+  },
+  
+  "urlDetails": {
+    "successUrl": "https://yoursite.com/success",
+    "failureUrl": "https://yoursite.com/failure",
+    "notificationUrl": "https://yoursite.com/webhooks"
+  },
+  
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<checksum>"
+}
+```
+
+### Response
+
+```json
+{
+  "orderId": "350728608",
+  "paymentOption": {
+    "redirectUrl": "https://gw-apm.nuvei.com/Home?PaymentToken=ABC123..."
+  },
+  "transactionStatus": "REDIRECT",
+  "status": "SUCCESS"
+}
+```
+
+## Feature Support
+
+| APM | Refunds | Partial Refunds | Recurring | Payouts |
+|-----|---------|-----------------|-----------|---------|
+| iDEAL | ✅ | ✅ | ❌ | ❌ |
+| Bancontact | ✅ | ✅ | ✅ | ❌ |
+| Sofort | ✅ | ✅ | ❌ | ❌ |
+| giropay | ✅ | ✅ | ❌ | ❌ |
+| EPS | ✅ | ✅ | ❌ | ❌ |
+| Przelewy24 | ✅ | ✅ | ❌ | ❌ |
+| Trustly | ✅ | ✅ | ✅ | ✅ |
+| Multibanco | ❌ | ❌ | ❌ | ❌ |
+| SEPA | ✅ | ✅ | ✅ | ✅ |
+
+## Settlement Times
+
+| APM | Funds Settlement |
+|-----|------------------|
+| iDEAL | Real-time to T+1 |
+| Bancontact | T+1 |
+| Sofort | T+2 |
+| giropay | Real-time |
+| Trustly | T+2 to T+3 |
+| SEPA Direct Debit | T+5 to T+14 |
+
+## Best Practices for Europe
+
+<AccordionGroup>
+  <Accordion title="Detect customer location" icon="location-dot">
+    Use IP geolocation or billing address to show relevant APMs. Dutch customers expect iDEAL, Germans expect Sofort/Klarna.
+  </Accordion>
+  
+  <Accordion title="Support multiple languages" icon="language">
+    Use the `languageCode` parameter to show APM names in local language.
+  </Accordion>
+  
+  <Accordion title="Consider BNPL in Germany" icon="clock">
+    German shoppers strongly prefer "Buy Now, Pay Later" options. Consider Klarna or PayPal Pay Later.
+  </Accordion>
+  
+  <Accordion title="Handle EUR and local currencies" icon="euro-sign">
+    Most European APMs work with EUR, but Poland (PLN), Sweden (SEK), and others need local currency.
+  </Accordion>
+</AccordionGroup>
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="APM Integration Guide" icon="code" href="/apms/integration">
+    How to integrate APMs
+  </Card>
+  <Card title="Wallets" icon="wallet" href="/apms/wallets/overview">
+    PayPal, Apple Pay, Google Pay
+  </Card>
+  <Card title="BNPL" icon="calendar" href="/apms/bnpl/overview">
+    Klarna, Afterpay, Affirm
+  </Card>
+  <Card title="All APMs" icon="globe" href="/apms/overview">
+    Complete APM list
+  </Card>
+</CardGroup>

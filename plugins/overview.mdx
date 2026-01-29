@@ -7,61 +7,138 @@ description: "Pre-built integrations for popular e-commerce platforms"
 
 Integrate Nuvei payments into your e-commerce platform with our official plugins. Get up and running quickly without custom development.
 
-## Supported Platforms
+## E-Commerce Platforms
 
-<CardGroup cols={2}>
-  <Card title="Magento 2" icon="magento" href="/plugins/magento">
-    Adobe Commerce / Magento Open Source
+<CardGroup cols={3}>
+  <Card title="Magento 2" icon="magento" href="/plugins/ecommerce/magento">
+    Adobe Commerce / Open Source
   </Card>
-  <Card title="WooCommerce" icon="wordpress" href="/plugins/woocommerce">
+  <Card title="WooCommerce" icon="wordpress" href="/plugins/ecommerce/woocommerce">
     WordPress e-commerce
   </Card>
-  <Card title="Shopify" icon="shopify" href="/plugins/shopify">
-    Hosted e-commerce platform
+  <Card title="Shopify" icon="shopify" href="/plugins/ecommerce/shopify">
+    Hosted platform
   </Card>
-  <Card title="PrestaShop" icon="store" href="/plugins/prestashop">
-    Open source e-commerce
+  <Card title="PrestaShop" icon="store" href="/plugins/ecommerce/prestashop">
+    Open source PHP
   </Card>
-  <Card title="OpenCart" icon="cart-shopping" href="/plugins/opencart">
-    PHP-based shopping cart
+  <Card title="OpenCart" icon="cart-shopping" href="/plugins/ecommerce/opencart">
+    PHP shopping cart
   </Card>
-  <Card title="Salesforce Commerce" icon="salesforce" href="/plugins/salesforce">
-    B2C Commerce Cloud
+  <Card title="Shopware" icon="shopping-bag" href="/plugins/ecommerce/shopware">
+    German e-commerce
+  </Card>
+  <Card title="VTEX" icon="v" href="/plugins/ecommerce/vtex">
+    Enterprise commerce
+  </Card>
+  <Card title="Wix" icon="wix" href="/plugins/ecommerce/wix">
+    Website builder
+  </Card>
+  <Card title="Commercetools" icon="cubes" href="/plugins/ecommerce/commercetools">
+    Headless commerce
   </Card>
 </CardGroup>
 
-## Plugin Features
+## Enterprise Platforms
 
-All Nuvei plugins include:
+<CardGroup cols={3}>
+  <Card title="Salesforce Commerce" icon="salesforce" href="/plugins/enterprise/salesforce">
+    B2C Commerce Cloud
+  </Card>
+  <Card title="SAP Commerce" icon="s" href="/plugins/enterprise/sap">
+    Hybris / Commerce Cloud
+  </Card>
+  <Card title="Mirakl" icon="store" href="/plugins/enterprise/mirakl">
+    Marketplace platform
+  </Card>
+</CardGroup>
 
-| Feature | Description |
-|---------|-------------|
-| Card Payments | Visa, Mastercard, Amex, and more |
-| 3D Secure 2.0 | PSD2 compliant authentication |
-| APMs | Local payment methods by region |
-| Tokenization | Save cards for returning customers |
-| Refunds | Process refunds from admin panel |
-| Webhooks | Automatic order status updates |
-| Multi-currency | Accept payments in local currencies |
-| Sandbox Mode | Test before going live |
+## Plugin Comparison
 
-## Installation Overview
+| Platform | Installation | Maintenance | Best For |
+|----------|-------------|-------------|----------|
+| Magento 2 | Composer | Developer | Mid-market, Enterprise |
+| WooCommerce | WordPress plugin | Self/Managed | SMB, Startups |
+| Shopify | App store | Automatic | SMB, D2C brands |
+| PrestaShop | Module install | Self | SMB, Europe |
+| OpenCart | Extension upload | Self | Small business |
+| Shopware | Plugin manager | Self | Germany, Europe |
+| VTEX | VTEX IO | Automatic | Enterprise, LATAM |
+| Wix | App market | Automatic | Small business |
+| Commercetools | API connector | Developer | Headless, Enterprise |
+| Salesforce | Cartridge | Developer | Enterprise |
+| SAP | Extension | Developer | Enterprise |
+| Mirakl | Connector | Developer | Marketplaces |
+
+## Feature Matrix
+
+| Feature | Magento | WooCommerce | Shopify | PrestaShop |
+|---------|---------|-------------|---------|------------|
+| Cards | ✅ | ✅ | ✅ | ✅ |
+| 3D Secure 2 | ✅ | ✅ | ✅ | ✅ |
+| APMs | ✅ | ✅ | ✅ | ✅ |
+| Apple Pay | ✅ | ✅ | ✅ | ✅ |
+| Google Pay | ✅ | ✅ | ✅ | ✅ |
+| Tokenization | ✅ | ✅ | ✅ | ✅ |
+| Subscriptions | ✅ | ✅ | ⚠️ | ✅ |
+| Refunds | ✅ | ✅ | ✅ | ✅ |
+| Partial Capture | ✅ | ✅ | ✅ | ✅ |
+| Multi-currency | ✅ | ✅ | ✅ | ✅ |
+| Multi-store | ✅ | ⚠️ | ⚠️ | ✅ |
+
+<Note>
+  ⚠️ = Partial support or requires additional configuration
+</Note>
+
+## Quick Start
+
+### What You'll Need
+
+Before installing any plugin, have ready:
+
+1. **Nuvei Credentials**
+   - Merchant ID
+   - Merchant Site ID
+   - Secret Key
+   
+2. **Environment Choice**
+   - Sandbox (for testing)
+   - Production (for live payments)
+
+3. **Platform Requirements**
+   - Supported platform version
+   - PHP version (for self-hosted)
+   - SSL certificate
+
+### General Installation Steps
 
 <Steps>
-  <Step title="Download Plugin">
-    Get the plugin from your platform's marketplace or Nuvei's GitHub
+  <Step title="Download the Plugin">
+    Get the plugin from your platform's marketplace or Nuvei's download page.
   </Step>
-  <Step title="Install">
-    Upload via your platform's admin panel or composer/npm
+  
+  <Step title="Install on Your Platform">
+    Follow platform-specific installation instructions.
   </Step>
-  <Step title="Configure">
-    Enter your Nuvei credentials (Merchant ID, Site ID, Secret Key)
+  
+  <Step title="Configure Credentials">
+    Enter your Nuvei Merchant ID, Site ID, and Secret Key.
   </Step>
-  <Step title="Test">
-    Enable sandbox mode and process test transactions
+  
+  <Step title="Set Environment">
+    Start with Sandbox mode for testing.
   </Step>
+  
+  <Step title="Configure Payment Methods">
+    Enable cards, APMs, and wallets as needed.
+  </Step>
+  
+  <Step title="Test Transactions">
+    Process test payments to verify setup.
+  </Step>
+  
   <Step title="Go Live">
-    Switch to production credentials
+    Switch to Production mode when ready.
   </Step>
 </Steps>
 
@@ -123,6 +200,43 @@ Configuration: **Stores** → **Configuration** → **Sales** → **Payment Meth
   </Accordion>
 </AccordionGroup>
 
+## Testing Checklist
+
+Before going live, verify:
+
+- [ ] **Successful card payment** - Standard card with CVV
+- [ ] **3D Secure flow** - Complete authentication
+- [ ] **APM payment** - At least one APM (e.g., PayPal)
+- [ ] **Refund** - Full and partial refund
+- [ ] **Saved cards** - Return customer payment
+- [ ] **Webhook reception** - Order status updates
+- [ ] **Error handling** - Declined card displays proper message
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Payments not appearing" icon="eye-slash">
+    1. Verify credentials are correct (check for spaces)
+    2. Confirm environment matches (sandbox vs production)
+    3. Check payment methods are enabled in Nuvei portal
+    4. Clear platform cache
+  </Accordion>
+  
+  <Accordion title="Webhook not received" icon="bell-slash">
+    1. Confirm webhook URL is publicly accessible
+    2. Check firewall/security rules
+    3. Verify HTTPS certificate is valid
+    4. Check webhook settings in Nuvei portal
+  </Accordion>
+  
+  <Accordion title="3D Secure failing" icon="shield-halved">
+    1. Ensure returnURL is configured correctly
+    2. Check popup blockers aren't interfering
+    3. Verify billing address is being sent
+    4. Test with a different test card
+  </Accordion>
+</AccordionGroup>
+
 ## Support
 
 <CardGroup cols={2}>
@@ -135,19 +249,24 @@ Configuration: **Stores** → **Configuration** → **Sales** → **Payment Meth
   <Card title="Support Portal" icon="headset" href="https://support.nuvei.com">
     Technical support
   </Card>
-  <Card title="Slack Community" icon="slack" href="https://nuvei-developers.slack.com">
-    Developer community
+  <Card title="Integration Help" icon="handshake" href="/resources/support">
+    Get implementation help
   </Card>
 </CardGroup>
 
-## Coming Soon
+## Quick Links
 
-<Info>
-  Detailed plugin documentation for each platform is being added, including:
-  
-  - Step-by-step installation guides
-  - Configuration screenshots
-  - Troubleshooting common issues
-  - Customization options
-  - Upgrade guides
-</Info>
+<CardGroup cols={2}>
+  <Card title="Magento 2" icon="magento" href="/plugins/ecommerce/magento">
+    Full Magento guide
+  </Card>
+  <Card title="WooCommerce" icon="wordpress" href="/plugins/ecommerce/woocommerce">
+    Full WooCommerce guide
+  </Card>
+  <Card title="Shopify" icon="shopify" href="/plugins/ecommerce/shopify">
+    Full Shopify guide
+  </Card>
+  <Card title="Salesforce" icon="salesforce" href="/plugins/enterprise/salesforce">
+    Enterprise integration
+  </Card>
+</CardGroup>

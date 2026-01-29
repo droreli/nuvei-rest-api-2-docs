@@ -1,0 +1,262 @@
+---
+title: "Shopify"
+description: "Nuvei payments app for Shopify stores"
+---
+
+# Shopify App
+
+<Info>
+  **Type:** Shopify App  
+  **Platform:** Shopify (all plans)  
+  **Installation:** Shopify App Store
+</Info>
+
+Accept payments on your Shopify store with the Nuvei payment app. Easy installation from the Shopify App Store with automatic updates.
+
+## Features
+
+| Feature | Supported |
+|---------|-----------|
+| Credit/Debit Cards | ✅ |
+| 3D Secure 2.0 | ✅ |
+| Alternative Payment Methods | ✅ |
+| Apple Pay | ✅ |
+| Google Pay | ✅ |
+| Shop Pay | ✅ |
+| Refunds | ✅ |
+| Multi-currency | ✅ |
+| Shopify Markets | ✅ |
+
+## Installation
+
+### From Shopify App Store
+
+1. Go to the [Shopify App Store](https://apps.shopify.com)
+2. Search for "Nuvei Payments"
+3. Click **Add app**
+4. Review permissions and click **Install app**
+5. Enter your Nuvei credentials
+6. Activate the payment method
+
+### Enable as Payment Method
+
+1. Go to **Settings** → **Payments**
+2. Find Nuvei in the list
+3. Click **Activate**
+4. Complete configuration
+
+## Configuration
+
+### API Credentials
+
+| Setting | Description |
+|---------|-------------|
+| **Merchant ID** | Your Nuvei Merchant ID |
+| **Merchant Site ID** | Your Nuvei Site ID |
+| **Secret Key** | Your Nuvei Secret Key |
+| **Environment** | Test Mode or Live Mode |
+
+### Payment Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Payment Capture** | Automatic or Manual |
+| **Enable APMs** | Show alternative payment methods |
+| **Card Types** | Accepted card brands |
+
+## Shopify Checkout Integration
+
+The Nuvei app integrates with Shopify's checkout system:
+
+### Standard Checkout
+
+Nuvei appears as a payment option alongside other methods:
+
+```
+┌────────────────────────────────────────────────────┐
+│ Payment                                            │
+├────────────────────────────────────────────────────┤
+│ ○ Credit card (Nuvei)                              │
+│   ┌────────────────────────────────────────────┐  │
+│   │ Card number                                │  │
+│   │ ┌──────────────────┐ ┌─────────┐ ┌───────┐│  │
+│   │ │4111 1111 1111 1111│ │ MM / YY │ │ CVV  ││  │
+│   │ └──────────────────┘ └─────────┘ └───────┘│  │
+│   └────────────────────────────────────────────┘  │
+│                                                    │
+│ ○ PayPal                                          │
+│ ○ Klarna - Pay in 4                               │
+│ ○ iDEAL                                           │
+└────────────────────────────────────────────────────┘
+```
+
+### Checkout Extensions
+
+The app supports Shopify Checkout Extensions for customized experiences.
+
+## Testing
+
+### Test Mode
+
+1. Enable Test Mode in app settings
+2. Use Shopify's Bogus Gateway for basic testing
+3. Use Nuvei test cards for realistic testing
+
+### Test Cards
+
+| Card Number | Result |
+|-------------|--------|
+| 4000000000001000 | Approved |
+| 4000000000001091 | 3DS Required |
+| 4000000000001018 | Declined |
+
+### Test Order Flow
+
+1. Add product to cart
+2. Proceed to checkout
+3. Select Nuvei payment
+4. Enter test card details
+5. Complete order
+6. Verify in Shopify admin
+
+## Order Management
+
+### View Transaction Details
+
+1. Go to **Orders** in Shopify admin
+2. Click on an order
+3. View payment details in **Transaction** section
+
+### Capture Payment
+
+For manual capture orders:
+
+1. Open the order
+2. Click **Capture payment**
+3. Enter amount to capture
+4. Confirm
+
+### Refund Order
+
+1. Open the order
+2. Click **Refund**
+3. Select items or enter amount
+4. Click **Refund** button
+
+## Shopify Markets
+
+The app supports Shopify Markets for international selling:
+
+- **Currency conversion** - Show prices in local currency
+- **Payment methods** - Display region-specific APMs
+- **3D Secure** - Automatic compliance per region
+
+### Market-Specific APMs
+
+```javascript
+// Example: APMs by market
+Netherlands → iDEAL, Bancontact, Cards
+Germany → Sofort, Klarna, Cards  
+Brazil → PIX, Boleto, Cards
+```
+
+## Shopify Flow Integration
+
+Create automated workflows with Shopify Flow:
+
+### Example Triggers
+
+- Payment captured → Send thank you email
+- Payment failed → Notify support team
+- High-value order → Require manual review
+
+## Metafields
+
+The app stores transaction data in metafields:
+
+| Metafield | Namespace | Description |
+|-----------|-----------|-------------|
+| `transaction_id` | `nuvei` | Nuvei transaction ID |
+| `auth_code` | `nuvei` | Authorization code |
+| `payment_method` | `nuvei` | Payment method used |
+
+Access via Shopify Admin API:
+```graphql
+query {
+  order(id: "gid://shopify/Order/123") {
+    metafields(namespace: "nuvei", first: 10) {
+      edges {
+        node {
+          key
+          value
+        }
+      }
+    }
+  }
+}
+```
+
+## Webhooks
+
+The app automatically handles Shopify webhooks:
+
+| Event | Action |
+|-------|--------|
+| `orders/create` | Initialize payment |
+| `orders/cancelled` | Void/refund payment |
+| `refunds/create` | Process refund |
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Payment not appearing at checkout" icon="eye-slash">
+    1. Check app is installed and activated
+    2. Verify credentials in app settings
+    3. Ensure payment method is enabled in Settings → Payments
+    4. Clear browser cache
+  </Accordion>
+  
+  <Accordion title="APMs not showing" icon="globe">
+    1. Check APMs are enabled in app settings
+    2. Verify customer's shipping/billing country
+    3. Some APMs have currency restrictions
+  </Accordion>
+  
+  <Accordion title="Test mode not working" icon="flask">
+    1. Confirm Test Mode is enabled
+    2. Use proper test card numbers
+    3. Check Shopify's test order settings
+  </Accordion>
+  
+  <Accordion title="Orders stuck in pending" icon="clock">
+    1. Check webhook delivery in app settings
+    2. Verify Nuvei portal for transaction status
+    3. Contact support if webhook issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Limitations
+
+| Feature | Status |
+|---------|--------|
+| Shopify POS | ❌ Not supported |
+| Draft Orders | ✅ Supported |
+| Recurring (native) | ⚠️ Via subscriptions app |
+| B2B Checkout | ✅ Supported |
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="App Store" icon="shopify" href="https://apps.shopify.com/nuvei">
+    Shopify App Store listing
+  </Card>
+  <Card title="Help Center" icon="circle-question" href="https://help.shopify.com">
+    Shopify Help Center
+  </Card>
+  <Card title="Support" icon="headset" href="https://support.nuvei.com">
+    Nuvei technical support
+  </Card>
+  <Card title="Status" icon="signal" href="https://status.nuvei.com">
+    System status
+  </Card>
+</CardGroup>

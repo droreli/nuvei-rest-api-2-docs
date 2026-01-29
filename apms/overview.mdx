@@ -1,6 +1,6 @@
 ---
 title: "Alternative Payment Methods"
-description: "Accept local and regional payment methods worldwide"
+description: "Accept local and regional payment methods worldwide with 700+ APMs"
 ---
 
 # Alternative Payment Methods (APMs)
@@ -28,37 +28,43 @@ Expand your payment acceptance beyond cards with Nuvei's extensive network of 70
   </Card>
 </CardGroup>
 
-## Payment Method Categories
+## APM Categories
 
 ### Digital Wallets
 
+Global and regional e-wallets for fast, secure payments.
+
 <CardGroup cols={3}>
+  <Card title="PayPal" icon="paypal" href="/apms/wallets/paypal">
+    Global digital wallet
+  </Card>
   <Card title="Apple Pay" icon="apple" href="/apms/wallets/apple-pay">
     iOS and Safari payments
   </Card>
   <Card title="Google Pay" icon="google" href="/apms/wallets/google-pay">
     Android and Chrome
   </Card>
-  <Card title="PayPal" icon="paypal" href="/apms/wallets/paypal">
-    Global digital wallet
-  </Card>
 </CardGroup>
 
-### Bank Transfers
+### Bank Transfers (Europe)
+
+Real-time bank transfer methods popular in European markets.
 
 <CardGroup cols={3}>
-  <Card title="iDEAL" icon="building-columns" href="/apms/bank/ideal">
+  <Card title="iDEAL" icon="building-columns" href="/apms/europe/ideal">
     Netherlands #1 method
   </Card>
-  <Card title="Sofort" icon="building-columns" href="/apms/bank/sofort">
+  <Card title="Sofort" icon="building-columns" href="/apms/europe/sofort">
     Germany & Austria
   </Card>
-  <Card title="Bancontact" icon="building-columns" href="/apms/bank/bancontact">
+  <Card title="Bancontact" icon="credit-card" href="/apms/europe/bancontact">
     Belgium
   </Card>
 </CardGroup>
 
 ### Buy Now Pay Later (BNPL)
+
+Installment payment solutions for higher conversion on larger purchases.
 
 <CardGroup cols={3}>
   <Card title="Klarna" icon="clock" href="/apms/bnpl/klarna">
@@ -72,16 +78,18 @@ Expand your payment acceptance beyond cards with Nuvei's extensive network of 70
   </Card>
 </CardGroup>
 
-### Local Methods
+### Local Payment Methods
+
+Regional methods with high adoption in specific markets.
 
 <CardGroup cols={3}>
-  <Card title="PIX" icon="bolt" href="/apms/local/pix">
+  <Card title="PIX" icon="bolt" href="/apms/americas/pix">
     Brazil instant payments
   </Card>
-  <Card title="UPI" icon="mobile" href="/apms/local/upi">
+  <Card title="UPI" icon="mobile" href="/apms/apac/upi">
     India unified payments
   </Card>
-  <Card title="OXXO" icon="store" href="/apms/local/oxxo">
+  <Card title="OXXO" icon="store" href="/apms/americas/oxxo">
     Mexico cash voucher
   </Card>
 </CardGroup>
@@ -89,54 +97,59 @@ Expand your payment acceptance beyond cards with Nuvei's extensive network of 70
 ## APMs by Region
 
 ### Europe
-| Method | Countries | Type |
-|--------|-----------|------|
-| iDEAL | Netherlands | Bank Transfer |
-| Sofort | Germany, Austria | Bank Transfer |
-| Bancontact | Belgium | Cards + Bank |
-| giropay | Germany | Bank Transfer |
-| eps | Austria | Bank Transfer |
-| Przelewy24 | Poland | Bank Transfer |
-| Trustly | Nordics, EU | Bank Transfer |
-| Multibanco | Portugal | Bank Reference |
+
+| Method | Countries | Type | Payouts | Refunds | Recurring |
+|--------|-----------|------|---------|---------|-----------|
+| [iDEAL](/apms/europe/ideal) | Netherlands | Bank Transfer | ✅ | ✅ | ❌ |
+| [Sofort](/apms/europe/sofort) | Germany, Austria, Switzerland | Bank Transfer | ✅ | ✅ | ❌ |
+| [Bancontact](/apms/europe/bancontact) | Belgium | Cards + Bank | ✅ | ✅ | ✅ |
+| [giropay](/apms/europe/giropay) | Germany | Bank Transfer | ❌ | ✅ | ❌ |
+| [EPS](/apms/europe/eps) | Austria | Bank Transfer | ❌ | ✅ | ❌ |
+| [Przelewy24](/apms/europe/przelewy24) | Poland | Bank Transfer | ❌ | ✅ | ❌ |
+| [Trustly](/apms/europe/trustly) | Nordics, EU | Bank Transfer | ✅ | ✅ | ❌ |
+| [Multibanco](/apms/europe/multibanco) | Portugal | Bank Reference | ❌ | ✅ | ❌ |
+| [SEPA](/apms/europe/sepa) | Eurozone | Direct Debit | ✅ | ✅ | ✅ |
 
 ### Americas
-| Method | Countries | Type |
-|--------|-----------|------|
-| PIX | Brazil | Instant Payment |
-| Boleto | Brazil | Bank Slip |
-| OXXO | Mexico | Cash Voucher |
-| PSE | Colombia | Bank Transfer |
-| ACH | USA | Bank Debit |
-| Interac | Canada | Bank Transfer |
+
+| Method | Countries | Type | Payouts | Refunds | Recurring |
+|--------|-----------|------|---------|---------|-----------|
+| [PIX](/apms/americas/pix) | Brazil | Instant Payment | ✅ | ✅ | ❌ |
+| [Boleto](/apms/americas/boleto) | Brazil | Bank Slip | ❌ | ✅ | ❌ |
+| [OXXO](/apms/americas/oxxo) | Mexico | Cash Voucher | ❌ | ✅ | ❌ |
+| [PSE](/apms/americas/pse) | Colombia | Bank Transfer | ❌ | ✅ | ❌ |
+| [Interac](/apms/americas/interac) | Canada | Bank Transfer | ✅ | ✅ | ❌ |
+| [ACH](/apms/americas/ach) | USA | Bank Debit | ✅ | ✅ | ✅ |
 
 ### Asia-Pacific
-| Method | Countries | Type |
-|--------|-----------|------|
-| UPI | India | Instant Payment |
-| PayNow | Singapore | Instant Payment |
-| GrabPay | Southeast Asia | Wallet |
-| Alipay | China | Wallet |
-| WeChat Pay | China | Wallet |
-| POLi | Australia, NZ | Bank Transfer |
 
-## Integration
+| Method | Countries | Type | Payouts | Refunds | Recurring |
+|--------|-----------|------|---------|---------|-----------|
+| [UPI](/apms/apac/upi) | India | Instant Payment | ❌ | ✅ | ❌ |
+| [Alipay](/apms/apac/alipay) | China | Wallet | ❌ | ✅ | ❌ |
+| [WeChat Pay](/apms/apac/wechat-pay) | China | Wallet | ❌ | ✅ | ❌ |
+| [GrabPay](/apms/apac/grabpay) | Southeast Asia | Wallet | ❌ | ✅ | ❌ |
+| [POLi](/apms/apac/poli) | Australia, NZ | Bank Transfer | ❌ | ❌ | ❌ |
+| [PayNow](/apms/apac/paynow) | Singapore | Instant Payment | ❌ | ✅ | ❌ |
 
-APMs work with all Nuvei integration methods:
+## APM Integration
+
+APMs work with all Nuvei integration methods. See the [APM Integration Guide](/apms/integration) for details.
 
 <Tabs>
   <Tab title="Payment Page">
     APMs appear automatically based on customer location:
     
-    ```json
-    {
-      "merchantId": "<merchantId>",
-      "merchantSiteId": "<merchantSiteId>",
-      "currency": "EUR",
-      "amount": "100.00",
-      "country": "NL"  // Shows iDEAL for Netherlands
-    }
     ```
+    https://secure.nuvei.com/ppp/purchase.do?
+      merchant_id=<merchantId>&
+      merchant_site_id=<merchantSiteId>&
+      currency=EUR&
+      amount=100.00&
+      country=NL
+    ```
+    
+    iDEAL and other Dutch methods automatically display.
   </Tab>
   <Tab title="Simply Connect">
     Enable APMs in checkout configuration:
@@ -147,10 +160,10 @@ APMs work with all Nuvei integration methods:
       amount: "100.00",
       currency: "EUR",
       country: "NL",
-      // APMs auto-display based on country
+      // APMs auto-display based on country/currency
+      // Or explicitly filter:
       paymentMethods: {
-        // Or explicitly specify
-        include: ["apmgw_iDEAL", "cc_card"]
+        include: ["apmgw_iDeal", "cc_card"]
       }
     });
     ```
@@ -159,7 +172,7 @@ APMs work with all Nuvei integration methods:
     Get available APMs for a country:
     
     ```json
-    POST /ppp/api/v1/getApms.do
+    POST /ppp/api/v1/getMerchantPaymentMethods.do
     
     {
       "sessionToken": "<sessionToken>",
@@ -169,12 +182,29 @@ APMs work with all Nuvei integration methods:
       "currencyCode": "EUR"
     }
     ```
+    
+    Then submit payment with the APM:
+    
+    ```json
+    POST /ppp/api/v1/payment.do
+    
+    {
+      "paymentOption": {
+        "alternativePaymentMethod": {
+          "paymentMethod": "apmgw_iDeal",
+          "BIC": "INGBNL2A"
+        }
+      }
+    }
+    ```
   </Tab>
 </Tabs>
 
-## APM Flow
+## APM Workflow Types
 
-Most APMs follow a redirect flow:
+### Redirect Flow (Most Common)
+
+Customer is redirected to the APM provider to complete payment.
 
 ```mermaid
 sequenceDiagram
@@ -184,39 +214,96 @@ sequenceDiagram
     participant APM Provider
     
     Customer->>Merchant: Select APM (e.g., iDEAL)
-    Merchant->>Nuvei: Initiate APM payment
-    Nuvei-->>Merchant: Redirect URL
+    Merchant->>Nuvei: POST /payment
+    Nuvei-->>Merchant: redirectUrl
     Merchant->>Customer: Redirect to APM
     Customer->>APM Provider: Complete payment
     APM Provider->>Nuvei: Payment notification
-    APM Provider-->>Customer: Redirect back
+    APM Provider-->>Customer: Redirect to merchant
+    Nuvei->>Merchant: DMN webhook (APPROVED/DECLINED)
+```
+
+### Direct Flow
+
+Customer completes payment on merchant's page (e.g., PayPal Billing Agreements).
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant Merchant
+    participant Nuvei
+    participant APM Provider
+    
+    Customer->>Merchant: Submit payment
+    Merchant->>Nuvei: POST /payment with UPO
+    Nuvei->>APM Provider: Process payment
+    APM Provider-->>Nuvei: Result
+    Nuvei-->>Merchant: Instant response
     Nuvei->>Merchant: DMN webhook
 ```
 
-## Coming Soon
+## APM Features
 
-<Info>
-  Full APM documentation for each payment method is being added. This includes:
-  
-  - Individual method integration guides
-  - Testing credentials for sandbox
-  - Error codes and handling
-  - Regional configuration options
-</Info>
+### Payouts
 
-## Quick Links
+Send funds to customers via their APM account:
+
+```json
+POST /ppp/api/v1/payout.do
+
+{
+  "userTokenId": "<userTokenId>",
+  "userPaymentOptionId": "<userPaymentOptionId>",
+  "amount": "50.00",
+  "currency": "EUR"
+}
+```
+
+<Note>
+  Payouts require an existing UPO from a previous deposit. Not all APMs support payouts.
+</Note>
+
+### Refunds
+
+Refund APM transactions the same way as card transactions:
+
+```json
+POST /ppp/api/v1/refundTransaction.do
+
+{
+  "relatedTransactionId": "<transactionId>",
+  "amount": "50.00",
+  "currency": "EUR"
+}
+```
+
+### Recurring Payments
+
+Some APMs support recurring/subscription payments:
+
+- **PayPal Billing Agreements**: Sign once, charge repeatedly
+- **SEPA Direct Debit**: Recurring bank debits
+- **Bancontact**: Card-on-file recurring
+
+## Browse by Category
 
 <CardGroup cols={2}>
-  <Card title="Payment Page" icon="credit-card" href="/integrations/payment-page/overview">
-    Hosted checkout with APMs
+  <Card title="Europe" icon="earth-europe" href="/apms/europe/overview">
+    iDEAL, Sofort, Bancontact, and 15+ more
   </Card>
-  <Card title="Simply Connect" icon="code" href="/integrations/simply-connect/overview">
-    Embedded APM checkout
+  <Card title="Americas" icon="earth-americas" href="/apms/americas/overview">
+    PIX, Boleto, OXXO, Interac, and more
   </Card>
-  <Card title="Webhooks" icon="bell" href="/integrations/features/webhooks">
-    APM payment notifications
+  <Card title="Asia-Pacific" icon="earth-asia" href="/apms/apac/overview">
+    UPI, Alipay, WeChat Pay, GrabPay
   </Card>
-  <Card title="Contact Sales" icon="phone" href="https://nuvei.com/contact">
-    Enable specific APMs
+  <Card title="Digital Wallets" icon="wallet" href="/apms/wallets/overview">
+    PayPal, Apple Pay, Google Pay
+  </Card>
+  <Card title="BNPL" icon="clock" href="/apms/bnpl/overview">
+    Klarna, Afterpay, Affirm
+  </Card>
+  <Card title="Integration Guide" icon="code" href="/apms/integration">
+    How to integrate APMs
   </Card>
 </CardGroup>
