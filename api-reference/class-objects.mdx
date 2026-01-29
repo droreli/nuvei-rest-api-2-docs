@@ -1,17 +1,19 @@
 ---
 title: 'Class Objects Reference'
-description: 'Complete reference for Nuvei API request and response objects'
+description: 'Complete reference for all Nuvei API request and response objects'
 ---
 
 # Class Objects Reference
 
-This reference documents all common objects used across Nuvei APIs. These objects are reusable components in requests and responses.
+This comprehensive reference documents all objects used in Nuvei API requests and responses. Objects are reusable across multiple API endpoints.
 
-## Payment Objects
+---
 
-### paymentOption
+## paymentOption
 
-Contains payment method details for processing transactions.
+The `paymentOption` object contains payment method details. Structure varies based on payment type.
+
+### Card Payment
 
 ```json
 {
@@ -21,24 +23,29 @@ Contains payment method details for processing transactions.
       "cardHolderName": "John Smith",
       "expirationMonth": "12",
       "expirationYear": "2025",
-      "CVV": "217"
+      "CVV": "217",
+      "threeD": {},
+      "storedCredentials": {}
     }
   }
 }
 ```
 
-**Card Sub-Object:**
+**card Object Fields:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `cardNumber` | string | Yes | Full card number (13-19 digits) |
-| `cardHolderName` | string | Yes | Name on card |
-| `expirationMonth` | string | Yes | 2-digit month (01-12) |
-| `expirationYear` | string | Yes | 4-digit year |
-| `CVV` | string | Yes* | Card verification value |
-| `ccTempToken` | string | No | Temporary token from Web SDK |
+| Field | Type | Max | Required | Description |
+|-------|------|-----|----------|-------------|
+| `cardNumber` | string | 20 | Yes | Full card number (13-19 digits) |
+| `cardHolderName` | string | 70 | Yes | Name as printed on card |
+| `expirationMonth` | string | 2 | Yes | 2-digit month (01-12) |
+| `expirationYear` | string | 4 | Yes | 2 or 4-digit year |
+| `CVV` | string | 4 | Yes* | Card verification value |
+| `ccTempToken` | string | 45 | No | Temporary token from Web SDK |
+| `threeD` | object | - | No | 3D Secure data |
+| `storedCredentials` | object | - | No | Credential-on-file data |
+| `cardHolderNameVerification` | object | - | No | Name verification |
 
-**Using User Payment Option (UPO):**
+### User Payment Option (Saved Card)
 
 ```json
 {
@@ -51,13 +58,19 @@ Contains payment method details for processing transactions.
 }
 ```
 
-**Using APM:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `userPaymentOptionId` | string | Yes | Saved payment method ID |
+| `card.CVV` | string | Conditional | Required if `alwaysCollectCvv` enabled |
+
+### Alternative Payment Method (APM)
 
 ```json
 {
   "paymentOption": {
     "alternativePaymentMethod": {
-      "paymentMethod": "apmgw_PayPal"
+      "paymentMethod": "apmgw_PayPal",
+      "email": "user@example.com"
     }
   }
 }
@@ -65,12 +78,38 @@ Contains payment method details for processing transactions.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `userPaymentOptionId` | string | No | Saved payment method ID |
-| `alternativePaymentMethod` | object | No | APM configuration |
+| `paymentMethod` | string | Yes | APM identifier (e.g., `apmgw_PayPal`) |
+| Additional fields | varies | Conditional | APM-specific fields |
 
-### threeD
+### External Token (Network Token/DPAN)
 
-3D Secure configuration and authentication data.
+```json
+{
+  "paymentOption": {
+    "card": {
+      "externalToken": {
+        "externalTokenProvider": "ApplePay",
+        "mobileToken": "{Apple Pay token data}"
+      }
+    }
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `externalTokenProvider` | string | `ApplePay`, `GooglePay`, `Visa`, `Mastercard` |
+| `mobileToken` | string | Token data from wallet provider |
+| `cryptogram` | string | Payment cryptogram |
+| `eciIndicator` | string | ECI from wallet |
+
+---
+
+## threeD
+
+3D Secure authentication configuration and data.
+
+### Request (Input)
 
 ```json
 {
@@ -82,10 +121,22 @@ Contains payment method details for processing transactions.
     "platformType": "02",
     "v2AdditionalParams": {
       "challengeWindowSize": "05",
-      "challengePreference": "01"
+      "challengePreference": "01",
+      "deliveryEmail": "user@example.com",
+      "deliveryTimeFrame": "01",
+      "giftCardAmount": "0",
+      "giftCardCount": "0",
+      "giftCardCurrency": "",
+      "preOrderDate": "",
+      "preOrderPurchaseInd": "01",
+      "reorderItemsInd": "01",
+      "shipIndicator": "01",
+      "rebillExpiry": "",
+      "rebillFrequency": "",
+      "challengeWindowSize": "05"
     },
     "browserDetails": {
-      "acceptHeader": "text/html",
+      "acceptHeader": "text/html,application/xhtml+xml",
       "ip": "192.168.1.1",
       "javaEnabled": "false",
       "javaScriptEnabled": "true",
@@ -94,7 +145,7 @@ Contains payment method details for processing transactions.
       "screenHeight": "1080",
       "screenWidth": "1920",
       "timeZone": "-300",
-      "userAgent": "Mozilla/5.0..."
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
     },
     "account": {
       "age": "05",
@@ -113,11 +164,6 @@ Contains payment method details for processing transactions.
       "addressFirstUseInd": "02",
       "nameInd": "01",
       "suspiciousActivity": "01"
-    },
-    "acquirer": {
-      "bin": "123456",
-      "merchantId": "987654321",
-      "merchantName": "Your Store"
     }
   }
 }
@@ -125,15 +171,15 @@ Contains payment method details for processing transactions.
 
 **Top-Level Fields:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `methodCompletionInd` | string | `Y`, `N`, `U` - fingerprint completion |
-| `version` | string | 3DS version: `1.0`, `2.1.0`, `2.2.0` |
-| `notificationUrl` | string | Callback URL for challenge result |
-| `merchantUrl` | string | Your website URL |
-| `platformType` | string | `01` (app), `02` (browser) |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `methodCompletionInd` | string | Conditional | `Y`, `N`, `U` - fingerprint completion |
+| `version` | string | No | Preferred 3DS version: `2.1.0`, `2.2.0` |
+| `notificationUrl` | string | Yes (3DS2) | Callback URL for challenge result |
+| `merchantUrl` | string | No | Your website URL |
+| `platformType` | string | Yes | `01` (app), `02` (browser) |
 
-**browserDetails Sub-Object:**
+**browserDetails Fields (Required for 3DS2):**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -141,26 +187,106 @@ Contains payment method details for processing transactions.
 | `ip` | string | Yes | Customer IP address |
 | `javaEnabled` | string | Yes | `true` or `false` |
 | `javaScriptEnabled` | string | Yes | `true` or `false` |
-| `language` | string | Yes | Browser language |
-| `colorDepth` | string | Yes | Screen color depth |
+| `language` | string | Yes | Browser language (e.g., `en-US`) |
+| `colorDepth` | string | Yes | Screen color depth (bits) |
 | `screenHeight` | string | Yes | Screen height in pixels |
 | `screenWidth` | string | Yes | Screen width in pixels |
 | `timeZone` | string | Yes | Timezone offset in minutes |
-| `userAgent` | string | Yes | Browser user agent |
+| `userAgent` | string | Yes | Full browser user agent |
 
-**Challenge Window Sizes (v2AdditionalParams.challengeWindowSize):**
+**v2AdditionalParams Fields:**
 
-| Value | Dimensions |
-|-------|------------|
-| `01` | 250 x 400 |
-| `02` | 390 x 400 |
-| `03` | 500 x 600 |
-| `04` | 600 x 400 |
+| Field | Type | Description |
+|-------|------|-------------|
+| `challengeWindowSize` | string | `01`-`05` (see table below) |
+| `challengePreference` | string | `01` (no preference), `02` (no challenge), `03` (challenge requested), `04` (mandate challenge) |
+| `deliveryEmail` | string | Email for electronic delivery |
+| `deliveryTimeFrame` | string | `01` (electronic), `02` (same day), `03` (overnight), `04` (2+ days) |
+| `shipIndicator` | string | `01` (cardholder address), `02` (verified address), `03` (different address), `04` (pickup), `05` (digital), `06` (travel), `07` (other) |
+| `preOrderPurchaseInd` | string | `01` (available), `02` (future) |
+| `reorderItemsInd` | string | `01` (first time), `02` (reorder) |
+
+**Challenge Window Sizes:**
+
+| Code | Dimensions |
+|------|------------|
+| `01` | 250 x 400 pixels |
+| `02` | 390 x 400 pixels |
+| `03` | 500 x 600 pixels |
+| `04` | 600 x 400 pixels |
 | `05` | Full screen |
 
-## Customer Objects
+**account Fields (Risk Indicators):**
 
-### billingAddress
+| Field | Type | Description |
+|-------|------|-------------|
+| `age` | string | Account age: `01` (no account), `02` (created during txn), `03` (<30 days), `04` (30-60 days), `05` (>60 days) |
+| `lastChangeDate` | string | Last account change (YYYYMMDD) |
+| `lastChangeInd` | string | `01` (during txn), `02` (<30 days), `03` (30-60 days), `04` (>60 days) |
+| `registrationDate` | string | Account creation date (YYYYMMDD) |
+| `passwordChangeDate` | string | Last password change (YYYYMMDD) |
+| `purchasesCount6M` | string | Purchases in last 6 months |
+| `transactionsCount24H` | string | Transactions in last 24 hours |
+| `transactionsCount1Y` | string | Transactions in last year |
+| `cardSavedDate` | string | Date card was saved (YYYYMMDD) |
+| `suspiciousActivity` | string | `01` (no suspicious activity), `02` (suspicious activity) |
+
+### Response (Output)
+
+```json
+{
+  "threeD": {
+    "methodUrl": "https://acs.bank.com/method",
+    "methodPayload": "eyJtZXRob2ROb3RpZmljYXRpb25VUkwiOi...",
+    "version": "2.2.0",
+    "v2supported": "true",
+    "serverTransId": "d65e93c3-35ab-41ba-b307-767bef3c7b8a",
+    "directoryServerId": "A000000004",
+    "directoryServerPublicKey": "...",
+    "acsUrl": "https://acs.bank.com/challenge",
+    "cReq": "eyJhY3NUcmFuc0lEIjoiMTIzNDU2...",
+    "authenticationType": "02",
+    "cardHolderInfoText": "Additional authentication required",
+    "sdk": {
+      "acsSignedContent": "..."
+    },
+    "result": "C",
+    "eci": "05",
+    "cavv": "AAABAWFlmQAAAABjRWWZEEFgFz8=",
+    "dsTransID": "d65e93c3-35ab-41ba-b307-767bef3c7b8a",
+    "whiteListStatus": "Y",
+    "flow": "challenge",
+    "threeDReasonId": "1",
+    "threeDReason": "Authentication successful",
+    "isLiabilityOnIssuer": "1",
+    "challengeCancelReasonId": "",
+    "challengeCancelReason": "",
+    "isExemptionRequestInAuthentication": "0",
+    "challengePreferenceReason": "No preference"
+  }
+}
+```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `methodUrl` | string | URL for 3DS method (fingerprinting) |
+| `methodPayload` | string | Base64 payload for method iframe |
+| `acsUrl` | string | ACS challenge URL |
+| `cReq` | string | Challenge request data |
+| `result` | string | `Y` (authenticated), `N` (failed), `A` (attempted), `U` (unavailable), `C` (challenge required) |
+| `eci` | string | Electronic Commerce Indicator |
+| `cavv` | string | Cardholder Authentication Value |
+| `dsTransID` | string | Directory Server Transaction ID |
+| `threeDReasonId` | string | Reason code |
+| `threeDReason` | string | Human-readable reason |
+| `isLiabilityOnIssuer` | string | `1` = liability shifted |
+| `flow` | string | `frictionless` or `challenge` |
+
+---
+
+## billingAddress
 
 Customer billing information.
 
@@ -172,29 +298,39 @@ Customer billing information.
     "email": "john.smith@example.com",
     "phone": "+1-555-123-4567",
     "address": "123 Main Street",
+    "address2": "Apt 4B",
     "city": "New York",
     "state": "NY",
     "zip": "10001",
-    "country": "US"
+    "country": "US",
+    "cell": "+1-555-987-6543",
+    "county": "New York County"
   }
 }
 ```
 
-| Field | Type | Max Length | Description |
-|-------|------|------------|-------------|
-| `firstName` | string | 30 | Customer first name |
-| `lastName` | string | 40 | Customer last name |
-| `email` | string | 100 | Email address |
-| `phone` | string | 18 | Phone number |
-| `address` | string | 60 | Street address |
-| `city` | string | 30 | City |
-| `state` | string | 2 | State/province code (US/CA) |
-| `zip` | string | 10 | Postal/ZIP code |
-| `country` | string | 2 | ISO 3166-1 alpha-2 country code |
-| `cell` | string | 18 | Mobile phone (optional) |
-| `county` | string | 255 | County (optional) |
+| Field | Type | Max | Required | Description |
+|-------|------|-----|----------|-------------|
+| `firstName` | string | 30 | Recommended | Customer first name |
+| `lastName` | string | 40 | Recommended | Customer last name |
+| `email` | string | 100 | Recommended | Email address |
+| `phone` | string | 18 | No | Phone number |
+| `address` | string | 60 | Conditional | Street address (required for AVS) |
+| `address2` | string | 60 | No | Address line 2 |
+| `city` | string | 30 | Conditional | City |
+| `state` | string | 2 | Conditional | State/province code (US/CA) |
+| `zip` | string | 10 | Conditional | Postal/ZIP code (required for AVS) |
+| `country` | string | 2 | Recommended | ISO 3166-1 alpha-2 country code |
+| `cell` | string | 18 | No | Mobile phone |
+| `county` | string | 255 | No | County |
 
-### shippingAddress
+<Note>
+  For US/UK transactions, `address` and `zip` are required for AVS (Address Verification).
+</Note>
+
+---
+
+## shippingAddress
 
 Shipping/delivery information.
 
@@ -204,34 +340,37 @@ Shipping/delivery information.
     "firstName": "John",
     "lastName": "Smith",
     "address": "456 Oak Avenue",
+    "address2": "Suite 100",
     "city": "Los Angeles",
     "state": "CA",
     "zip": "90001",
     "country": "US",
     "phone": "+1-555-987-6543",
     "cell": "+1-555-111-2222",
-    "shippingMethod": "01"
+    "email": "john@example.com",
+    "shippingCounty": "Los Angeles County"
   }
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `shippingMethod` | string | Shipping method indicator |
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `firstName` | string | 30 | Recipient first name |
+| `lastName` | string | 40 | Recipient last name |
+| `address` | string | 60 | Street address |
+| `address2` | string | 60 | Address line 2 |
+| `city` | string | 30 | City |
+| `state` | string | 2 | State/province code |
+| `zip` | string | 10 | Postal/ZIP code |
+| `country` | string | 2 | ISO country code |
+| `phone` | string | 18 | Phone number |
+| `cell` | string | 18 | Mobile phone |
+| `email` | string | 100 | Email address |
+| `shippingCounty` | string | 255 | County |
 
-**Shipping Method Values:**
+---
 
-| Value | Description |
-|-------|-------------|
-| `01` | Same day |
-| `02` | Overnight |
-| `03` | Two-day |
-| `04` | Three-day |
-| `05` | Low-cost |
-| `06` | Pickup |
-| `07` | Other |
-
-### userDetails
+## userDetails
 
 Additional customer information for risk assessment.
 
@@ -244,22 +383,24 @@ Additional customer information for risk assessment.
     "phone": "+1-555-123-4567",
     "dateOfBirth": "1985-06-15",
     "county": "Los Angeles",
+    "language": "en",
     "identification": "123456789",
     "identificationType": "PASSPORT"
   }
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `firstName` | string | First name |
-| `lastName` | string | Last name |
-| `email` | string | Email address |
-| `phone` | string | Phone number |
-| `dateOfBirth` | string | Date of birth (YYYY-MM-DD) |
-| `county` | string | County/region |
-| `identification` | string | ID document number |
-| `identificationType` | string | Type of ID document |
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `firstName` | string | 30 | First name |
+| `lastName` | string | 40 | Last name |
+| `email` | string | 100 | Email address |
+| `phone` | string | 18 | Phone number |
+| `dateOfBirth` | string | 10 | Date of birth (YYYY-MM-DD) |
+| `county` | string | 255 | County/region |
+| `language` | string | 2 | Preferred language |
+| `identification` | string | 15 | ID document number |
+| `identificationType` | string | 20 | Type of ID document |
 
 **Identification Types:**
 
@@ -271,9 +412,9 @@ Additional customer information for risk assessment.
 | `SSN` | Social Security Number |
 | `TAX_ID` | Tax identification number |
 
-## Device & Technical Objects
+---
 
-### deviceDetails
+## deviceDetails
 
 Information about the customer's device.
 
@@ -282,8 +423,8 @@ Information about the customer's device.
   "deviceDetails": {
     "ipAddress": "192.168.1.100",
     "deviceType": "DESKTOP",
-    "deviceOS": "Windows",
-    "browser": "Chrome",
+    "deviceOS": "Windows 10",
+    "browser": "Chrome 120",
     "deviceName": "Windows Desktop",
     "deviceManufacturer": "Dell",
     "deviceModel": "XPS 15"
@@ -291,17 +432,55 @@ Information about the customer's device.
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `ipAddress` | string | Customer IP address |
-| `deviceType` | string | `DESKTOP`, `MOBILE`, `TABLET`, `TV`, `UNKNOWN` |
-| `deviceOS` | string | Operating system |
-| `browser` | string | Browser name |
-| `deviceName` | string | Device name |
-| `deviceManufacturer` | string | Device manufacturer |
-| `deviceModel` | string | Device model |
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `ipAddress` | string | 45 | Customer IP (IPv4 or IPv6) |
+| `deviceType` | string | 10 | `DESKTOP`, `MOBILE`, `TABLET`, `TV`, `UNKNOWN` |
+| `deviceOS` | string | 255 | Operating system |
+| `browser` | string | 255 | Browser name and version |
+| `deviceName` | string | 255 | Device name |
+| `deviceManufacturer` | string | 255 | Device manufacturer |
+| `deviceModel` | string | 255 | Device model |
 
-### urlDetails
+---
+
+## merchantDetails
+
+Custom merchant data for reconciliation.
+
+```json
+{
+  "merchantDetails": {
+    "customField1": "order_123",
+    "customField2": "premium_customer",
+    "customField3": "campaign_summer2024",
+    "customField4": "affiliate_456",
+    "customField5": "promo_code_ABC123",
+    "customField6": "",
+    "customField7": "",
+    "customField8": "",
+    "customField9": "",
+    "customField10": "",
+    "customField11": "",
+    "customField12": "",
+    "customField13": "",
+    "customField14": "",
+    "customField15": ""
+  }
+}
+```
+
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `customField1-15` | string | 255 each | Free-form merchant data |
+
+<Tip>
+  Custom fields are returned in webhooks (DMNs) and API responses. Use them for order tracking, attribution, and reconciliation.
+</Tip>
+
+---
+
+## urlDetails
 
 URLs for redirects and notifications.
 
@@ -317,51 +496,17 @@ URLs for redirects and notifications.
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `successUrl` | string | Redirect after successful payment |
-| `failureUrl` | string | Redirect after failed payment |
-| `pendingUrl` | string | Redirect for pending APM payments |
-| `notificationUrl` | string | Webhook callback URL |
-| `backUrl` | string | Return to cart/cancel URL |
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `successUrl` | string | 1000 | Redirect after successful payment |
+| `failureUrl` | string | 1000 | Redirect after failed payment |
+| `pendingUrl` | string | 1000 | Redirect for pending APM payments |
+| `notificationUrl` | string | 1000 | Webhook callback URL (DMN) |
+| `backUrl` | string | 1000 | Return to cart/cancel URL |
 
-## Merchant Objects
+---
 
-### merchantDetails
-
-Custom merchant data for reconciliation.
-
-```json
-{
-  "merchantDetails": {
-    "customField1": "order_123",
-    "customField2": "premium_customer",
-    "customField3": "campaign_summer",
-    "customField4": "affiliate_456",
-    "customField5": "promo_code_ABC",
-    "customField6": "",
-    "customField7": "",
-    "customField8": "",
-    "customField9": "",
-    "customField10": "",
-    "customField11": "",
-    "customField12": "",
-    "customField13": "",
-    "customField14": "",
-    "customField15": ""
-  }
-}
-```
-
-| Field | Type | Max Length | Description |
-|-------|------|------------|-------------|
-| `customField1-15` | string | 255 each | Free-form merchant data |
-
-<Note>
-  Custom fields are returned in webhooks and API responses. Use them for order tracking, attribution, and reconciliation.
-</Note>
-
-### subMerchant
+## subMerchant
 
 Payment facilitator (PayFac) sub-merchant details.
 
@@ -381,23 +526,84 @@ Payment facilitator (PayFac) sub-merchant details.
 }
 ```
 
+| Field | Type | Max | Required | Description |
+|-------|------|-----|----------|-------------|
+| `id` | string | 15 | Yes | Sub-merchant identifier |
+| `countryCode` | string | 2 | Yes | ISO country code |
+| `city` | string | 20 | Yes | City |
+| `name` | string | 25 | No | Sub-merchant name |
+| `address` | string | 45 | No | Street address |
+| `state` | string | 2 | No | State/province |
+| `zip` | string | 10 | No | Postal code |
+| `email` | string | 255 | No | Contact email |
+| `phone` | string | 20 | No | Contact phone |
+
+---
+
+## storedCredentials
+
+Credential-on-file and recurring payment indicators.
+
+```json
+{
+  "storedCredentials": {
+    "storedCredentialsMode": "1"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `storedCredentialsMode` | string | `0` (use stored), `1` (store new) |
+
+**Usage with paymentOption:**
+
+```json
+{
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4111111111111111",
+      "cardHolderName": "John Smith",
+      "expirationMonth": "12",
+      "expirationYear": "2025",
+      "CVV": "217",
+      "storedCredentials": {
+        "storedCredentialsMode": "1"
+      }
+    }
+  }
+}
+```
+
+---
+
+## externalSchemeDetails
+
+For merchant-initiated transactions (MIT) using credentials from another processor.
+
+```json
+{
+  "externalSchemeDetails": {
+    "transactionId": "MCC1234567890",
+    "brand": "VISA",
+    "bin": "411111"
+  }
+}
+```
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | string | Yes | Sub-merchant identifier |
-| `countryCode` | string | Yes | ISO country code |
-| `city` | string | Yes | City |
-| `name` | string | No | Sub-merchant name |
-| `address` | string | No | Street address |
-| `state` | string | No | State/province |
-| `zip` | string | No | Postal code |
-| `email` | string | No | Contact email |
-| `phone` | string | No | Contact phone |
+| `transactionId` | string | Yes | Original transaction ID from external processor |
+| `brand` | string | Yes | Card brand: `VISA`, `MASTERCARD`, `AMEX` |
+| `bin` | string | No | Card BIN (first 6 digits) |
 
-## Transaction Objects
+---
 
-### addendums
+## addendums
 
 Industry-specific additional data.
+
+### localPayment (Latin America)
 
 ```json
 {
@@ -408,30 +614,10 @@ Industry-specific additional data.
       "firstInstallment": "100",
       "periodicalInstallment": "50",
       "numberOfInstallments": "6"
-    },
-    "cardPresentData": {
-      "terminalId": "TERM001",
-      "storeNumber": "STORE123",
-      "entryMode": "01"
-    },
-    "airline": {
-      "ticketNumber": "0012345678901",
-      "passengerName": "SMITH/JOHN",
-      "pnrCode": "ABC123",
-      "flightLegs": [
-        {
-          "departureAirport": "JFK",
-          "arrivalAirport": "LAX",
-          "flightNumber": "AA123",
-          "departureDate": "2024-12-15"
-        }
-      ]
     }
   }
 }
 ```
-
-**localPayment (Latin America/Brazil):**
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -441,46 +627,72 @@ Industry-specific additional data.
 | `periodicalInstallment` | string | Regular installment amount |
 | `numberOfInstallments` | string | Total number of installments |
 
-**airline (Travel industry):**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `ticketNumber` | string | Airline ticket number |
-| `passengerName` | string | Passenger name (LAST/FIRST) |
-| `pnrCode` | string | Booking reference |
-| `flightLegs` | array | Flight segment details |
-
-### storedCredentials
-
-Credential-on-file and subscription indicators.
+### airline
 
 ```json
 {
-  "storedCredentials": {
-    "storedCredentialsMode": "1",
-    "credentialOnFile": "Y",
-    "credentialOnFileReason": "recurring"
+  "addendums": {
+    "airline": {
+      "ticketNumber": "0012345678901",
+      "passengerName": "SMITH/JOHN",
+      "pnrCode": "ABC123",
+      "departureDate": "2024-12-15",
+      "originAirport": "JFK",
+      "destinationAirport": "LAX",
+      "carrierCode": "AA",
+      "flightNumber": "123",
+      "travelAgencyCode": "TA12345",
+      "travelAgencyName": "Travel Agency Inc",
+      "flightLegs": [
+        {
+          "departureAirport": "JFK",
+          "arrivalAirport": "LAX",
+          "flightNumber": "AA123",
+          "departureDate": "2024-12-15",
+          "carrierCode": "AA",
+          "fareBasisCode": "Y"
+        }
+      ]
+    }
   }
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `storedCredentialsMode` | string | `0` (use stored), `1` (store new) |
-| `credentialOnFile` | string | `Y` if using stored credentials |
-| `credentialOnFileReason` | string | Reason for credential use |
+### lodging
 
-**credentialOnFileReason Values:**
+```json
+{
+  "addendums": {
+    "lodging": {
+      "checkInDate": "2024-12-15",
+      "checkOutDate": "2024-12-18",
+      "roomRate": "150.00",
+      "roomTax": "15.00",
+      "noShowIndicator": "0",
+      "duration": "3",
+      "customerServicePhone": "+1-555-123-4567"
+    }
+  }
+}
+```
 
-| Value | Description | Use Case |
-|-------|-------------|----------|
-| `firstRecurring` | Initial recurring transaction | First subscription payment |
-| `recurring` | Subsequent recurring | Ongoing subscription |
-| `mit` | Merchant-initiated | Delayed charges, top-ups |
-| `cit` | Customer-initiated | Customer using saved card |
-| `unscheduled` | Unscheduled credential-on-file | Variable amount/timing |
+### cardPresentData
 
-### currencyConversion
+```json
+{
+  "addendums": {
+    "cardPresentData": {
+      "terminalId": "TERM001",
+      "storeNumber": "STORE123",
+      "entryMode": "01"
+    }
+  }
+}
+```
+
+---
+
+## currencyConversion
 
 Dynamic currency conversion (DCC) data.
 
@@ -499,98 +711,145 @@ Dynamic currency conversion (DCC) data.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `type` | string | Conversion type (`dcc`, `mcp`) |
+| `type` | string | `dcc` (dynamic currency conversion), `mcp` (multi-currency pricing) |
 | `originalAmount` | string | Original transaction amount |
 | `originalCurrency` | string | Original currency code |
 | `convertedAmount` | string | Amount in cardholder currency |
 | `convertedCurrency` | string | Cardholder's currency |
 | `conversionRate` | string | Exchange rate applied |
 
-## Response Objects
+---
 
-### transactionResponse
+## dynamicDescriptor
 
-Standard transaction response structure.
+Custom statement descriptor.
 
 ```json
 {
-  "transactionId": "123456789",
-  "transactionStatus": "APPROVED",
-  "authCode": "ABC123",
-  "partialApprovalDetails": {
-    "isPartialApproval": "false"
-  },
-  "paymentOption": {
-    "userPaymentOptionId": "987654321",
-    "card": {
-      "cardNumber": "4***1111",
-      "bin": "411111",
-      "last4Digits": "1111",
-      "ccCardNumber": "4***1111",
-      "ccExpMonth": "12",
-      "ccExpYear": "25",
-      "acquirerId": "19",
-      "cvv2Reply": "M",
-      "avsCode": "Y"
-    }
-  },
-  "fraudDetails": {
-    "score": "0",
-    "recommendation": "Accept",
-    "system": {
-      "systemId": "1",
-      "systemName": "Nuvei"
-    }
+  "dynamicDescriptor": {
+    "merchantName": "MyStore",
+    "merchantPhone": "+1-555-123-4567"
   }
 }
 ```
 
-**cvv2Reply Codes:**
+| Field | Type | Max | Description |
+|-------|------|-----|-------------|
+| `merchantName` | string | 25 | Name on cardholder statement |
+| `merchantPhone` | string | 13 | Phone on cardholder statement |
 
-| Code | Description |
-|------|-------------|
-| `M` | Match |
-| `N` | No match |
-| `P` | Not processed |
-| `U` | Unknown |
-| `S` | Service not supported |
+---
 
-**avsCode Values:**
+## openAmount
 
-| Code | Description |
-|------|-------------|
-| `Y` | Address and postal code match |
-| `A` | Address matches, postal code doesn't |
-| `Z` | Postal code matches, address doesn't |
-| `N` | Neither match |
-| `U` | Unavailable |
-
-### errorResponse
-
-Error response structure.
+Variable/open amount configuration.
 
 ```json
 {
-  "status": "ERROR",
-  "errCode": "1",
-  "reason": "Invalid input",
-  "gwErrorCode": "1234",
-  "gwErrorReason": "Card number invalid",
-  "gwExtendedErrorCode": "5678",
-  "paymentMethodErrorCode": "100",
-  "paymentMethodErrorReason": "Insufficient funds"
+  "openAmount": {
+    "min": "10",
+    "max": "1000"
+  }
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `status` | string | `ERROR` or `DECLINED` |
-| `errCode` | string | Nuvei error code |
-| `reason` | string | Human-readable error |
-| `gwErrorCode` | string | Gateway-specific error code |
-| `gwErrorReason` | string | Gateway error message |
-| `paymentMethodErrorCode` | string | Payment method error code |
-| `paymentMethodErrorReason` | string | Payment method error message |
+| `min` | string | Minimum allowed amount |
+| `max` | string | Maximum allowed amount |
+
+---
+
+## Response Objects
+
+### transactionResponse
+
+Standard transaction response fields.
+
+```json
+{
+  "status": "SUCCESS",
+  "transactionId": "711000000012345678",
+  "transactionStatus": "APPROVED",
+  "transactionType": "Sale",
+  "authCode": "ABC123",
+  "gwErrorCode": "0",
+  "gwErrorReason": "",
+  "gwExtendedErrorCode": "0",
+  "paymentMethodErrorCode": "0",
+  "paymentMethodErrorReason": "",
+  "userPaymentOptionId": "987654321",
+  "externalTransactionId": "",
+  "partialApprovalDetails": {
+    "isPartialApproval": "false",
+    "amountInfo": {
+      "requestedAmount": "100.00",
+      "requestedCurrency": "USD",
+      "processedAmount": "100.00",
+      "processedCurrency": "USD"
+    }
+  }
+}
+```
+
+### fraudDetails
+
+Fraud screening results.
+
+```json
+{
+  "fraudDetails": {
+    "score": "15",
+    "recommendation": "Accept",
+    "finalDecision": "Accept",
+    "system": {
+      "systemId": "1",
+      "systemName": "Nuvei"
+    },
+    "rules": [
+      {
+        "ruleId": "123",
+        "ruleName": "High Risk Country",
+        "ruleAction": "Review"
+      }
+    ]
+  }
+}
+```
+
+### cvv2Reply Codes
+
+| Code | Description |
+|------|-------------|
+| `M` | CVV match |
+| `N` | CVV does not match |
+| `P` | Not processed |
+| `U` | Issuer not certified |
+| `S` | Service not supported |
+
+### avsCode Values
+
+| Code | Description |
+|------|-------------|
+| `A` | Address matches, ZIP doesn't |
+| `B` | Street address match (international) |
+| `C` | Street and postal not verified (international) |
+| `D` | Street and postal match (international) |
+| `E` | AVS error |
+| `G` | Issuer does not participate (international) |
+| `I` | Address not verified (international) |
+| `M` | Street and postal match (international) |
+| `N` | Neither address nor ZIP match |
+| `P` | Postal match (international) |
+| `R` | System unavailable |
+| `S` | Service not supported |
+| `U` | Information unavailable |
+| `W` | 9-digit ZIP matches, address doesn't |
+| `X` | Exact match (address + 9-digit ZIP) |
+| `Y` | Address + 5-digit ZIP match |
+| `Z` | 5-digit ZIP matches, address doesn't |
+
+---
 
 ## Next Steps
 
@@ -598,10 +857,10 @@ Error response structure.
   <Card title="REST API 1.0" icon="code" href="/api-reference/rest-1/overview">
     API endpoint reference
   </Card>
-  <Card title="REST API 2.0" icon="bolt" href="/api-reference/payments/overview">
+  <Card title="REST API 2.0" icon="bolt" href="/api-reference/payments/create-payment">
     Modern REST API
   </Card>
   <Card title="Webhooks" icon="webhook" href="/webhooks/overview">
-    Response notifications
+    Server-side notifications
   </Card>
 </CardGroup>

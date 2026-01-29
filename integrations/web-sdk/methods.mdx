@@ -1,52 +1,75 @@
 ---
 title: 'Web SDK Methods'
-description: 'Complete reference for Nuvei Web SDK JavaScript methods'
+description: 'Complete reference for all Nuvei Web SDK JavaScript methods'
 ---
 
 # Web SDK Methods
 
 The Nuvei Web SDK provides JavaScript methods for building custom payment integrations with full control over the UI and payment flow.
 
-## Initialization
+## SDK Initialization
 
 ### SafeCharge()
 
-Initialize the Web SDK.
+Initialize the Web SDK with configuration options.
 
 ```javascript
-// Initialize with configuration
 const safecharge = SafeCharge({
-  env: 'int',              // 'int' for sandbox, 'prod' for production
-  merchantId: '1234567890',
-  merchantSiteId: '123456'
+  // Required
+  env: 'int',                      // 'int' (sandbox) or 'prod' (production)
+  merchantId: '1234567890',        // Your Nuvei merchant ID
+  merchantSiteId: '123456',        // Your Nuvei merchant site ID
+  
+  // Optional
+  sessionToken: 'xxx',             // Pre-set session token
+  
+  // Advanced options
+  blockCards: ['amex'],            // Block card brands globally
+  blockPasteCard: true,            // Prevent card paste
+  disableNuveiAnalytics: false,    // Disable analytics
+  showAccountCapture: false,       // Show account capture option
+  support19Digits: false,          // Support 19-digit cards
+  strictCardBlocking: false,       // Use BIN-level blocking
+  cvvIcon: true,                   // Show CVV help icon
+  
+  // Event callback
+  onPaymentEvent: function(event) {
+    console.log('Payment event:', event);
+  }
 });
 ```
 
 **Configuration Options:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `env` | string | Yes | Environment: `int` (sandbox) or `prod` (production) |
-| `merchantId` | string | Yes | Your Nuvei merchant ID |
-| `merchantSiteId` | string | Yes | Your Nuvei merchant site ID |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `env` | string | Yes | - | `int` (sandbox) or `prod` (production) |
+| `merchantId` | string | Yes | - | Your Nuvei merchant ID |
+| `merchantSiteId` | string | Yes | - | Your Nuvei merchant site ID |
+| `sessionToken` | string | No | - | Pre-set session token |
+| `blockCards` | array | No | `[]` | Globally blocked card brands |
+| `blockPasteCard` | boolean | No | `false` | Prevent pasting card numbers |
+| `disableNuveiAnalytics` | boolean | No | `false` | Disable SDK analytics |
+| `showAccountCapture` | boolean | No | `false` | Show bank account capture |
+| `support19Digits` | boolean | No | `false` | Support 19-digit cards |
+| `strictCardBlocking` | boolean | No | `false` | Use BIN-level card blocking |
+| `cvvIcon` | boolean/object | No | `true` | CVV help icon configuration |
+| `onPaymentEvent` | function | No | - | Global payment event callback |
 
-**Environment URLs:**
-| Environment | URL |
-|-------------|-----|
-| `int` (Sandbox) | `https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js` |
-| `prod` (Production) | `https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js` |
+---
 
 ## Payment Methods
 
 ### createPayment()
 
-Create a payment using card data or an APM.
+Create a payment using card data, APM, or saved payment method.
 
 ```javascript
 safecharge.createPayment({
+  // Required
   sessionToken: sessionToken,
   
-  // Card payment
+  // Payment Option - Card
   paymentOption: {
     card: {
       cardNumber: '4111111111111111',
@@ -57,20 +80,47 @@ safecharge.createPayment({
     }
   },
   
-  // Billing address
+  // Optional - Billing address
   billingAddress: {
     firstName: 'John',
     lastName: 'Smith',
     email: 'john@example.com',
+    phone: '+1-555-123-4567',
+    address: '123 Main St',
+    city: 'New York',
+    state: 'NY',
+    zip: '10001',
     country: 'US'
-  }
+  },
+  
+  // Optional - Shipping address
+  shippingAddress: {
+    firstName: 'John',
+    lastName: 'Smith',
+    address: '123 Main St',
+    city: 'New York',
+    state: 'NY',
+    zip: '10001',
+    country: 'US'
+  },
+  
+  // Optional - Custom data
+  clientUniqueId: 'order_789',
+  merchantDetails: {
+    customField1: 'value1'
+  },
+  
+  // Optional - URL details
+  urlDetails: {
+    notificationUrl: 'https://your-site.com/webhook'
+  },
+  
+  // Optional - Additional params
+  alwaysCollectCvv: 'true',
+  selectedBrand: 'VISA'
   
 }, function(response) {
-  if (response.result === 'APPROVED') {
-    console.log('Payment successful:', response.transactionId);
-  } else {
-    console.log('Payment failed:', response.errorDescription);
-  }
+  handleResponse(response);
 });
 ```
 
@@ -81,16 +131,16 @@ safecharge.createPayment({
   sessionToken: sessionToken,
   
   paymentOption: {
-    userPaymentOptionId: '1234567890',  // UPO ID
+    userPaymentOptionId: '1234567890',
     card: {
-      CVV: '217'  // CVV still required
+      CVV: '217'  // CVV required if alwaysCollectCvv enabled
     }
   }
   
 }, handleResponse);
 ```
 
-**Using Alternative Payment Method:**
+**Using APM:**
 
 ```javascript
 safecharge.createPayment({
@@ -100,66 +150,81 @@ safecharge.createPayment({
     alternativePaymentMethod: {
       paymentMethod: 'apmgw_PayPal'
     }
+  },
+  
+  // Required for APM redirects
+  urlDetails: {
+    successUrl: 'https://your-site.com/success',
+    failureUrl: 'https://your-site.com/failure',
+    pendingUrl: 'https://your-site.com/pending'
   }
   
 }, handleResponse);
 ```
 
-**Parameters:**
+**Request Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `sessionToken` | string | Yes | Session token from openOrder |
-| `paymentOption` | object | Yes | Payment details (card, UPO, or APM) |
-| `billingAddress` | object | No | Customer billing address |
-| `deviceDetails` | object | No | Device fingerprinting data |
-| `urlDetails` | object | No | Redirect URLs for APMs |
+| `paymentOption` | object | Yes | Payment method details |
+| `billingAddress` | object | Recommended | Customer billing address |
+| `shippingAddress` | object | No | Shipping address |
+| `deviceDetails` | object | Recommended | Device fingerprinting |
+| `urlDetails` | object | Conditional | Redirect URLs (required for APMs) |
+| `clientUniqueId` | string | No | Your unique transaction ID |
+| `merchantDetails` | object | No | Custom fields 1-15 |
+| `alwaysCollectCvv` | string | No | CVV collection mode |
+| `selectedBrand` | string | No | Selected brand for co-badged cards |
 
-**Response:**
+**Response Object:**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `result` | string | `APPROVED`, `DECLINED`, `PENDING`, `ERROR` |
 | `transactionId` | string | Nuvei transaction ID |
-| `authCode` | string | Authorization code |
 | `transactionStatus` | string | Detailed status |
-| `errorCode` | string | Error code if failed |
-| `errorDescription` | string | Error message if failed |
+| `authCode` | string | Authorization code |
+| `errCode` | string | Error code (if failed) |
+| `errorDescription` | string | Error message (if failed) |
+| `userPaymentOptionId` | string | Saved payment method ID |
+| `threeD` | object | 3DS authentication details |
+
+**3DS Response Fields:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `eci` | string | Electronic Commerce Indicator |
+| `cavv` | string | Cardholder Authentication Value |
+| `dsTransID` | string | Directory Server Transaction ID |
+| `threeDReasonId` | string | 3DS reason code |
+| `threeDReason` | string | 3DS reason message |
+| `isLiabilityOnIssuer` | string | `1` = liability shifted |
+| `challengePreferenceReason` | string | Challenge preference reason |
+
+---
 
 ### authenticate3d()
 
-Perform 3D Secure authentication.
+Perform 3D Secure authentication after initial payment request returns REDIRECT status.
 
 ```javascript
-// Step 1: Initialize 3DS
-safecharge.createPayment({
+safecharge.authenticate3d({
+  // Required
   sessionToken: sessionToken,
-  paymentOption: {
-    card: cardData
-  },
-  // Request 3DS
-  relatedTransactionId: null,  // First call
+  transactionId: initialResponse.transactionId,
   
-}, function(initResponse) {
-  if (initResponse.transactionStatus === 'REDIRECT') {
-    // 3DS required - Step 2: Authenticate
-    safecharge.authenticate3d({
-      sessionToken: sessionToken,
-      transactionId: initResponse.transactionId,
-      
-      // 3DS challenge will render here
-      challengeWindowSize: '05',  // Full screen
-      container: '#challenge-container'
-      
-    }, function(authResponse) {
-      if (authResponse.result === 'APPROVED') {
-        // 3DS complete, payment processed
-        console.log('Payment approved:', authResponse.transactionId);
-      } else if (authResponse.result === 'DECLINED') {
-        // 3DS or payment failed
-        console.log('Payment declined:', authResponse.errorDescription);
-      }
-    });
+  // Optional - Challenge window configuration
+  challengeWindowSize: '05',  // Full screen
+  
+  // Optional - Container for challenge iframe
+  container: '#challenge-container'
+  
+}, function(response) {
+  if (response.result === 'APPROVED') {
+    console.log('Payment approved after 3DS');
+  } else {
+    console.log('Payment failed:', response.errorDescription);
   }
 });
 ```
@@ -177,15 +242,44 @@ safecharge.createPayment({
 
 | Code | Dimensions |
 |------|------------|
-| `01` | 250 x 400 |
-| `02` | 390 x 400 |
-| `03` | 500 x 600 |
-| `04` | 600 x 400 |
+| `01` | 250 x 400 pixels |
+| `02` | 390 x 400 pixels |
+| `03` | 500 x 600 pixels |
+| `04` | 600 x 400 pixels |
 | `05` | Full screen |
+
+**Full 3DS Flow Example:**
+
+```javascript
+safecharge.createPayment({
+  sessionToken: sessionToken,
+  paymentOption: {
+    card: cardData
+  }
+}, function(initResponse) {
+  if (initResponse.transactionStatus === 'REDIRECT') {
+    // 3DS required
+    safecharge.authenticate3d({
+      sessionToken: sessionToken,
+      transactionId: initResponse.transactionId,
+      challengeWindowSize: '05'
+    }, function(authResponse) {
+      handleFinalResponse(authResponse);
+    });
+  } else {
+    // No 3DS required, payment complete
+    handleFinalResponse(initResponse);
+  }
+});
+```
+
+---
+
+## APM Methods
 
 ### getAPMs()
 
-Retrieve available alternative payment methods.
+Retrieve available alternative payment methods based on country and currency.
 
 ```javascript
 safecharge.getAPMs({
@@ -198,7 +292,11 @@ safecharge.getAPMs({
   if (response.status === 'SUCCESS') {
     response.paymentMethods.forEach(apm => {
       console.log(apm.paymentMethod, apm.paymentMethodDisplayName);
-      // Render APM button/option
+      
+      // Check if APM requires additional fields
+      if (apm.fields && apm.fields.length > 0) {
+        console.log('Required fields:', apm.fields);
+      }
     });
   }
 });
@@ -211,7 +309,7 @@ safecharge.getAPMs({
 | `sessionToken` | string | Yes | Session token |
 | `currencyCode` | string | Yes | ISO currency code |
 | `countryCode` | string | Yes | ISO country code |
-| `languageCode` | string | No | Language for display names |
+| `languageCode` | string | No | Display language |
 
 **Response:**
 
@@ -229,10 +327,13 @@ safecharge.getAPMs({
     {
       "paymentMethod": "apmgw_Sofort",
       "paymentMethodDisplayName": "Sofort",
+      "countries": ["DE", "AT"],
+      "currencies": ["EUR"],
       "fields": [
         {
           "name": "iban",
           "type": "text",
+          "caption": "IBAN",
           "required": true
         }
       ]
@@ -241,25 +342,31 @@ safecharge.getAPMs({
 }
 ```
 
-## Tokenization Methods
+---
 
-### getCardDetails()
+## DCC Methods
 
-Get card details including BIN information (for UI updates like showing card brand).
+### clientGetDccDetails()
+
+Get Dynamic Currency Conversion details for a transaction.
 
 ```javascript
-safecharge.getCardDetails({
+safecharge.clientGetDccDetails({
   sessionToken: sessionToken,
-  cardNumber: '411111'  // At least 6 digits (BIN)
+  cardNumber: '4111111111111111',  // Or first 6 digits
+  originalAmount: '100.00',
+  originalCurrency: 'USD'
   
 }, function(response) {
-  if (response.status === 'SUCCESS') {
-    console.log('Card Brand:', response.brand);      // VISA
-    console.log('Card Type:', response.cardType);    // credit/debit
-    console.log('Issuing Country:', response.issuingCountry);
+  if (response.status === 'SUCCESS' && response.dccAllowed) {
+    console.log('DCC available');
+    console.log('Converted amount:', response.convertedAmount);
+    console.log('Converted currency:', response.convertedCurrency);
+    console.log('Exchange rate:', response.conversionRate);
+    console.log('Markup:', response.markup);
     
-    // Update UI with card brand icon
-    updateCardBrandIcon(response.brand);
+    // Present choice to user
+    showDccChoice(response);
   }
 });
 ```
@@ -268,14 +375,60 @@ safecharge.getCardDetails({
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `brand` | string | Card brand (VISA, MASTERCARD, etc.) |
+| `dccAllowed` | boolean | Whether DCC is available |
+| `convertedAmount` | string | Amount in cardholder currency |
+| `convertedCurrency` | string | Cardholder currency code |
+| `conversionRate` | string | Exchange rate |
+| `markup` | string | DCC markup percentage |
+| `rateSourceName` | string | Rate source name |
+
+---
+
+## Tokenization Methods
+
+### getCardDetails()
+
+Get card details including BIN information (card brand, type, issuer).
+
+```javascript
+safecharge.getCardDetails({
+  sessionToken: sessionToken,
+  cardNumber: '411111'  // At least first 6 digits (BIN)
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Brand:', response.brand);          // VISA
+    console.log('Type:', response.cardType);        // credit/debit
+    console.log('Country:', response.issuingCountry);
+    console.log('Bank:', response.issuingBank);
+    
+    // Update UI
+    updateCardBrandIcon(response.brand);
+    
+    // Check for blocked card types
+    if (response.cardType === 'prepaid' && blockPrepaid) {
+      showError('Prepaid cards not accepted');
+    }
+  }
+});
+```
+
+**Response:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `brand` | string | Card brand (VISA, MASTERCARD, AMEX, etc.) |
 | `cardType` | string | `credit`, `debit`, `prepaid` |
 | `issuingCountry` | string | ISO country code |
 | `issuingBank` | string | Issuing bank name |
+| `cardProgram` | string | Card program (Platinum, Gold, etc.) |
+| `cardProduct` | string | Card product type |
+
+---
 
 ### getUserUPOs()
 
-Retrieve user's saved payment methods.
+Retrieve user's saved payment methods (User Payment Options).
 
 ```javascript
 safecharge.getUserUPOs({
@@ -285,12 +438,19 @@ safecharge.getUserUPOs({
 }, function(response) {
   if (response.status === 'SUCCESS') {
     response.paymentMethods.forEach(upo => {
-      console.log(upo.userPaymentOptionId, upo.upoName);
+      console.log('UPO ID:', upo.userPaymentOptionId);
+      console.log('Type:', upo.paymentMethodName);
+      console.log('Name:', upo.upoName);
       
       if (upo.paymentMethodName === 'cc_card') {
         console.log('Card:', upo.ccCardNumber);  // Masked
+        console.log('Expiry:', upo.ccExpMonth + '/' + upo.ccExpYear);
+        console.log('Brand:', upo.brand);
       }
     });
+    
+    // Render saved payment methods UI
+    renderSavedPaymentMethods(response.paymentMethods);
   }
 });
 ```
@@ -309,16 +469,73 @@ safecharge.getUserUPOs({
       "ccCardNumber": "4***4242",
       "ccExpMonth": "12",
       "ccExpYear": "26",
-      "brand": "VISA"
+      "brand": "VISA",
+      "cardType": "credit"
     },
     {
       "userPaymentOptionId": "987654321",
       "paymentMethodName": "apmgw_PayPal",
-      "upoName": "user@example.com"
+      "upoName": "user@example.com",
+      "upoStatus": "enabled"
     }
   ]
 }
 ```
+
+---
+
+### addCardUpo()
+
+Save a new card as a User Payment Option.
+
+```javascript
+safecharge.addCardUpo({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  card: {
+    cardNumber: '4111111111111111',
+    cardHolderName: 'John Smith',
+    expirationMonth: '12',
+    expirationYear: '2026',
+    CVV: '217'
+  },
+  billingAddress: {
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'john@example.com',
+    country: 'US'
+  }
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Card saved, UPO ID:', response.userPaymentOptionId);
+  }
+});
+```
+
+---
+
+### addApmUpo()
+
+Save a new APM as a User Payment Option.
+
+```javascript
+safecharge.addApmUpo({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  paymentMethod: 'apmgw_PayPal',
+  apmData: {
+    email: 'user@example.com'
+  }
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('APM saved, UPO ID:', response.userPaymentOptionId);
+  }
+});
+```
+
+---
 
 ### deleteUPO()
 
@@ -333,86 +550,159 @@ safecharge.deleteUPO({
 }, function(response) {
   if (response.status === 'SUCCESS') {
     console.log('Payment method deleted');
-    // Update UI to remove the card
+    // Update UI
+    removeFromPaymentMethodList('123456789');
   }
 });
 ```
 
-## Apple Pay Methods
+---
 
-### setupApplePay()
+## Account Capture Methods
 
-Initialize Apple Pay on the page.
+### accountCapture()
+
+Capture bank account details for payouts.
 
 ```javascript
-// Check if Apple Pay is available
-if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
-  safecharge.setupApplePay({
-    sessionToken: sessionToken,
-    merchantId: 'merchant.com.example',
-    
-    // Button configuration
-    buttonType: 'buy',     // 'buy', 'pay', 'donate', etc.
-    buttonStyle: 'black',  // 'black', 'white', 'white-outline'
-    buttonContainer: '#apple-pay-button'
-  });
-}
+safecharge.accountCapture({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  
+  // Rendering
+  container: '#account-capture-container',
+  
+  // Locale
+  locale: 'en',
+  country: 'US',
+  
+  // Callbacks
+  onAccountReady: function(accountData) {
+    console.log('Account captured:', accountData);
+    // accountData contains bank details for payout
+  },
+  onError: function(error) {
+    console.error('Account capture error:', error);
+  }
+});
 ```
 
-### createApplePayPayment()
+---
+
+## Withdrawal Methods
+
+### submitWdRequest()
+
+Submit a withdrawal/payout request.
+
+```javascript
+safecharge.submitWdRequest({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  userPaymentOptionId: '123456789',  // Saved payout method
+  amount: '100.00',
+  currency: 'USD',
+  merchantDetails: {
+    customField1: 'withdrawal_ref_123'
+  }
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Withdrawal submitted:', response.withdrawalRequestId);
+  }
+});
+```
+
+---
+
+### getWdRequests()
+
+Get withdrawal request history.
+
+```javascript
+safecharge.getWdRequests({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    response.withdrawalRequests.forEach(wd => {
+      console.log('Request ID:', wd.requestId);
+      console.log('Amount:', wd.amount, wd.currency);
+      console.log('Status:', wd.status);
+      console.log('Created:', wd.createdAt);
+    });
+  }
+});
+```
+
+---
+
+### cancelWdRequest()
+
+Cancel a pending withdrawal request.
+
+```javascript
+safecharge.cancelWdRequest({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  withdrawalRequestId: 'wd_123456'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Withdrawal cancelled');
+    // Restore user balance
+    updateUserBalance();
+  }
+});
+```
+
+---
+
+## Digital Wallet Methods
+
+### Apple Pay
+
+#### createApplePayPayment()
 
 Process an Apple Pay payment.
 
 ```javascript
-safecharge.createApplePayPayment({
-  sessionToken: sessionToken,
+// First check if Apple Pay is available
+if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
   
-  // Payment request
-  paymentRequest: {
-    countryCode: 'US',
-    currencyCode: 'USD',
-    total: {
-      label: 'Your Store',
-      amount: '99.99'
+  safecharge.createApplePayPayment({
+    sessionToken: sessionToken,
+    
+    // Apple Pay request
+    paymentRequest: {
+      countryCode: 'US',
+      currencyCode: 'USD',
+      total: {
+        label: 'Your Store',
+        amount: '99.99'
+      },
+      merchantCapabilities: ['supports3DS'],
+      supportedNetworks: ['visa', 'masterCard', 'amex']
     },
-    merchantCapabilities: ['supports3DS'],
-    supportedNetworks: ['visa', 'masterCard', 'amex']
-  }
-  
-}, function(response) {
-  if (response.result === 'APPROVED') {
-    console.log('Apple Pay payment successful');
-  }
-});
+    
+    // Billing contact (optional)
+    requireBillingAddress: true
+    
+  }, function(response) {
+    if (response.result === 'APPROVED') {
+      console.log('Apple Pay payment successful');
+      redirectToConfirmation(response.transactionId);
+    }
+  });
+}
 ```
 
-## Google Pay Methods
+---
 
-### setupGooglePay()
+### Google Pay
 
-Initialize Google Pay button.
-
-```javascript
-safecharge.setupGooglePay({
-  sessionToken: sessionToken,
-  
-  // Google Pay configuration
-  environment: 'TEST',  // 'TEST' or 'PRODUCTION'
-  merchantId: 'BCR2DN6xxxxxx',
-  merchantName: 'Your Store',
-  
-  // Button configuration
-  buttonColor: 'black',
-  buttonType: 'pay',
-  buttonContainer: '#google-pay-button',
-  
-  // Payment data
-  allowedCardNetworks: ['VISA', 'MASTERCARD'],
-  allowedCardAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS']
-});
-```
-
-### createGooglePayPayment()
+#### createGooglePayPayment()
 
 Process a Google Pay payment.
 
@@ -420,72 +710,99 @@ Process a Google Pay payment.
 safecharge.createGooglePayPayment({
   sessionToken: sessionToken,
   
+  // Google Pay configuration
+  environment: 'TEST',  // 'TEST' or 'PRODUCTION'
+  merchantId: 'BCR2DN6xxxxxx',  // Google Merchant ID
+  merchantName: 'Your Store',
+  
+  // Transaction info
   transactionInfo: {
     totalPriceStatus: 'FINAL',
     totalPrice: '99.99',
     currencyCode: 'USD',
     countryCode: 'US'
-  }
+  },
+  
+  // Card networks
+  allowedCardNetworks: ['VISA', 'MASTERCARD', 'AMEX'],
+  allowedCardAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS']
   
 }, function(response) {
   if (response.result === 'APPROVED') {
     console.log('Google Pay payment successful');
+    redirectToConfirmation(response.transactionId);
   }
 });
 ```
 
+---
+
 ## Secure Fields (PCI SAQ A)
 
-For merchants who want to minimize PCI scope while maintaining UI control.
+Create secure hosted fields for card input while minimizing PCI scope.
 
 ### createFields()
-
-Create secure hosted fields for card input.
 
 ```javascript
 const fields = safecharge.createFields({
   sessionToken: sessionToken,
   
-  // Field styling
+  // Styling
   style: {
     base: {
       fontFamily: 'Arial, sans-serif',
       fontSize: '16px',
-      color: '#333'
+      color: '#333333',
+      '::placeholder': {
+        color: '#999999'
+      }
     },
     invalid: {
       color: '#ff0000'
+    },
+    focus: {
+      borderColor: '#00D09C'
     }
   }
 });
 
-// Mount individual fields
-fields.create('cardNumber').mount('#card-number');
-fields.create('cardExpiry').mount('#card-expiry');
-fields.create('cardCvc').mount('#card-cvc');
+// Create individual fields
+const cardNumber = fields.create('cardNumber');
+const cardExpiry = fields.create('cardExpiry');
+const cardCvc = fields.create('cardCvc');
+
+// Mount to DOM elements
+cardNumber.mount('#card-number');
+cardExpiry.mount('#card-expiry');
+cardCvc.mount('#card-cvc');
 
 // Listen for events
 fields.on('ready', () => {
-  console.log('Fields ready');
+  console.log('Secure fields ready');
 });
 
 fields.on('change', (event) => {
   if (event.error) {
-    showError(event.field, event.error.message);
+    showFieldError(event.field, event.error.message);
   } else {
-    clearError(event.field);
+    clearFieldError(event.field);
   }
   
-  // Update card brand
+  // Card brand detection
   if (event.field === 'cardNumber' && event.brand) {
-    updateBrandIcon(event.brand);
+    updateCardBrandIcon(event.brand);
   }
+  
+  // Track completion
+  updateSubmitButton(event.complete);
 });
 
-fields.on('submit', (event) => {
-  if (event.complete) {
-    processPayment();
-  }
+fields.on('focus', (event) => {
+  highlightField(event.field);
+});
+
+fields.on('blur', (event) => {
+  unhighlightField(event.field);
 });
 ```
 
@@ -495,13 +812,15 @@ Tokenize card data from secure fields.
 
 ```javascript
 fields.tokenize({
-  cardHolderName: document.getElementById('name').value
+  // Additional data
+  cardHolderName: document.getElementById('cardholder-name').value
   
 }).then(result => {
   if (result.error) {
     console.error('Tokenization failed:', result.error);
+    showError(result.error.message);
   } else {
-    // Use the temporary token for payment
+    // Use temporary token for payment
     safecharge.createPayment({
       sessionToken: sessionToken,
       paymentOption: {
@@ -511,25 +830,72 @@ fields.tokenize({
       }
     }, handleResponse);
   }
+}).catch(error => {
+  console.error('Tokenization error:', error);
 });
 ```
 
-## Full Integration Example
+---
+
+## Utility Methods
+
+### setOpenAmount()
+
+Set the transaction amount dynamically (for open amount scenarios).
+
+```javascript
+safecharge.setOpenAmount({
+  sessionToken: sessionToken,
+  amount: '150.00'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Amount updated');
+    updateDisplayedAmount('150.00');
+  }
+});
+```
+
+---
+
+### getToken()
+
+Retrieve current session token.
+
+```javascript
+const token = safecharge.getToken();
+console.log('Current session token:', token);
+```
+
+---
+
+### destroy()
+
+Clean up SDK resources and remove payment elements.
+
+```javascript
+safecharge.destroy();
+```
+
+---
+
+## Complete Integration Example
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Payment</title>
+  <title>Custom Payment Form</title>
   <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js"></script>
 </head>
 <body>
-  <div id="card-form">
-    <div id="card-number"></div>
-    <div id="card-expiry"></div>
-    <div id="card-cvc"></div>
+  <div id="payment-form">
+    <div id="card-number" class="field"></div>
+    <div id="card-expiry" class="field"></div>
+    <div id="card-cvc" class="field"></div>
     <input type="text" id="cardholder-name" placeholder="Name on Card">
-    <button id="pay-button">Pay $99.99</button>
+    <button id="pay-button" disabled>Pay $99.99</button>
+    <div id="error-message"></div>
   </div>
   
   <div id="saved-cards"></div>
@@ -543,17 +909,27 @@ fields.tokenize({
       merchantSiteId: '123456'
     });
     
-    // Get session token from your server
-    fetch('/api/create-session')
-      .then(r => r.json())
-      .then(data => initPayment(data.sessionToken));
+    let sessionToken;
     
-    function initPayment(sessionToken) {
-      // Setup secure fields
+    // Get session token from your server
+    fetch('/api/create-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: '99.99', currency: 'USD' })
+    })
+    .then(r => r.json())
+    .then(data => {
+      sessionToken = data.sessionToken;
+      initializePayment();
+    });
+    
+    function initializePayment() {
+      // Setup Secure Fields
       const fields = safecharge.createFields({
         sessionToken: sessionToken,
         style: {
-          base: { fontSize: '16px', color: '#333' }
+          base: { fontSize: '16px', color: '#333' },
+          invalid: { color: '#ff0000' }
         }
       });
       
@@ -561,13 +937,24 @@ fields.tokenize({
       fields.create('cardExpiry').mount('#card-expiry');
       fields.create('cardCvc').mount('#card-cvc');
       
-      // Get saved cards
+      // Track field completion
+      let formComplete = false;
+      fields.on('change', (event) => {
+        formComplete = event.complete;
+        document.getElementById('pay-button').disabled = !formComplete;
+        
+        if (event.field === 'cardNumber' && event.brand) {
+          console.log('Detected brand:', event.brand);
+        }
+      });
+      
+      // Load saved cards
       safecharge.getUserUPOs({
         sessionToken: sessionToken,
-        userTokenId: 'user_123'
+        userTokenId: currentUserId
       }, renderSavedCards);
       
-      // Get available APMs
+      // Load available APMs
       safecharge.getAPMs({
         sessionToken: sessionToken,
         currencyCode: 'USD',
@@ -576,26 +963,36 @@ fields.tokenize({
       
       // Handle payment
       document.getElementById('pay-button').onclick = async () => {
-        // Tokenize card data
-        const tokenResult = await fields.tokenize({
-          cardHolderName: document.getElementById('cardholder-name').value
-        });
+        const button = document.getElementById('pay-button');
+        button.disabled = true;
+        button.textContent = 'Processing...';
         
-        if (tokenResult.error) {
-          showError(tokenResult.error);
-          return;
+        try {
+          // Tokenize card data
+          const tokenResult = await fields.tokenize({
+            cardHolderName: document.getElementById('cardholder-name').value
+          });
+          
+          if (tokenResult.error) {
+            throw new Error(tokenResult.error.message);
+          }
+          
+          // Create payment
+          safecharge.createPayment({
+            sessionToken: sessionToken,
+            paymentOption: {
+              card: {
+                ccTempToken: tokenResult.ccTempToken
+              }
+            },
+            billingAddress: getBillingAddress()
+          }, handlePaymentResponse);
+          
+        } catch (error) {
+          showError(error.message);
+          button.disabled = false;
+          button.textContent = 'Pay $99.99';
         }
-        
-        // Create payment
-        safecharge.createPayment({
-          sessionToken: sessionToken,
-          paymentOption: {
-            card: {
-              ccTempToken: tokenResult.ccTempToken
-            }
-          },
-          billingAddress: collectBillingAddress()
-        }, handlePaymentResponse);
       };
     }
     
@@ -610,33 +1007,73 @@ fields.tokenize({
           challengeWindowSize: '05'
         }, handlePaymentResponse);
       } else {
-        showError(response.errorDescription);
+        showError(response.errorDescription || 'Payment failed');
+        resetButton();
       }
     }
     
     function renderSavedCards(response) {
+      if (response.status !== 'SUCCESS') return;
+      
       const container = document.getElementById('saved-cards');
       response.paymentMethods.forEach(upo => {
         const btn = document.createElement('button');
         btn.textContent = upo.upoName;
-        btn.onclick = () => payWithUPO(upo.userPaymentOptionId);
+        btn.onclick = () => payWithSavedCard(upo.userPaymentOptionId);
         container.appendChild(btn);
       });
     }
     
     function renderAPMs(response) {
+      if (response.status !== 'SUCCESS') return;
+      
       const container = document.getElementById('apm-buttons');
       response.paymentMethods.forEach(apm => {
         const btn = document.createElement('button');
-        btn.innerHTML = `<img src="${apm.logoURL}"> ${apm.paymentMethodDisplayName}`;
+        btn.innerHTML = `<img src="${apm.logoURL}" alt="${apm.paymentMethodDisplayName}">`;
         btn.onclick = () => payWithAPM(apm.paymentMethod);
         container.appendChild(btn);
       });
+    }
+    
+    function payWithSavedCard(upoId) {
+      safecharge.createPayment({
+        sessionToken: sessionToken,
+        paymentOption: {
+          userPaymentOptionId: upoId
+        }
+      }, handlePaymentResponse);
+    }
+    
+    function payWithAPM(paymentMethod) {
+      safecharge.createPayment({
+        sessionToken: sessionToken,
+        paymentOption: {
+          alternativePaymentMethod: { paymentMethod }
+        },
+        urlDetails: {
+          successUrl: window.location.origin + '/success',
+          failureUrl: window.location.origin + '/failure',
+          pendingUrl: window.location.origin + '/pending'
+        }
+      }, handlePaymentResponse);
+    }
+    
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+    }
+    
+    function resetButton() {
+      const button = document.getElementById('pay-button');
+      button.disabled = false;
+      button.textContent = 'Pay $99.99';
     }
   </script>
 </body>
 </html>
 ```
+
+---
 
 ## Next Steps
 
@@ -649,5 +1086,8 @@ fields.tokenize({
   </Card>
   <Card title="REST API" icon="code" href="/api-reference/rest-1/overview">
     Server-side API reference
+  </Card>
+  <Card title="Class Objects" icon="cube" href="/api-reference/class-objects">
+    Object reference
   </Card>
 </CardGroup>
