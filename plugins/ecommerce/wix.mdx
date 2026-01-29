@@ -1,0 +1,139 @@
+---
+title: "Wix"
+description: "Nuvei payments for Wix websites and stores"
+---
+
+# Wix Integration
+
+<Info>
+  **Platform:** Wix Stores / Wix Payments  
+  **Integration:** Native app  
+  **Best For:** Small businesses, simple stores  
+  **Support:** Cards, some APMs
+</Info>
+
+Accept payments on your Wix website through Nuvei, supporting credit cards and popular payment methods.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Easy Setup" icon="wand-magic-sparkles">
+    No coding required
+  </Card>
+  <Card title="Card Payments" icon="credit-card">
+    Major card brands
+  </Card>
+  <Card title="Secure Checkout" icon="shield">
+    PCI DSS compliant
+  </Card>
+  <Card title="Mobile Ready" icon="mobile">
+    Optimized for all devices
+  </Card>
+</CardGroup>
+
+## Requirements
+
+- Wix Premium plan with e-commerce
+- Nuvei merchant account
+- Business verification complete
+
+## Setup
+
+### 1. Connect Nuvei
+
+1. Go to Wix Dashboard → **Settings**
+2. Select **Accept Payments**
+3. Click **Connect** next to Nuvei
+4. Enter Nuvei credentials
+
+### 2. Configure Settings
+
+| Setting | Description |
+|---------|-------------|
+| Business Name | Shown on customer statements |
+| Currency | Primary currency |
+| Test Mode | Enable for testing |
+
+### 3. Payment Methods
+
+Enable methods in your Nuvei portal, they'll appear in Wix:
+
+- Credit/Debit cards
+- PayPal (if enabled)
+- Apple Pay
+- Google Pay
+
+## Checkout Experience
+
+Wix provides a seamless checkout:
+
+1. Customer adds to cart
+2. Proceeds to checkout
+3. Selects Nuvei payment
+4. Enters card details
+5. Completes purchase
+
+## Order Management
+
+### View Transactions
+
+1. Go to **Orders** in Wix Dashboard
+2. Select order
+3. View payment details
+
+### Refunds
+
+1. Go to **Orders**
+2. Select order to refund
+3. Click **Refund** → **Full** or **Partial**
+4. Confirm refund
+
+## Testing
+
+1. Enable Test Mode in payment settings
+2. Use test cards
+3. Place test orders
+4. Disable Test Mode for production
+
+## Limitations
+
+<Warning>
+  Wix integration has some limitations compared to direct API:
+  - Limited APM support
+  - No custom checkout styling
+  - Wix handles payment flow
+</Warning>
+
+## Advanced Features
+
+For advanced features, consider:
+
+- **Wix Velo** - Custom code for more control
+- **Direct API** - Full Nuvei capabilities
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection issues" icon="plug">
+    - Verify API credentials
+    - Check Wix premium status
+    - Contact Nuvei support
+  </Accordion>
+  
+  <Accordion title="Payment declined" icon="xmark">
+    - Check card details
+    - Verify test/live mode
+    - Review Nuvei portal
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="Wix Help" icon="question" href="https://support.wix.com">
+    Wix documentation
+  </Card>
+  <Card title="Nuvei Support" icon="headset" href="https://support.nuvei.com">
+    Technical support
+  </Card>
+</CardGroup>

@@ -1,0 +1,164 @@
+---
+title: "OpenCart"
+description: "Nuvei extension for OpenCart e-commerce platform"
+---
+
+# OpenCart Extension
+
+<Info>
+  **Platform:** OpenCart 3.x / 4.x  
+  **Extension Version:** 2.x  
+  **Integration Type:** Redirect, Embedded  
+  **Support:** Full payment lifecycle
+</Info>
+
+Add Nuvei payments to your OpenCart store with our official extension, supporting credit cards, APMs, and digital wallets.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Multiple Payment Methods" icon="credit-card">
+    Cards, APMs, wallets
+  </Card>
+  <Card title="3D Secure 2" icon="shield">
+    Strong authentication
+  </Card>
+  <Card title="Order Management" icon="list-check">
+    Capture, refund, void from admin
+  </Card>
+  <Card title="Multi-currency" icon="coins">
+    Process in multiple currencies
+  </Card>
+</CardGroup>
+
+## Requirements
+
+- OpenCart 3.0+ or 4.x
+- PHP 7.2+
+- SSL certificate
+- Nuvei merchant account
+
+## Installation
+
+### OpenCart 4.x
+
+1. Download extension from OpenCart Marketplace
+2. Go to **Extensions** → **Installer**
+3. Upload the extension zip
+4. Go to **Extensions** → **Payments**
+5. Find Nuvei and click **Install**
+
+### OpenCart 3.x
+
+1. Upload files to OpenCart directory via FTP
+2. Go to **Extensions** → **Payments**
+3. Find Nuvei and click **Install**
+
+## Configuration
+
+Navigate to **Extensions** → **Payments** → **Nuvei** → **Edit**
+
+### API Credentials
+
+| Setting | Description |
+|---------|-------------|
+| Merchant ID | Your Nuvei merchant ID |
+| Merchant Site ID | Your site ID |
+| Secret Key | API secret key |
+| Mode | Live or Test |
+
+### Payment Settings
+
+| Setting | Options |
+|---------|---------|
+| Transaction Type | Authorize / Authorize & Capture |
+| Payment Methods | Select enabled methods |
+| Minimum Order | Minimum amount for Nuvei |
+| Status | Enabled/Disabled |
+
+### Order Statuses
+
+Map Nuvei statuses to OpenCart:
+
+| Nuvei Status | OpenCart Status |
+|--------------|-----------------|
+| Approved | Processing |
+| Pending | Pending |
+| Declined | Failed |
+| Refunded | Refunded |
+
+## Order Management
+
+### Capture
+
+1. Go to **Sales** → **Orders**
+2. Select order
+3. In Nuvei section, click **Capture**
+
+### Refund
+
+1. Go to **Sales** → **Orders**
+2. Select order
+3. In Nuvei section, enter amount and click **Refund**
+
+### Void
+
+1. Go to **Sales** → **Orders**
+2. Select order
+3. In Nuvei section, click **Void**
+
+## Multi-Store Setup
+
+Configure Nuvei per store:
+
+1. Go to **System** → **Settings**
+2. Select store
+3. Configure Nuvei extension for that store
+
+## Webhooks
+
+Set up notification URL:
+
+```
+https://yourstore.com/index.php?route=extension/payment/nuvei/callback
+```
+
+## Testing
+
+1. Set Mode to **Test**
+2. Use sandbox credentials
+3. Test with Nuvei test cards
+4. Verify order creation
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Extension not showing" icon="eye-slash">
+    - Clear OpenCart cache
+    - Verify files uploaded correctly
+    - Check file permissions
+  </Accordion>
+  
+  <Accordion title="Payment declined" icon="xmark">
+    - Check API credentials
+    - Verify test/live mode
+    - Review OpenCart error log
+  </Accordion>
+  
+  <Accordion title="Callback issues" icon="rotate">
+    - Verify webhook URL accessible
+    - Check SSL certificate
+    - Review server logs
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="https://docs.nuvei.com">
+    Full API docs
+  </Card>
+  <Card title="OpenCart Forum" icon="comments" href="https://forum.opencart.com">
+    Community support
+  </Card>
+</CardGroup>

@@ -226,7 +226,12 @@
         "apms/europe/overview",
         "apms/europe/ideal",
         "apms/europe/sofort",
-        "apms/europe/bancontact"
+        "apms/europe/bancontact",
+        "apms/europe/giropay",
+        "apms/europe/eps",
+        "apms/europe/przelewy24",
+        "apms/europe/trustly",
+        "apms/europe/sepa"
       ]
     },
     {
@@ -234,26 +239,40 @@
       "pages": [
         "apms/americas/overview",
         "apms/americas/pix",
-        "apms/americas/oxxo"
+        "apms/americas/oxxo",
+        "apms/americas/boleto",
+        "apms/americas/interac",
+        "apms/americas/ach"
       ]
     },
     {
       "group": "Asia-Pacific",
       "pages": [
-        "apms/apac/overview"
+        "apms/apac/overview",
+        "apms/apac/alipay",
+        "apms/apac/wechat-pay",
+        "apms/apac/upi",
+        "apms/apac/grabpay",
+        "apms/apac/poli",
+        "apms/apac/paynow"
       ]
     },
     {
       "group": "Wallets",
       "pages": [
         "apms/wallets/overview",
-        "apms/wallets/paypal"
+        "apms/wallets/paypal",
+        "apms/wallets/apple-pay",
+        "apms/wallets/google-pay"
       ]
     },
     {
       "group": "Buy Now, Pay Later",
       "pages": [
-        "apms/bnpl/overview"
+        "apms/bnpl/overview",
+        "apms/bnpl/klarna",
+        "apms/bnpl/afterpay",
+        "apms/bnpl/affirm"
       ]
     },
     {
@@ -267,7 +286,21 @@
       "pages": [
         "plugins/ecommerce/magento",
         "plugins/ecommerce/woocommerce",
-        "plugins/ecommerce/shopify"
+        "plugins/ecommerce/shopify",
+        "plugins/ecommerce/prestashop",
+        "plugins/ecommerce/opencart",
+        "plugins/ecommerce/shopware",
+        "plugins/ecommerce/wix"
+      ]
+    },
+    {
+      "group": "Enterprise Platforms",
+      "pages": [
+        "plugins/enterprise/salesforce",
+        "plugins/enterprise/sap",
+        "plugins/enterprise/commercetools",
+        "plugins/enterprise/vtex",
+        "plugins/enterprise/mirakl"
       ]
     },
     {
