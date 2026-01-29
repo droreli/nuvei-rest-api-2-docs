@@ -1,0 +1,283 @@
+---
+title: 'User Payment Options'
+description: 'Manage customer saved payment methods and tokenized cards'
+---
+
+# User Payment Options (UPOs)
+
+The User Payment Options report allows you to view and manage customer saved payment methods, including tokenized cards, bank accounts, and APM credentials.
+
+---
+
+## Accessing the Report
+
+Navigate to **Operations > User Payment Options** in the Control Panel.
+
+---
+
+## What are UPOs?
+
+User Payment Options (UPOs) are saved payment methods associated with a customer (identified by `userTokenId`). UPOs enable:
+
+- **One-click checkout** - Returning customers pay faster
+- **Recurring payments** - Automated billing without re-entering card details
+- **Payouts** - Send funds to saved payment methods
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| User Token ID | Your customer identifier |
+| UPO ID | Unique payment option identifier |
+| Payment Method | Card, bank account, or APM type |
+| UPO Name | Display name (e.g., "Visa ending 4242") |
+| Status | enabled, disabled, expired |
+| Created Date | When UPO was created |
+| Last Used | Date of last transaction |
+| Expiration | Card expiration date (cards only) |
+
+### Card UPO Details
+
+| Field | Description |
+|-------|-------------|
+| Card Number | Masked PAN (e.g., 4***1234) |
+| Card Brand | VISA, MASTERCARD, AMEX, etc. |
+| Expiration | MM/YY |
+| Card Type | Credit, Debit, Prepaid |
+| Issuing Bank | Card issuer name |
+| Issuing Country | Country of issue |
+
+### Bank Account UPO Details
+
+| Field | Description |
+|-------|-------------|
+| Account Type | Checking, Savings |
+| Account Number | Masked account number |
+| Routing Number | Bank routing number |
+| Bank Name | Bank name |
+
+### APM UPO Details
+
+| Field | Description |
+|-------|-------------|
+| APM Type | PayPal, SEPA, etc. |
+| Account Reference | APM-specific identifier |
+| Email | Associated email (if applicable) |
+
+---
+
+## Searching UPOs
+
+### By User Token ID
+
+Find all saved payment methods for a specific customer:
+
+<Steps>
+  <Step title="Enter User Token ID">
+    Input the customer's `userTokenId` in the search field
+  </Step>
+  <Step title="Run Search">
+    Click Search to retrieve all UPOs for that customer
+  </Step>
+</Steps>
+
+### By UPO ID
+
+Find a specific payment method:
+
+<Steps>
+  <Step title="Enter UPO ID">
+    Input the specific `userPaymentOptionId`
+  </Step>
+  <Step title="Run Search">
+    Click Search to retrieve the UPO details
+  </Step>
+</Steps>
+
+---
+
+## Managing UPOs
+
+### View UPO Details
+
+Click on a UPO row to view full details including:
+- Complete payment method information
+- Transaction history using this UPO
+- Status and validation details
+
+### Disable UPO
+
+Disable a UPO to prevent its use in future transactions:
+
+<Steps>
+  <Step title="Select UPO">
+    Find and select the UPO to disable
+  </Step>
+  <Step title="Click Disable">
+    Click the Disable action button
+  </Step>
+  <Step title="Confirm">
+    Confirm the action
+  </Step>
+</Steps>
+
+<Note>
+Disabled UPOs can be re-enabled. Use Delete for permanent removal.
+</Note>
+
+### Enable UPO
+
+Re-enable a previously disabled UPO:
+
+<Steps>
+  <Step title="Find Disabled UPO">
+    Search for the disabled UPO
+  </Step>
+  <Step title="Click Enable">
+    Click the Enable action button
+  </Step>
+</Steps>
+
+### Delete UPO
+
+Permanently remove a saved payment method:
+
+<Warning>
+Deleting a UPO is permanent and cannot be undone. Associated recurring payments will fail.
+</Warning>
+
+<Steps>
+  <Step title="Select UPO">
+    Find and select the UPO to delete
+  </Step>
+  <Step title="Click Delete">
+    Click the Delete action button
+  </Step>
+  <Step title="Confirm">
+    Confirm permanent deletion
+  </Step>
+</Steps>
+
+---
+
+## UPO Status
+
+| Status | Description | Can Transact |
+|--------|-------------|:------------:|
+| **enabled** | Active and ready for use | ✅ |
+| **disabled** | Manually disabled | ❌ |
+| **expired** | Card has expired | ❌ |
+| **invalid** | Card declined or invalidated | ❌ |
+
+---
+
+## Card Account Updater
+
+Nuvei's Card Account Updater (CAU) automatically updates expired or reissued cards:
+
+| Feature | Description |
+|---------|-------------|
+| **Automatic Updates** | Card numbers and expiration dates updated |
+| **Network Support** | Visa Account Updater, Mastercard ABU |
+| **Frequency** | Monthly updates |
+| **Notification** | DMN sent when card details change |
+
+### CAU Benefits
+
+- Reduces failed recurring payments
+- Improves customer experience
+- No customer action required
+- Maintains payment continuity
+
+---
+
+## API Integration
+
+### Get User UPOs
+
+Retrieve UPOs programmatically:
+
+```bash
+POST /ppp/api/v1/getUserUPOs.do
+{
+  "merchantId": "1234567890",
+  "merchantSiteId": "123456",
+  "userTokenId": "customer_123",
+  "sessionToken": "xxx"
+}
+```
+
+### Add UPO
+
+Save a new payment method:
+
+```bash
+POST /ppp/api/v1/addUPOCreditCard.do
+{
+  "merchantId": "1234567890",
+  "merchantSiteId": "123456",
+  "userTokenId": "customer_123",
+  "cardData": {
+    "cardNumber": "4111111111111111",
+    "cardHolderName": "John Doe",
+    "expirationMonth": "12",
+    "expirationYear": "2025",
+    "CVV": "217"
+  },
+  "sessionToken": "xxx"
+}
+```
+
+### Delete UPO
+
+Remove a saved payment method:
+
+```bash
+POST /ppp/api/v1/deleteUPO.do
+{
+  "merchantId": "1234567890",
+  "merchantSiteId": "123456",
+  "userTokenId": "customer_123",
+  "userPaymentOptionId": "12345678",
+  "sessionToken": "xxx"
+}
+```
+
+See [Tokenization API Reference](/api-reference/rest-1/tokenization/get-user-upos) for complete documentation.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Implement Card Account Updater">
+    Enable CAU to automatically keep card details current and reduce failed payments.
+  </Accordion>
+  
+  <Accordion title="Clean up expired UPOs">
+    Periodically review and remove expired or invalid UPOs to maintain data quality.
+  </Accordion>
+  
+  <Accordion title="Provide customer self-service">
+    Allow customers to manage their saved payment methods through your UI using the API.
+  </Accordion>
+  
+  <Accordion title="Monitor UPO usage">
+    Track which UPOs are actively used and investigate any that suddenly stop working.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tokenization Guide" icon="lock" href="/integrations/features/tokenization">
+    Implement card tokenization
+  </Card>
+  <Card title="Recurring Payments" icon="repeat" href="/integrations/features/recurring">
+    Set up recurring billing
+  </Card>
+</CardGroup>

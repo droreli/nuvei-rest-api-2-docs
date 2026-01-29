@@ -1,0 +1,329 @@
+---
+title: 'Test Cards'
+description: 'Complete test card database for sandbox testing'
+---
+
+# Test Cards
+
+Use these test cards in the **integration (sandbox) environment** to simulate various payment scenarios.
+
+<Warning>
+Test cards only work in the integration environment. No actual funds are transferred.
+</Warning>
+
+---
+
+## General Rules
+
+- CVV can be any 3-digit number (4 digits for Amex)
+- Expiration date can be any future date
+- Test cards won't work in production
+
+---
+
+## Non-3DS Cards - Approved
+
+### Visa
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `4761344136141390` | UK | Standard approval |
+| `4761201381475297` | UK | Standard approval |
+| `4159129252458086` | UK | Standard approval |
+| `4123407439043051` | UK | Standard approval |
+| `4001888687412469` | UK | Standard approval |
+| `4444493318246892` | UK | Standard approval |
+| `4000996174334475` | UK | **Partial approval** |
+| `4000287447386587` | UK | **Debit card** |
+
+### Mastercard
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `5101081046006034` | UK | Standard approval |
+| `5101084411423750` | UK | Standard approval |
+| `5333304500657872` | UK | Standard approval |
+| `5333308664112277` | UK | Standard approval |
+| `5550345228382224` | UK | Standard approval |
+| `5550347471347813` | UK | Standard approval |
+| `2222755234426838` | UK | 2-series Mastercard |
+| `2221004483162815` | UK | 2-series Mastercard |
+| `5333608104136723` | UK | **Partial approval** |
+
+### American Express
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `375510513169537` | UK | Standard approval |
+| `375510288656924` | UK | Standard approval |
+| `375510379996452` | UK | Standard approval |
+| `375510082116984` | UK | Standard approval |
+
+### Discover
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `6509821665351005` | US | Standard approval |
+| `6221267465440274` | US | Standard approval |
+| `6500217278165735` | US | Standard approval |
+
+### Diners Club
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `361253433727425` | UK | Standard approval |
+| `386009540225286` | UK | Standard approval |
+
+### China UnionPay (CUP)
+
+| Card Number | Country | Notes |
+|-------------|---------|-------|
+| `6221272566426206` | CN | Standard approval |
+| `6233050545583578` | CN | Standard approval |
+
+---
+
+## Non-3DS Cards - Declined
+
+### Decline Scenarios
+
+<Tabs>
+  <Tab title="Standard Decline">
+    | Brand | Card Number | Country |
+    |-------|-------------|---------|
+    | Visa | `4008370896662369` | UK |
+    | Mastercard | `5333418445863914` | RU |
+    | Amex | `375521501910816` | UK |
+  </Tab>
+  <Tab title="Soft Decline">
+    Cards that return soft decline (can retry with 3DS):
+    
+    | Brand | Card Number | Country |
+    |-------|-------------|---------|
+    | Visa | `4021937195658141` | UK |
+    | Mastercard | `5118081410264525` | UK |
+  </Tab>
+  <Tab title="Do Not Honor">
+    | Brand | Card Number |
+    |-------|-------------|
+    | Visa | `4000164166749263` |
+    | Mastercard | `5333463046218753` |
+    | Amex | `375526064276158` |
+  </Tab>
+  <Tab title="Insufficient Funds">
+    | Brand | Card Number |
+    |-------|-------------|
+    | Visa | `4000173946194872` |
+    | Visa | `4008384424370890` |
+    | Mastercard | `5333475572200849` |
+    | Amex | `375527639875136` |
+  </Tab>
+  <Tab title="Lost/Stolen">
+    | Brand | Card Number |
+    |-------|-------------|
+    | Visa | `4000157454627969` |
+    | Mastercard | `5333452804487502` |
+    | Amex | `375525991062202` |
+  </Tab>
+  <Tab title="Expired Card">
+    | Brand | Card Number |
+    |-------|-------------|
+    | Visa | `4000247422310226` |
+    | Mastercard | `5333540337444022` |
+    | Amex | `375534876707683` |
+  </Tab>
+  <Tab title="Invalid CVV">
+    | Brand | Card Number |
+    |-------|-------------|
+    | Mastercard | `5333583123003909` |
+    | Amex | `375538733297606` |
+  </Tab>
+</Tabs>
+
+---
+
+## 3DS Test Cards
+
+### 3DS Card Numbers
+
+| Result | Brand | Card Number | threeDSMethodURL |
+|--------|-------|-------------|------------------|
+| Approved | Visa | `4000020951595032` | NULL |
+| Approved | Visa | `4000027891380961` | `https://3dsn.sandbox.nuvei.com` |
+| Approved | Mastercard | `5333302221254276` | NULL |
+| Approved | Mastercard | `2221008123677736` | `https://3dsn.sandbox.nuvei.com` |
+| Decline | Visa | `4000319872807223` | NULL |
+| Do Not Honor | Visa | `4000164166749263` | NULL |
+
+### 3DS cardHolderName Patterns
+
+Control 3DS flow using `cardHolderName` values:
+
+<Tabs>
+  <Tab title="Frictionless Browser">
+    Use these values for frictionless authentication (no challenge):
+    
+    | cardHolderName | Description |
+    |----------------|-------------|
+    | `FL-BRW1` | Frictionless, fully authenticated |
+    | `FL-BRW2` | Frictionless, attempts |
+    | `FL-BRW3` | Frictionless, not authenticated |
+    | `FL BRWA` | Frictionless with space |
+    | `FL-BRW1-EXMPT` | Frictionless with exemption |
+  </Tab>
+  <Tab title="Challenge Browser">
+    Use these values to trigger 3DS challenge:
+    
+    | cardHolderName | Description |
+    |----------------|-------------|
+    | `CL-BRW1` | Challenge, fully authenticated |
+    | `CL-BRW2` | Challenge, attempts |
+    | `CL-BRW3` | Challenge, not authenticated |
+    | `CL BRWA` | Challenge with space |
+  </Tab>
+  <Tab title="Error Browser">
+    Use these values to simulate 3DS errors:
+    
+    | cardHolderName | Description |
+    |----------------|-------------|
+    | `ERR-BRW1` | Error during authentication |
+    | `ERR-BRW2` | Error with challenge |
+    | `ERR-BRW3` | Protocol error |
+  </Tab>
+  <Tab title="Frictionless App">
+    For in-app SDK testing:
+    
+    | cardHolderName | Description |
+    |----------------|-------------|
+    | `FL-APP1` | Frictionless, fully authenticated |
+    | `FL-APP2` | Frictionless, attempts |
+    | `FL-APP3` | Frictionless, not authenticated |
+  </Tab>
+  <Tab title="Challenge App">
+    For in-app SDK testing with challenge:
+    
+    | cardHolderName | Description |
+    |----------------|-------------|
+    | `CL-APP1` | Challenge, fully authenticated |
+    | `CL-APP2` | Challenge, attempts |
+    | `CL-APP3` | Challenge, not authenticated |
+  </Tab>
+</Tabs>
+
+---
+
+## Amount-Based 3DS Testing
+
+Trigger specific 3DS flows using transaction amounts:
+
+| Flow | Amount | Cards |
+|------|--------|-------|
+| **Frictionless** | `83.1` (any currency) | `5545060700001113`, `4567491000001113` |
+| **Challenge** | `115.2` (any currency) | `5545060700002228`, `4567491000002228` |
+
+<Tip>
+Amount-based testing is useful when you can't control the cardholder name.
+</Tip>
+
+---
+
+## Testing by Country
+
+### UK Cards
+
+| Brand | Card Number | Status |
+|-------|-------------|--------|
+| Visa | `4761344136141390` | Approved |
+| Visa | `4008370896662369` | Declined |
+| Mastercard | `5101081046006034` | Approved |
+| Amex | `375510513169537` | Approved |
+
+### US Cards
+
+| Brand | Card Number | Status |
+|-------|-------------|--------|
+| Visa | `4000996174334475` | Approved (partial) |
+| Discover | `6509821665351005` | Approved |
+
+### EU Cards (Non-UK)
+
+| Brand | Card Number | Country | Status |
+|-------|-------------|---------|--------|
+| Mastercard | `5333418445863914` | Russia | Declined |
+
+---
+
+## Special Scenarios
+
+### Partial Approval
+
+Test partial approval (amount approved less than requested):
+
+| Card Number | Brand |
+|-------------|-------|
+| `4000996174334475` | Visa |
+| `5333608104136723` | Mastercard |
+
+### Debit Cards
+
+Test debit card processing:
+
+| Card Number | Brand | Type |
+|-------------|-------|------|
+| `4000287447386587` | Visa | Debit |
+
+### Corporate Cards
+
+Test corporate/business cards:
+
+| Card Number | Brand | Type |
+|-------------|-------|------|
+| Contact Nuvei | Various | Corporate |
+
+---
+
+## Response Codes
+
+### Successful Responses
+
+| Status | transactionStatus | Description |
+|--------|-------------------|-------------|
+| Approved | `APPROVED` | Transaction successful |
+| Pending | `PENDING` | Awaiting completion |
+
+### Decline Responses
+
+| Reason Code | Description |
+|-------------|-------------|
+| `-1` | General decline |
+| `1001` | Insufficient funds |
+| `1002` | Card expired |
+| `1003` | CVV mismatch |
+| `1004` | Invalid card number |
+| `1005` | Do not honor |
+| `1006` | Lost card |
+| `1007` | Stolen card |
+| `1008` | Card restricted |
+
+---
+
+## Live Test Card Database
+
+For the complete, searchable test card database with additional filters and scenarios, visit the official Nuvei documentation:
+
+<Card title="Official Test Card Database" icon="database" href="https://docs.nuvei.com/documentation/integration/testing/testing-cards/">
+  Access the full searchable test card database
+</Card>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="3DS Testing" icon="shield" href="/testing/3ds-testing">
+    Detailed 3DS test scenarios
+  </Card>
+  <Card title="APM Testing" icon="building-columns" href="/testing/apm-testing">
+    Test alternative payment methods
+  </Card>
+</CardGroup>

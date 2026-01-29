@@ -1,0 +1,204 @@
+---
+title: 'Settlement Summary Report'
+description: 'View settlement summaries and drill into settlement details'
+---
+
+# Settlement Summary Report
+
+The Settlement Summary Report provides an overview of your settlements over time, aligned with your settlement agreement.
+
+<Frame caption="Settlement Summary Report view">
+  ![Settlement Summary](/images/control-panel/settlement-summary.png)
+</Frame>
+
+---
+
+## Accessing the Report
+
+Navigate to **Finance > Settlement Summary** in the Control Panel.
+
+<Note>
+Financial reports display data for up to **14 months**. Numbers are rounded to the nearest hundredth.
+</Note>
+
+---
+
+## Generating a Report
+
+<Steps>
+  <Step title="Set Date Range">
+    Select start and end dates (up to 14 months back)
+  </Step>
+  <Step title="Select Filters">
+    - **Acquirer Bank**: Filter by processing bank
+    - **Settlement Currency**: Filter by currency
+    - **Settlement View**: Collapsed or Expanded
+  </Step>
+  <Step title="Run Report">
+    Click **Run Report** to generate results
+  </Step>
+</Steps>
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Date | Settlement date |
+| ID | Settlement ID (Payout ID for Merchant Settlement, Batch ID for chargebacks) |
+| Acquirer Bank | Bank or APM that processed the transaction |
+| Settlement Currency | Currency of settlement |
+| Client Name | Merchant account |
+| Balance Date | Balance date |
+| Settlement Amount | Amount after currency conversion |
+| Transaction Currency | Original transaction currency |
+
+---
+
+## Settlement Views
+
+### Collapsed View
+
+Shows aggregated settlement totals:
+
+| Column | Description |
+|--------|-------------|
+| Date | Settlement date |
+| Total Amount | Sum of all settlements |
+| Credit | Positive amounts (sales) |
+| Debit | Negative amounts (refunds, fees) |
+| Net | Credit minus Debit |
+
+### Expanded View
+
+Shows individual settlement line items:
+
+| Column | Description |
+|--------|-------------|
+| Date | Settlement date |
+| Settlement ID | Individual settlement identifier |
+| Type | Sale, Refund, Fee, Chargeback |
+| Amount | Settlement amount |
+| Currency | Settlement currency |
+| Acquirer | Processing bank |
+
+---
+
+## Details Column
+
+Each row has three icons for additional details:
+
+| Icon | Action | Description |
+|------|--------|-------------|
+| 📋 | Settlement List | View individual settlements in this batch |
+| 📥 | Download | Export to CSV or Excel |
+| 🔍 | Movement Details | Drill into fund movements |
+
+---
+
+## Settlement Types
+
+| Type | Description |
+|------|-------------|
+| **Sale** | Settled sales transactions |
+| **Refund** | Processed refunds |
+| **Chargeback** | Chargeback debits |
+| **Chargeback Reversal** | Won chargebacks returned |
+| **Fee** | Processing fees |
+| **Adjustment** | Manual adjustments |
+| **Reserve** | Rolling reserve withholdings |
+| **Reserve Release** | Rolling reserve releases |
+
+---
+
+## Time Zone Considerations
+
+<Warning>
+**Important:** Settlement Summary Report is **not affected** by user time zone settings. Dates reflect settlement processing dates.
+</Warning>
+
+However, the Movement Drill Down **is affected** by user time zone settings.
+
+---
+
+## Sample Report Download
+
+<Card title="Download Sample Settlement Summary" icon="file-excel" href="https://docs.nuvei.com/wp-content/uploads/2023/10/sample-settlement-summary.xlsx">
+  Download a sample Excel report to understand the data format
+</Card>
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Daily settlement reconciliation">
+    1. Generate report for yesterday
+    2. Compare settlement amounts to expected
+    3. Drill into any discrepancies
+    4. Match to bank deposits
+  </Accordion>
+  
+  <Accordion title="Monthly financial close">
+    1. Generate report for full month
+    2. Export to CSV/Excel
+    3. Import to accounting system
+    4. Reconcile with general ledger
+  </Accordion>
+  
+  <Accordion title="Investigate missing funds">
+    1. Find expected settlement date
+    2. Check settlement status
+    3. Drill into movement details
+    4. Contact support if needed
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Understanding Settlement Timing
+
+### Settlement Lifecycle
+
+```
+Day 1: Transaction authorized and captured
+Day 2: Transaction submitted in batch
+Day 3: Acquirer settles batch
+Day 4-5: Funds transferred to Nuvei
+Day 5-7: Payout to merchant
+```
+
+### Factors Affecting Timing
+
+| Factor | Impact |
+|--------|--------|
+| Acquirer | Different processing times |
+| Currency | Cross-border delays |
+| Holidays | Banking day delays |
+| Amount | Large settlements may have review |
+| New merchant | Initial settlements may have delays |
+
+---
+
+## Settlement Status
+
+| Status | Description |
+|--------|-------------|
+| **Pending** | Settlement in progress |
+| **Settled** | Funds received from acquirer |
+| **Paid Out** | Funds transferred to merchant |
+| **Held** | Settlement on hold (reserve, review) |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movement Report" icon="arrow-right-arrow-left" href="/control-panel/finance/movement-report">
+    Detailed fund movements
+  </Card>
+  <Card title="Reconciliation Guide" icon="check-double" href="/control-panel/finance/reconciliation-guide">
+    Reconciliation process
+  </Card>
+</CardGroup>

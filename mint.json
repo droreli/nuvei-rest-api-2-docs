@@ -31,6 +31,10 @@
       "url": "integrations"
     },
     {
+      "name": "Control Panel",
+      "url": "control-panel"
+    },
+    {
       "name": "REST API 2.0",
       "url": "rest-2"
     },
@@ -41,6 +45,10 @@
     {
       "name": "APMs",
       "url": "apms"
+    },
+    {
+      "name": "Testing",
+      "url": "testing"
     },
     {
       "name": "Plugins",
@@ -129,6 +137,62 @@
         "integrations/features/recurring",
         "integrations/features/webhooks",
         "integrations/features/payouts"
+      ]
+    },
+    {
+      "group": "Control Panel",
+      "pages": [
+        "control-panel/overview",
+        "control-panel/dashboard"
+      ]
+    },
+    {
+      "group": "Operations",
+      "pages": [
+        "control-panel/operations/transactions-report",
+        "control-panel/operations/exceptions-report",
+        "control-panel/operations/withdrawal-requests",
+        "control-panel/operations/bulk-upload",
+        "control-panel/operations/user-payment-options",
+        "control-panel/operations/paylink",
+        "control-panel/operations/recurring-plans"
+      ]
+    },
+    {
+      "group": "Finance",
+      "pages": [
+        "control-panel/finance/overview",
+        "control-panel/finance/settlement-summary",
+        "control-panel/finance/movement-report",
+        "control-panel/finance/fees-report",
+        "control-panel/finance/balance-report",
+        "control-panel/finance/reconciliation-guide"
+      ]
+    },
+    {
+      "group": "Risk Management",
+      "pages": [
+        "control-panel/risk/overview",
+        "control-panel/risk/chargebacks-report",
+        "control-panel/risk/client-rules",
+        "control-panel/risk/disputes",
+        "control-panel/risk/case-management"
+      ]
+    },
+    {
+      "group": "Settings",
+      "pages": [
+        "control-panel/settings/integration-settings",
+        "control-panel/settings/team-management"
+      ]
+    },
+    {
+      "group": "Testing",
+      "pages": [
+        "testing/overview",
+        "testing/test-cards",
+        "testing/3ds-testing",
+        "testing/apm-testing"
       ]
     },
     {

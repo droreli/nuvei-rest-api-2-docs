@@ -1,0 +1,343 @@
+---
+title: 'Recurring Plans & Subscriptions'
+description: 'Manage subscription plans and recurring billing from the Control Panel'
+---
+
+# Recurring Plans & Subscriptions
+
+Manage subscription plans, view active subscriptions, and monitor recurring billing from the Control Panel.
+
+---
+
+## Overview
+
+Nuvei supports two approaches to recurring billing:
+
+| Approach | Description | Management |
+|----------|-------------|------------|
+| **Nuvei-Managed** | Nuvei handles scheduling and billing | Control Panel + API |
+| **Merchant-Managed** | You control billing schedule | API only |
+
+This section covers **Nuvei-Managed** recurring billing via the Control Panel.
+
+---
+
+## Recurring Plans Report
+
+Navigate to **Operations > Recurring Plans Report**.
+
+### Plan Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Plan ID | Unique plan identifier |
+| Plan Name | Display name |
+| Amount | Recurring charge amount |
+| Currency | Billing currency |
+| Frequency | daily, weekly, monthly, yearly |
+| Status | active, paused, cancelled |
+| Created | Plan creation date |
+| Active Subscriptions | Number of active subscribers |
+
+---
+
+## Creating a Plan
+
+<Steps>
+  <Step title="Click Create Plan">
+    Click **Create Plan** in the Recurring Plans section
+  </Step>
+  <Step title="Enter Plan Details">
+    - **Plan Name**: Descriptive name
+    - **Plan ID**: Your unique identifier (optional)
+    - **Amount**: Recurring charge amount
+    - **Currency**: Billing currency
+  </Step>
+  <Step title="Set Frequency">
+    - **Frequency**: daily, weekly, monthly, yearly
+    - **Interval**: e.g., every 2 months
+    - **Day of Month**: for monthly (1-28)
+  </Step>
+  <Step title="Configure Trial">
+    - **Trial Period**: Number of days
+    - **Trial Amount**: Amount during trial (0 for free)
+  </Step>
+  <Step title="Set Limits">
+    - **Max Charges**: Total number of billing cycles
+    - **End Date**: Plan end date (optional)
+  </Step>
+  <Step title="Save">
+    Click Save to create the plan
+  </Step>
+</Steps>
+
+---
+
+## Plan Configuration Options
+
+### Frequency Options
+
+| Frequency | Description | Example |
+|-----------|-------------|---------|
+| **Daily** | Every N days | Every day, every 3 days |
+| **Weekly** | Every N weeks | Weekly, bi-weekly |
+| **Monthly** | Every N months | Monthly, quarterly |
+| **Yearly** | Every N years | Annual subscription |
+
+### Trial Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Trial Days** | Length of trial period |
+| **Trial Amount** | Amount charged during trial (0 = free) |
+| **No Trial** | Billing starts immediately |
+
+### Billing Limits
+
+| Setting | Description |
+|---------|-------------|
+| **Unlimited** | Bill indefinitely |
+| **Max Cycles** | Stop after N billing cycles |
+| **End Date** | Stop on specific date |
+
+---
+
+## Recurring Subscriptions Report
+
+Navigate to **Operations > Recurring Subscriptions Report**.
+
+### Subscription Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Subscription ID | Unique subscription identifier |
+| Plan ID | Associated plan |
+| User Token ID | Customer identifier |
+| UPO ID | Payment method used |
+| Status | active, paused, cancelled, completed |
+| Start Date | Subscription start date |
+| Next Billing | Next charge date |
+| Last Billing | Last successful charge |
+| Total Charged | Cumulative amount billed |
+
+### Subscription Status
+
+| Status | Description |
+|--------|-------------|
+| **Active** | Billing as scheduled |
+| **Paused** | Temporarily halted |
+| **Cancelled** | Permanently stopped |
+| **Completed** | Reached max cycles or end date |
+| **Failed** | Last billing attempt failed |
+
+---
+
+## Managing Subscriptions
+
+### View Subscription Details
+
+Click on a subscription to view:
+- Full billing history
+- Payment method details
+- Upcoming charges
+- Customer information
+
+### Pause Subscription
+
+Temporarily halt billing:
+
+<Steps>
+  <Step title="Select Subscription">
+    Find and select the subscription
+  </Step>
+  <Step title="Click Pause">
+    Click the Pause action
+  </Step>
+  <Step title="Set Resume Date">
+    Optionally set automatic resume date
+  </Step>
+  <Step title="Confirm">
+    Confirm the pause
+  </Step>
+</Steps>
+
+### Resume Subscription
+
+Resume a paused subscription:
+
+<Steps>
+  <Step title="Find Paused Subscription">
+    Filter by status = paused
+  </Step>
+  <Step title="Click Resume">
+    Select and click Resume
+  </Step>
+  <Step title="Set Next Billing">
+    Confirm next billing date
+  </Step>
+</Steps>
+
+### Cancel Subscription
+
+Permanently stop billing:
+
+<Warning>
+Cancellation is permanent. Consider pausing if the customer may return.
+</Warning>
+
+<Steps>
+  <Step title="Select Subscription">
+    Find the subscription to cancel
+  </Step>
+  <Step title="Click Cancel">
+    Click the Cancel action
+  </Step>
+  <Step title="Select Reason">
+    Choose cancellation reason
+  </Step>
+  <Step title="Confirm">
+    Confirm cancellation
+  </Step>
+</Steps>
+
+### Update Payment Method
+
+Change the UPO used for billing:
+
+<Steps>
+  <Step title="Select Subscription">
+    Find the subscription
+  </Step>
+  <Step title="Click Update Payment">
+    Click Update Payment Method
+  </Step>
+  <Step title="Select New UPO">
+    Choose from customer's saved methods
+  </Step>
+  <Step title="Confirm">
+    Save the change
+  </Step>
+</Steps>
+
+---
+
+## Billing Failures
+
+### Retry Logic
+
+When a recurring charge fails:
+
+| Attempt | Timing | Action |
+|---------|--------|--------|
+| 1st retry | +1 day | Automatic retry |
+| 2nd retry | +3 days | Automatic retry |
+| 3rd retry | +7 days | Automatic retry |
+| Final | +14 days | Subscription marked failed |
+
+### Failed Subscription Actions
+
+| Action | Description |
+|--------|-------------|
+| **Manual Retry** | Attempt charge immediately |
+| **Update UPO** | Try different payment method |
+| **Contact Customer** | Request updated card details |
+| **Cancel** | End the subscription |
+
+---
+
+## DMN Notifications
+
+Recurring events trigger DMN notifications:
+
+| Event | Description |
+|-------|-------------|
+| `subscription_created` | New subscription started |
+| `subscription_charge` | Recurring charge processed |
+| `subscription_charge_failed` | Charge attempt failed |
+| `subscription_paused` | Subscription paused |
+| `subscription_resumed` | Subscription resumed |
+| `subscription_cancelled` | Subscription cancelled |
+| `subscription_completed` | All cycles completed |
+
+---
+
+## API Integration
+
+### Create Plan
+
+```bash
+POST /ppp/api/v1/createPlan.do
+{
+  "merchantId": "1234567890",
+  "merchantSiteId": "123456",
+  "planId": "premium_monthly",
+  "name": "Premium Monthly",
+  "initialAmount": "0",
+  "recurringAmount": "19.99",
+  "currency": "USD",
+  "planStatus": "ACTIVE",
+  "startAfter": {
+    "day": "1",
+    "month": "0",
+    "year": "0"
+  },
+  "recurringPeriod": {
+    "day": "0",
+    "month": "1",
+    "year": "0"
+  }
+}
+```
+
+### Create Subscription
+
+```bash
+POST /ppp/api/v1/createSubscription.do
+{
+  "merchantId": "1234567890",
+  "merchantSiteId": "123456",
+  "userTokenId": "customer_123",
+  "planId": "premium_monthly",
+  "userPaymentOptionId": "12345678",
+  "sessionToken": "xxx"
+}
+```
+
+See [Recurring Payments Guide](/integrations/features/recurring) for complete API documentation.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Implement dunning management">
+    - Send payment failure emails to customers
+    - Provide easy payment method update links
+    - Grace periods before service interruption
+  </Accordion>
+  
+  <Accordion title="Enable Card Account Updater">
+    Automatically keep card details current to reduce failed payments.
+  </Accordion>
+  
+  <Accordion title="Use webhooks for status sync">
+    Implement DMN handlers to keep your system in sync with subscription status.
+  </Accordion>
+  
+  <Accordion title="Offer self-service management">
+    Let customers pause, resume, or cancel subscriptions through your UI.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Recurring Guide" icon="repeat" href="/integrations/features/recurring">
+    Full recurring implementation
+  </Card>
+  <Card title="UPO Management" icon="credit-card" href="/control-panel/operations/user-payment-options">
+    Manage payment methods
+  </Card>
+</CardGroup>

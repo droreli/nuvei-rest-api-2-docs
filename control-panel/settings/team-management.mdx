@@ -1,0 +1,309 @@
+---
+title: 'Team Management'
+description: 'Manage users, roles, and permissions for Control Panel access'
+---
+
+# Team Management
+
+Manage user accounts and assign roles to control access to Control Panel features.
+
+---
+
+## Accessing Team Management
+
+Navigate to **Settings > Team** in the Control Panel.
+
+<Frame caption="Team Management - Users and Roles tabs">
+  ![Team Management](/images/control-panel/team-management.png)
+</Frame>
+
+---
+
+## Users Tab
+
+### Creating a New User
+
+<Steps>
+  <Step title="Click Add User">
+    Click the **Add User** button in the top right
+  </Step>
+  <Step title="Enter User Details">
+    - **Username**: 1-20 characters (letters, numbers, and `.!@#$%_`)
+    - **Email**: Valid email address for notifications
+    - **First Name** and **Last Name**
+  </Step>
+  <Step title="Assign Role">
+    Select one or more roles for the user
+  </Step>
+  <Step title="Save">
+    Click **Create User** to send invitation email
+  </Step>
+</Steps>
+
+<Note>
+Username requirements: `/^[a-zA-Z0-9\.\!\@\#\$\%\_]+$/` with maximum 20 characters.
+</Note>
+
+### User Filters
+
+| Filter | Description |
+|--------|-------------|
+| **Search Users** | Text search by username, email, or name |
+| **Is Active** | Filter by active/inactive status |
+| **Role** | Filter by assigned role |
+
+### User Actions
+
+| Action | Icon | Description |
+|--------|------|-------------|
+| **Edit** | ✏️ | Modify user details and roles |
+| **Reset Password** | 🔑 | Send password reset email |
+| **Deactivate** | 🚫 | Disable user access (preserves account) |
+| **Activate** | ✅ | Re-enable deactivated user |
+| **Unblock** | 🔓 | Unlock account after failed login attempts |
+| **Send 2FA Email** | 📧 | Resend two-factor authentication setup email |
+| **Delete** | 🗑️ | Permanently remove user account |
+
+<Warning>
+Deleting a user is permanent and cannot be undone. Use **Deactivate** to temporarily disable access.
+</Warning>
+
+---
+
+## Roles Tab
+
+### Predefined Action Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Management** | Full access to all menu items, reports, and actions |
+| **Finance_Actions** | Finance section + Transaction/Batch ID/Withdrawal reports |
+| **Operations_Actions** | Operations menu, execute refunds/payouts/voids |
+| **Risk_Actions** | Transaction data, risk reports, risk-related actions |
+| **Risk Dispute** | Chargeback, Case Management, Disputes Reports only |
+| **Commercial** | Sign merchant account, APM Pricing Management |
+| **Developer only** | REST API 2.0 management, technical configuration |
+| **Temp** | Limited temporary role for technical onboarding |
+
+### Predefined Read-Only Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Finance_ReadOnly** | View-only access to Finance reports |
+| **Operations_ReadOnly** | View-only access to Operations reports |
+| **Risk_ReadOnly** | View-only access to Risk reports |
+
+---
+
+## Role Permissions Matrix
+
+### Operations Permissions
+
+| Permission | Management | Finance_Actions | Operations_Actions | Risk_Actions |
+|------------|:----------:|:---------------:|:-----------------:|:------------:|
+| View Transactions | ✅ | ✅ | ✅ | ✅ |
+| Issue Refund | ✅ | ❌ | ✅ | ❌ |
+| Void Transaction | ✅ | ❌ | ✅ | ❌ |
+| Settle Transaction | ✅ | ❌ | ✅ | ❌ |
+| Process Payout | ✅ | ❌ | ✅ | ❌ |
+| Bulk Upload | ✅ | ❌ | ✅ | ❌ |
+| Manage UPOs | ✅ | ❌ | ✅ | ❌ |
+| Create Paylinks | ✅ | ❌ | ✅ | ❌ |
+
+### Finance Permissions
+
+| Permission | Management | Finance_Actions | Operations_Actions | Risk_Actions |
+|------------|:----------:|:---------------:|:-----------------:|:------------:|
+| Settlement Summary | ✅ | ✅ | ❌ | ❌ |
+| Movement Report | ✅ | ✅ | ❌ | ❌ |
+| Fees Report | ✅ | ✅ | ❌ | ❌ |
+| Balance Report | ✅ | ✅ | ❌ | ❌ |
+| Merchant Statement | ✅ | ✅ | ❌ | ❌ |
+
+### Risk Permissions
+
+| Permission | Management | Finance_Actions | Operations_Actions | Risk_Actions | Risk Dispute |
+|------------|:----------:|:---------------:|:-----------------:|:------------:|:------------:|
+| Risk Dashboard | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Chargebacks Report | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Disputes Report | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Fraud Transactions | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Client Rules | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Case Management | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Submit Dispute | ✅ | ❌ | ❌ | ✅ | ✅ |
+
+### Settings Permissions
+
+| Permission | Management | Developer | All Others |
+|------------|:----------:|:---------:|:----------:|
+| Integration Settings | ✅ | ✅ | ❌ |
+| View Secret Key | ✅ (Admin only) | ❌ | ❌ |
+| Team Management | ✅ (Admin only) | ❌ | ❌ |
+| Audit Trace | ✅ | ❌ | ❌ |
+| APM Pricing | ✅ | ❌ | ❌ |
+
+---
+
+## Custom Roles
+
+Administrators can create custom roles for specific needs.
+
+### Creating a Custom Role
+
+<Steps>
+  <Step title="Go to Roles Tab">
+    Navigate to Settings > Team > Roles
+  </Step>
+  <Step title="Click Add Role">
+    Click **Add Role** button
+  </Step>
+  <Step title="Name the Role">
+    Enter a descriptive role name
+  </Step>
+  <Step title="Select Permissions">
+    Check the permissions to include in this role
+  </Step>
+  <Step title="Save">
+    Click **Create Role**
+  </Step>
+</Steps>
+
+### Managing Custom Roles
+
+| Action | Description |
+|--------|-------------|
+| **Duplicate** | Create a copy of an existing role to modify |
+| **Edit** | Modify permissions of a custom role |
+| **Delete** | Remove a custom role (reassign users first) |
+
+<Note>
+Some permissions are **Admin-exclusive** and cannot be assigned to custom roles:
+- Team Page access
+- Event API access
+- Secret Key visibility
+</Note>
+
+---
+
+## Two-Factor Authentication (2FA)
+
+2FA is required for all Control Panel users.
+
+### Setting Up 2FA
+
+<Steps>
+  <Step title="Receive Setup Email">
+    New users receive a 2FA setup email automatically
+  </Step>
+  <Step title="Install Authenticator App">
+    Use Google Authenticator, Authy, or similar app
+  </Step>
+  <Step title="Scan QR Code">
+    Scan the QR code from the setup email
+  </Step>
+  <Step title="Enter Verification Code">
+    Enter the 6-digit code to complete setup
+  </Step>
+</Steps>
+
+### 2FA Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Lost authenticator access | Admin can click "Send 2FA Email" to reset |
+| Code not working | Verify device time is accurate (use automatic time) |
+| Locked out | Contact your administrator to unblock account |
+
+---
+
+## Account Security
+
+### Password Requirements
+
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character
+- Cannot reuse last 5 passwords
+
+### Account Lockout
+
+| Condition | Lockout Duration |
+|-----------|------------------|
+| 5 failed login attempts | 15 minutes |
+| 10 failed login attempts | 1 hour |
+| 15 failed login attempts | Account blocked (requires admin unblock) |
+
+### Session Management
+
+| Setting | Value |
+|---------|-------|
+| Session timeout | 30 minutes of inactivity |
+| Concurrent sessions | Maximum 3 per user |
+| Session persistence | Not saved across browser close |
+
+---
+
+## Audit Trail
+
+Track user activities in the Audit Trace report:
+
+| Activity Logged | Description |
+|-----------------|-------------|
+| Login/Logout | User authentication events |
+| Failed login | Failed authentication attempts |
+| User created | New user account creation |
+| Role changed | Permission modifications |
+| Settings changed | Configuration updates |
+| Transaction actions | Refunds, voids, settlements |
+
+Access via **Settings > Audit Trace**.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Apply principle of least privilege">
+    Assign users only the permissions they need:
+    - Finance team → Finance_Actions or Finance_ReadOnly
+    - Customer support → Operations_Actions
+    - Risk analysts → Risk_Actions
+    - Developers → Developer only
+  </Accordion>
+  
+  <Accordion title="Regularly review user access">
+    Quarterly review recommended:
+    - Remove inactive users
+    - Update roles for job changes
+    - Verify no unnecessary admin access
+  </Accordion>
+  
+  <Accordion title="Use dedicated accounts">
+    Avoid shared accounts:
+    - Creates accountability in audit logs
+    - Prevents access issues when employees leave
+    - Ensures proper 2FA per user
+  </Accordion>
+  
+  <Accordion title="Deactivate instead of delete">
+    When employees leave:
+    - Deactivate immediately
+    - Preserve audit history
+    - Delete only if required by policy
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integration Settings" icon="plug" href="/control-panel/settings/integration-settings">
+    Configure API credentials and URLs
+  </Card>
+  <Card title="Audit Trace" icon="clock-rotate-left" href="/control-panel/settings/audit-trace">
+    Review user activity logs
+  </Card>
+</CardGroup>

@@ -1,0 +1,129 @@
+---
+title: 'Exceptions Report'
+description: 'Monitor and manage transactions flagged for review or requiring attention'
+---
+
+# Exceptions Report
+
+The Exceptions Report displays transactions that require manual review or have been flagged by fraud rules, velocity checks, or other risk filters.
+
+---
+
+## Accessing the Report
+
+Navigate to **Operations > Exceptions** in the Control Panel.
+
+---
+
+## Exception Types
+
+| Type | Description | Action Required |
+|------|-------------|-----------------|
+| **Manual Review** | Flagged by fraud rules for manual decision | Approve or Decline |
+| **Velocity Exceeded** | Too many transactions in time window | Review and decide |
+| **Amount Threshold** | Transaction exceeds configured limit | Review and decide |
+| **Country Mismatch** | IP country differs from billing country | Review and decide |
+| **BIN Mismatch** | Card country differs from billing country | Review and decide |
+| **High Risk Score** | External fraud score above threshold | Review and decide |
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Date | Exception creation date |
+| Transaction ID | Associated transaction identifier |
+| Exception Type | Category of exception |
+| Amount | Transaction amount |
+| Currency | Transaction currency |
+| Customer Email | Customer email address |
+| IP Country | Customer IP location |
+| Billing Country | Billing address country |
+| Risk Score | Fraud risk score |
+| Status | Pending, Approved, Declined |
+
+---
+
+## Managing Exceptions
+
+### Approve Exception
+
+Approves the transaction and proceeds with processing:
+
+<Steps>
+  <Step title="Select Transaction">
+    Check the box next to the exception
+  </Step>
+  <Step title="Click Approve">
+    Click the Approve button in the actions bar
+  </Step>
+  <Step title="Add Notes">
+    Optionally add a note explaining approval reason
+  </Step>
+  <Step title="Confirm">
+    Confirm the approval
+  </Step>
+</Steps>
+
+### Decline Exception
+
+Declines the transaction:
+
+<Steps>
+  <Step title="Select Transaction">
+    Check the box next to the exception
+  </Step>
+  <Step title="Click Decline">
+    Click the Decline button
+  </Step>
+  <Step title="Select Reason">
+    Choose a decline reason from the dropdown
+  </Step>
+  <Step title="Confirm">
+    Confirm the decline
+  </Step>
+</Steps>
+
+---
+
+## Bulk Actions
+
+Process multiple exceptions at once:
+
+| Action | Description |
+|--------|-------------|
+| **Bulk Approve** | Approve multiple selected exceptions |
+| **Bulk Decline** | Decline multiple selected exceptions |
+| **Export** | Download exceptions to CSV/XLSX |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Review exceptions promptly">
+    Pending exceptions may time out, resulting in automatic decline. Review within 24 hours.
+  </Accordion>
+  
+  <Accordion title="Document approval reasons">
+    Add notes when approving high-risk exceptions for audit purposes.
+  </Accordion>
+  
+  <Accordion title="Tune fraud rules">
+    If too many legitimate transactions are flagged, work with Nuvei to adjust fraud rules.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Fraud Rules" icon="shield" href="/control-panel/risk/client-rules">
+    Configure fraud screening rules
+  </Card>
+  <Card title="Transactions Report" icon="receipt" href="/control-panel/operations/transactions-report">
+    View all transactions
+  </Card>
+</CardGroup>

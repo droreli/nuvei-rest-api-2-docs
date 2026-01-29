@@ -1,0 +1,223 @@
+---
+title: 'Dashboard'
+description: 'Monitor KPIs, statistics, and performance graphs for your payment operations'
+---
+
+# Dashboard
+
+The Dashboard provides real-time statistics and graphs for monitoring your site traffic KPIs. Data shows trends up to the most recently completed hour.
+
+<Frame caption="Control Panel Dashboard - Main view with KPIs and comparison graphs">
+  ![Dashboard Overview](/images/control-panel/dashboard-overview.png)
+</Frame>
+
+---
+
+## Accessing the Dashboard
+
+Navigate to **Control Panel > Dashboard** after logging in at [portal.nuvei.com](https://portal.nuvei.com).
+
+---
+
+## Customizing the Dashboard
+
+Click the **Customize** button in the top right to personalize your dashboard view.
+
+### Currency Display
+
+Select your preferred currency for displaying statistics:
+- GBP (British Pound)
+- EUR (Euro)
+- USD (US Dollar)
+- SGD (Singapore Dollar)
+- HKD (Hong Kong Dollar)
+- AUD (Australian Dollar)
+
+---
+
+## Main Dashboard
+
+The Main Dashboard displays up to **4 key statistics** at a glance:
+
+| Statistic | Description |
+|-----------|-------------|
+| **Total Credit Remaining Funds** | Available balance for processing |
+| **Chargeback Ratio (Visa)** | Visa chargeback percentage vs. transactions |
+| **Chargeback Ratio (Mastercard)** | Mastercard chargeback percentage vs. transactions |
+| **Weekly Projection** | Estimated weekly sales based on current trends |
+| **Monthly Projection** | Estimated monthly sales based on current trends |
+| **Today's Sales** | Total sales amount for current day |
+| **Today's Transactions** | Transaction count for current day |
+| **Yesterday's Sales** | Total sales amount for previous day |
+| **Yesterday's Transactions** | Transaction count for previous day |
+| **Approval Ratio** | Percentage of approved vs. total transactions |
+
+<Tip>
+Click on any statistic card to drill down into detailed reports.
+</Tip>
+
+---
+
+## Comparison Graphs
+
+Display up to **2 comparison graphs** to visualize trends:
+
+| Graph Type | Description |
+|------------|-------------|
+| **Sales Comparison** | Compare sales amounts across time periods |
+| **Transactions Comparison** | Compare transaction counts across time periods |
+| **Chargeback Count** | Track chargeback volume over time |
+| **Fraud Ratio** | Monitor fraud percentage trends |
+| **Visa Chargeback Ratio** | Visa-specific chargeback trends |
+| **Mastercard Chargeback Ratio** | Mastercard-specific chargeback trends |
+
+### Graph Options
+
+- **Time Period**: Select daily, weekly, or monthly comparisons
+- **Date Range**: Choose specific date ranges for comparison
+- **Overlay**: Compare current period vs. previous period
+
+---
+
+## Overview Dashboard
+
+The Overview Dashboard provides **12 comprehensive charts** for deeper analysis:
+
+| Chart | Description | Calculation |
+|-------|-------------|-------------|
+| **Sales** | Total sales volume | Sum of approved transaction amounts |
+| **Transactions** | Transaction count | Count of all transactions |
+| **Approval Ratio** | Success rate | (Approved / Total) × 100 |
+| **Refund Ratio** | Refund percentage | (Refunded / Total) × 100 |
+| **Average Transaction Value** | Avg. amount per transaction | Total Sales / Transaction Count |
+| **Device Type** | Mobile vs. Desktop breakdown | Distribution by device |
+| **Payment Methods** | Payment method distribution | Cards, APMs, wallets usage |
+| **Location** | Geographic distribution | Transactions by country |
+| **Fraud Filters Ratio** | Fraud detection rate | Flagged / Total transactions |
+| **Decline Reason Codes** | Decline analysis | Distribution of decline reasons |
+| **Approval Ratio per Provider** | Provider performance | Approval rate by acquirer |
+| **Payment Providers** | Volume by provider | Distribution across acquirers |
+| **Processing Channel** | Channel breakdown | E-commerce, MOTO, etc. |
+
+---
+
+## Transaction Filters
+
+Filter dashboard data using these options:
+
+### Date Range Dropdown
+
+Select from preset ranges:
+- Today
+- Yesterday
+- Last 7 days
+- Last 30 days
+- This month
+- Last month
+- Custom range
+
+### Manage Filters
+
+Click **Manage Filters** to filter by:
+
+| Filter | Description |
+|--------|-------------|
+| **Payment Method** | Card, APM, wallet type |
+| **Country** | Billing or IP country |
+| **Processing Currency** | Transaction currency |
+| **Acquirer Bank** | Processing bank |
+| **Client Name** | Merchant account |
+| **Issuer Bank** | Card issuing bank |
+| **Site** | Specific merchant site |
+
+---
+
+## Additional Options
+
+### Export Data
+
+| Format | Description |
+|--------|-------------|
+| **PDF** | Visual report with charts |
+| **CSV** | Raw data for analysis |
+| **XLSX** | Excel format with formatting |
+
+### Print
+
+Click the **Print** icon to generate a printable version of the current dashboard view.
+
+### Schedule Queries
+
+Set up automated report delivery:
+
+<Steps>
+  <Step title="Click Schedule">
+    Select the schedule icon in the report toolbar
+  </Step>
+  <Step title="Configure Frequency">
+    Choose daily, weekly, or monthly delivery
+  </Step>
+  <Step title="Set Recipients">
+    Enter email addresses for report delivery
+  </Step>
+  <Step title="Select Format">
+    Choose PDF, CSV, or XLSX format
+  </Step>
+</Steps>
+
+---
+
+## Last Update Indicator
+
+<Frame caption="Last update timestamp shows data freshness">
+  ![Last Update](/images/control-panel/last-update.png)
+</Frame>
+
+The **clock icon** in the header displays when data was last refreshed. Dashboard data updates hourly.
+
+<Note>
+Real-time transaction data is available in the **Transactions Report** under Operations.
+</Note>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Monitor Approval Ratio Daily">
+    A sudden drop in approval ratio may indicate:
+    - Acquirer issues
+    - Fraud rule triggering
+    - Card network problems
+    
+    Investigate declines in the Transactions Report.
+  </Accordion>
+  
+  <Accordion title="Track Chargeback Ratios">
+    Keep chargeback ratios below card network thresholds:
+    - **Visa**: Below 0.9% (monitoring at 0.65%)
+    - **Mastercard**: Below 1.0% (monitoring at 0.5%)
+    
+    High ratios may result in penalties or account restrictions.
+  </Accordion>
+  
+  <Accordion title="Use Comparison Graphs">
+    Compare current performance to previous periods to identify:
+    - Seasonal trends
+    - Marketing campaign impact
+    - Unusual patterns requiring investigation
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Transactions Report" icon="receipt" href="/control-panel/operations/transactions-report">
+    Drill into transaction details
+  </Card>
+  <Card title="Risk Dashboard" icon="shield" href="/control-panel/risk/overview">
+    Monitor fraud and chargebacks
+  </Card>
+</CardGroup>

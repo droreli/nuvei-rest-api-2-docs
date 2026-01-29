@@ -1,0 +1,363 @@
+---
+title: 'Chargebacks Report'
+description: 'View, analyze, and dispute chargebacks from the Control Panel'
+---
+
+# Chargebacks Report
+
+The Chargebacks Report displays all chargebacks filed against your transactions. Use this report to analyze dispute patterns, submit evidence, and track dispute outcomes.
+
+<Frame caption="Chargebacks Report with filters and actions">
+  ![Chargebacks Report](/images/control-panel/chargebacks-report.png)
+</Frame>
+
+---
+
+## Accessing the Report
+
+Navigate to **Risk > Chargebacks** in the Control Panel.
+
+<Note>
+The Chargebacks Report updates daily and displays data for the past year.
+</Note>
+
+---
+
+## Generating a Report
+
+<Steps>
+  <Step title="Select Date Range">
+    Choose the chargeback date range
+  </Step>
+  <Step title="Apply Filters">
+    Add filters to narrow results (optional)
+  </Step>
+  <Step title="Run Report">
+    Click **Run Report** to generate results
+  </Step>
+</Steps>
+
+---
+
+## Chargeback Types
+
+| Type | Description |
+|------|-------------|
+| **Retrieval** | Information request (not yet a chargeback) |
+| **Chargeback** | Formal dispute initiated by cardholder |
+| **Pre-Arbitration** | Second chargeback after representment |
+| **Arbitration** | Card network arbitration |
+
+---
+
+## Chargeback Status
+
+| Status | Description |
+|--------|-------------|
+| **Regular** | Standard chargeback |
+| **Cancelled** | Chargeback reversed/cancelled |
+| **Collaboration** | Mastercard retrieval request |
+| **Soft_CB** | Soft chargeback (inquiry stage) |
+
+---
+
+## Report Parameters
+
+### Transaction Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Currency | Transaction currency |
+| Transaction ID | Original transaction identifier |
+| ARN | Acquirer Reference Number |
+| Client Unique ID | Your transaction reference |
+| Transaction Date | Original transaction date |
+| Chargeback Date | Date chargeback was filed |
+| Update Date | Last status update |
+| Dispute Due Date | Deadline for dispute response |
+| Client Name | Merchant account |
+| Multi-client | Parent merchant |
+| Site Name | Merchant site |
+| Affiliate | Affiliate identifier |
+| Transaction Type | Sale, Refund, etc. |
+| Chargeback Type | Retrieval, Chargeback, Pre-Arb |
+| Status | Current chargeback status |
+| Chargeback Category | Customer Service, Fraud, Processing Error |
+| Chargeback Reason Code | Network-specific reason code |
+| Transaction Amount | Original transaction amount |
+| Chargeback Amount | Disputed amount |
+
+### 3DS Fields
+
+| Parameter | Description |
+|-----------|-------------|
+| Is 3D | Whether 3DS was used |
+| 3D Version | Protocol version (1.0, 2.1, 2.2) |
+| Authentication Flow | Frictionless or Challenge |
+| Is Liability Shift | Fraud liability on issuer |
+
+### Payment Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| External Token Provider | Apple Pay, Google Pay, etc. |
+| Sub-method | Payment sub-method |
+| Payment Method | cc_card, apmgw_*, etc. |
+| PAN | Masked card number |
+| Name on Card | Cardholder name |
+| BIN | First 6-8 digits |
+| Issuer Bank | Card issuing bank |
+| Card Type | Credit, Debit, Prepaid |
+| Issuing Country | Card country of issue |
+
+### Consumer Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Email Address | Customer email |
+| User ID | Customer identifier |
+| Billing Country | Billing address country |
+| IP Country | IP geolocation country |
+| Billing State | Billing state/province |
+| First Name | Customer first name |
+| Last Name | Customer last name |
+| User Token ID | Nuvei user token |
+
+---
+
+## Chargeback Reason Codes
+
+### Visa Reason Codes
+
+| Code | Category | Description |
+|------|----------|-------------|
+| 10.1 | Fraud | EMV Liability Shift Counterfeit |
+| 10.2 | Fraud | EMV Liability Shift Non-Counterfeit |
+| 10.3 | Fraud | Other Fraud - Card-Present |
+| 10.4 | Fraud | Other Fraud - Card-Not-Present |
+| 10.5 | Fraud | Visa Fraud Monitoring Program |
+| 11.1 | Authorization | Card Recovery Bulletin |
+| 11.2 | Authorization | Declined Authorization |
+| 11.3 | Authorization | No Authorization |
+| 12.1 | Processing Error | Late Presentment |
+| 12.2 | Processing Error | Incorrect Transaction Code |
+| 12.3 | Processing Error | Incorrect Currency |
+| 12.4 | Processing Error | Incorrect Account Number |
+| 12.5 | Processing Error | Incorrect Amount |
+| 12.6.1 | Processing Error | Duplicate Processing |
+| 12.6.2 | Processing Error | Paid by Other Means |
+| 12.7 | Processing Error | Invalid Data |
+| 13.1 | Consumer Dispute | Merchandise/Services Not Received |
+| 13.2 | Consumer Dispute | Cancelled Recurring |
+| 13.3 | Consumer Dispute | Not as Described |
+| 13.4 | Consumer Dispute | Counterfeit Merchandise |
+| 13.5 | Consumer Dispute | Misrepresentation |
+| 13.6 | Consumer Dispute | Credit Not Processed |
+| 13.7 | Consumer Dispute | Cancelled Merchandise/Services |
+| 13.8 | Consumer Dispute | Original Credit Transaction Not Accepted |
+| 13.9 | Consumer Dispute | Non-Receipt of Cash or Load |
+
+### Mastercard Reason Codes
+
+| Code | Category | Description |
+|------|----------|-------------|
+| 4807 | Authorization | Warning Bulletin File |
+| 4808 | Authorization | Authorization-Related Chargeback |
+| 4812 | Authorization | Account Number Not on File |
+| 4831 | Processing Error | Transaction Amount Differs |
+| 4834 | Processing Error | Duplicate Processing |
+| 4837 | Fraud | No Cardholder Authorization |
+| 4840 | Fraud | Fraudulent Processing of Transaction |
+| 4841 | Consumer Dispute | Cancelled Recurring Transaction |
+| 4842 | Processing Error | Late Presentment |
+| 4846 | Processing Error | Correct Transaction Currency Code Not Provided |
+| 4849 | Consumer Dispute | Questionable Merchant Activity |
+| 4853 | Consumer Dispute | Cardholder Dispute |
+| 4854 | Consumer Dispute | Cardholder Dispute - Not Elsewhere Classified |
+| 4855 | Consumer Dispute | Goods or Services Not Provided |
+| 4859 | Consumer Dispute | Addendum, No-show, or ATM Dispute |
+| 4860 | Consumer Dispute | Credit Not Processed |
+| 4863 | Fraud | Cardholder Does Not Recognize |
+| 4870 | Digital Goods | Chip Liability Shift |
+| 4871 | Digital Goods | Chip/PIN Liability Shift |
+
+---
+
+## Available Actions
+
+### Contact Support
+
+Request assistance from Nuvei support for complex cases.
+
+### Refund
+
+For **Retrieval** type chargebacks, you can issue a refund to prevent escalation:
+
+<Steps>
+  <Step title="Select Retrieval">
+    Find the retrieval request
+  </Step>
+  <Step title="Click Refund">
+    Select Refund action
+  </Step>
+  <Step title="Confirm Amount">
+    Verify refund amount
+  </Step>
+  <Step title="Process">
+    Submit the refund
+  </Step>
+</Steps>
+
+<Tip>
+Refunding a retrieval request often prevents it from becoming a full chargeback.
+</Tip>
+
+### Dispute Request
+
+Submit evidence to dispute a chargeback:
+
+<Steps>
+  <Step title="Select Chargebacks">
+    Check boxes next to chargebacks to dispute (up to 20)
+  </Step>
+  <Step title="Click Dispute Request">
+    Click the Dispute Request button
+  </Step>
+  <Step title="Upload Documents">
+    Upload supporting evidence (max 10 files)
+  </Step>
+  <Step title="Add Notes">
+    Provide dispute explanation
+  </Step>
+  <Step title="Submit">
+    Submit the dispute
+  </Step>
+</Steps>
+
+#### Document Requirements
+
+| Format | Max Size | Max Files |
+|--------|----------|-----------|
+| PDF | 4 MB | 10 |
+| DOC/DOCX | 4 MB | 10 |
+| TXT | 4 MB | 10 |
+
+---
+
+## Compelling Evidence
+
+Submit appropriate evidence based on chargeback reason:
+
+### Fraud Chargebacks (10.x, 4837, 4863)
+
+| Evidence | Description |
+|----------|-------------|
+| 3DS authentication proof | ECI, CAVV, dsTransID |
+| Device fingerprint | Matching device from previous purchases |
+| Delivery confirmation | Signed delivery receipt |
+| Customer communication | Emails confirming order |
+| IP address match | Same IP as previous legitimate orders |
+
+### Service/Merchandise Not Received (13.1, 4855)
+
+| Evidence | Description |
+|----------|-------------|
+| Delivery confirmation | Tracking number, signature |
+| Proof of delivery | Photo, GPS coordinates |
+| Service completion | Screenshots, logs |
+| Customer acknowledgment | Confirmation email |
+
+### Cancelled Recurring (13.2, 4841)
+
+| Evidence | Description |
+|----------|-------------|
+| Terms of service | Signed/agreed terms |
+| Cancellation policy | Clear policy shown at signup |
+| Communication | No cancellation request received |
+| Billing notifications | Advance billing notices sent |
+
+### Credit Not Processed (13.6, 4860)
+
+| Evidence | Description |
+|----------|-------------|
+| Refund confirmation | Proof refund was issued |
+| Transaction ID | Refund transaction reference |
+| Bank statement | Evidence of credit |
+
+---
+
+## Sample Report Download
+
+<Card title="Download Sample Chargeback Report" icon="file-excel" href="https://docs.nuvei.com/wp-content/uploads/2023/01/sample_chargeback_report.xlsx">
+  Download a sample Excel report
+</Card>
+
+<Card title="Download Report Format" icon="table-columns" href="https://docs.nuvei.com/wp-content/uploads/2023/06/Chargeback-report-format.xlsx">
+  Download column format specification
+</Card>
+
+---
+
+## Chargeback Prevention
+
+### Before the Chargeback
+
+| Action | Description |
+|--------|-------------|
+| Clear billing descriptor | Customer recognizes charge |
+| Confirmation emails | Order and shipping confirmations |
+| 3DS authentication | Liability shift for fraud |
+| Good customer service | Resolve issues before disputes |
+
+### Use Pre-Chargeback Tools
+
+| Tool | Benefit |
+|------|---------|
+| Ethoca Alerts | Early warning, auto-refund |
+| Visa VRDR | Auto-accept eligible disputes |
+| Verifi CDRN | Consumer dispute resolution |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Respond within deadlines">
+    - **Visa**: 30 days from chargeback date
+    - **Mastercard**: 45 days from chargeback date
+    - Missing deadlines = automatic loss
+  </Accordion>
+  
+  <Accordion title="Keep detailed records">
+    Maintain for at least 18 months:
+    - Transaction details
+    - Customer communications
+    - Delivery confirmations
+    - 3DS authentication data
+  </Accordion>
+  
+  <Accordion title="Analyze patterns">
+    Review chargebacks for patterns:
+    - Specific products
+    - Geographic regions
+    - Customer segments
+    - Time periods
+  </Accordion>
+  
+  <Accordion title="Use 3DS consistently">
+    3DS provides liability shift for fraud chargebacks when authentication is successful.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Client Rules" icon="shield" href="/control-panel/risk/client-rules">
+    Configure fraud prevention
+  </Card>
+  <Card title="Case Management" icon="briefcase" href="/control-panel/risk/case-management">
+    Unified dispute console
+  </Card>
+</CardGroup>

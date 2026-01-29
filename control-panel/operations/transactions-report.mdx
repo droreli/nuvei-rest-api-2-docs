@@ -1,0 +1,333 @@
+---
+title: 'Transactions Report'
+description: 'Search, view, and manage all transactions with detailed filtering and actions'
+---
+
+# Transactions Report
+
+The Transactions Report contains all transaction data including status, currency conversion, amounts, and customer details. Use this report to search transactions, issue refunds, void payments, and more.
+
+<Frame caption="Transactions Report with filters and action buttons">
+  ![Transactions Report](/images/control-panel/transactions-report.png)
+</Frame>
+
+---
+
+## Accessing the Report
+
+Navigate to **Operations > Transactions** in the Control Panel menu.
+
+---
+
+## Generating a Report
+
+<Steps>
+  <Step title="Set Date Range">
+    Select the date range using the dropdown or custom date picker
+  </Step>
+  <Step title="Configure Filters">
+    Add filters to narrow results (optional)
+  </Step>
+  <Step title="Run Report">
+    Click **Run Report** to generate results
+  </Step>
+</Steps>
+
+---
+
+## Linkage Column
+
+Each transaction row has two icons in the Linkage column:
+
+| Icon | Description |
+|------|-------------|
+| **Lifecycle** | View the complete transaction lifecycle (auth, capture, refund, etc.) |
+| **Details** | Open transaction details summary in a side panel |
+
+---
+
+## Available Actions
+
+Right-click on a transaction or use the **Actions** button to access:
+
+### Refund
+
+Issue a refund for settled transactions.
+
+| Field | Description |
+|-------|-------------|
+| Amount | Refund amount (up to original transaction amount) |
+| Reason | Optional reason for the refund |
+
+<Note>
+Refunds can only be issued **after settlement** (typically 24+ hours after the transaction).
+</Note>
+
+### Instant Refund
+
+Fast refund using Mastercard Send or Visa Direct.
+
+| Feature | Description |
+|---------|-------------|
+| Speed | Funds delivered within **30 minutes** |
+| Networks | Mastercard Send, Visa Direct |
+| Availability | Requires enablement by Nuvei |
+
+### Payout
+
+Credit the customer **beyond** the original transaction amount.
+
+<Warning>
+Payouts require specific configuration and compliance approval.
+</Warning>
+
+### Void
+
+Cancel a transaction **before settlement** (within 24 hours).
+
+| Field | Description |
+|-------|-------------|
+| Reason | Optional reason for voiding |
+
+<Tip>
+Use void instead of refund when possible to avoid processing fees.
+</Tip>
+
+### Settle
+
+Capture an authorized transaction (up to 7 days after authorization).
+
+| Field | Description |
+|-------|-------------|
+| Amount | Capture amount (up to authorized amount) |
+
+### Void Credit
+
+Cancel a credit/refund before funds are returned to the customer.
+
+### Fast Payout
+
+Instant payout using Visa Direct or Mastercard MoneySend.
+
+| Feature | Description |
+|---------|-------------|
+| Speed | Funds delivered within **30 minutes** |
+| Use Case | Instant winnings, rapid refunds |
+
+### Proof of Payment
+
+Generate a PDF proof of payment (available for PIX APM transactions).
+
+---
+
+## Bulk Actions
+
+Perform actions on multiple transactions simultaneously:
+
+<Steps>
+  <Step title="Select Transactions">
+    Check the boxes next to transactions you want to process
+  </Step>
+  <Step title="Choose Action">
+    Select the bulk action from the dropdown
+  </Step>
+  <Step title="Confirm">
+    Review and confirm the bulk operation
+  </Step>
+</Steps>
+
+<Note>
+Bulk actions are limited to **20 transactions** per operation.
+</Note>
+
+---
+
+## Report Parameters
+
+### Transaction Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Date | Transaction date and time |
+| Transaction ID | Nuvei's unique transaction identifier |
+| Related Transaction ID | ID of related transactions (refund to original, etc.) |
+| Transaction Type | Sale, Auth, Settle, Credit, Refund, Void, Payout |
+| Authorization Type | Final, Pre-Auth |
+| Currency | Transaction currency |
+| Amount | Transaction amount |
+| Transaction Result | APPROVED, DECLINED, ERROR, PENDING |
+| Reason Code | Decline/error reason code |
+| Filter Reason | Fraud filter that triggered (if applicable) |
+| Processing Channel | E-commerce, MOTO, POS |
+| Acquiring Bank | Bank that processed the transaction |
+| Multi-client | Parent merchant (if applicable) |
+| Client Name | Merchant account name |
+| Site Name | Merchant site name |
+| APM Reference | Alternative Payment Method reference |
+| Client Request ID | Your unique transaction identifier |
+| Client Unique ID | Your customer identifier |
+| Merchant Advice Code | Issuer advice for recurring |
+| Authorization Code | Issuer authorization code |
+| ARN | Acquirer Reference Number |
+| Bin Country | Card issuing country |
+
+### Payment Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Payment Method | cc_card, apmgw_*, ppp_* |
+| Payment Option | Card brand or APM name |
+| Payment Sub-method | Specific APM variant |
+| PAN | Masked card number (e.g., 4***1234) |
+| PAN Type | Credit, Debit, Prepaid |
+| Issuing Country | Card country of issue |
+| BIN | First 6-8 digits of card |
+| Card Type | Credit, Debit, Corporate |
+| Expiration Date | Card expiry (MM/YY) |
+| Issuer Bank | Card issuing bank name |
+| Name on Card | Cardholder name |
+| Card Brand | VISA, MASTERCARD, AMEX, etc. |
+| External Token Provider | Apple Pay, Google Pay, etc. |
+
+### Consumer Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Billing Country | Customer billing country |
+| IP Country | Country based on IP address |
+| Email Address | Customer email |
+| User ID | Your customer identifier |
+| Billing First Name | Customer first name |
+| Billing Last Name | Customer last name |
+| Billing Address | Street address |
+| Billing City | City |
+| Billing State | State/Province |
+| Billing Zip | Postal code |
+| Billing Phone | Phone number |
+| IP Address | Customer IP address |
+| Device Type | Mobile, Desktop, Tablet |
+| Device Name | Device model |
+| Device OS | Operating system |
+| User Token ID | Nuvei user token |
+
+### Authentication Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| Transaction Highlights | Key flags (3DS, Recurring, etc.) |
+| AVS Result | Address Verification result |
+| CVV2 Result | CVV verification result |
+| Is 3D | Whether 3DS was used |
+| ECI | Electronic Commerce Indicator |
+| Authentication Status | 3DS authentication result |
+| Enrollment Status | Card enrollment in 3DS |
+| PSD2 Scope | In/out of PSD2 scope |
+| Is SCA Mandated | Strong Customer Auth required |
+| 3D Version | 3DS protocol version (1.0, 2.1, 2.2) |
+| Authentication Flow | Frictionless, Challenge |
+| Is Liability Shift | Fraud liability transferred to issuer |
+| Is External MPI | External 3DS provider used |
+| Acquirer Decision | Acquirer 3DS decision |
+| Exemption Type | TRA, LVE, etc. |
+
+### Risk Tab
+
+| Parameter | Description |
+|-----------|-------------|
+| External Fraud Score | Third-party fraud score |
+| Email Seniority | Email address age |
+| IP State | IP geolocation state |
+| Email Domain | Email domain (gmail, etc.) |
+| Fraud Decision | Fraud system decision |
+| Fraud Rules | Triggered fraud rules |
+
+---
+
+## Sample Report Download
+
+<Card title="Download Sample Transaction Report" icon="file-excel" href="https://docs.nuvei.com/wp-content/uploads/2024/01/sample-transaction-report.xlsx">
+  Download a sample Excel report to understand the data format
+</Card>
+
+<Card title="Download Report Column Format" icon="table-columns" href="https://docs.nuvei.com/wp-content/uploads/2023/06/Transaction-report-format.xlsx">
+  Download the column format specification
+</Card>
+
+---
+
+## Exporting Reports
+
+| Format | Description |
+|--------|-------------|
+| **CSV** | Comma-separated values for data analysis |
+| **XLSX** | Excel format with formatting |
+| **PDF** | Visual report for sharing |
+
+### Export Limits
+
+| Report Type | Row Limit |
+|-------------|-----------|
+| On-screen | 10,000 rows |
+| CSV/XLSX export | 100,000 rows |
+
+<Tip>
+For larger datasets, narrow your date range or use additional filters.
+</Tip>
+
+---
+
+## Scheduling Reports
+
+Set up automated report delivery:
+
+| Setting | Options |
+|---------|---------|
+| Frequency | Daily, Weekly, Monthly |
+| Format | CSV, XLSX, PDF |
+| Recipients | Up to 10 email addresses |
+| Filters | Pre-configured filter set |
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Find a specific transaction">
+    1. Go to Operations > Transactions
+    2. Enter the **Transaction ID** or **Client Unique ID** in the filter
+    3. Click Run Report
+  </Accordion>
+  
+  <Accordion title="Issue a partial refund">
+    1. Find the transaction
+    2. Click Actions > Refund
+    3. Enter the partial amount
+    4. Confirm the refund
+  </Accordion>
+  
+  <Accordion title="Check why a transaction was declined">
+    1. Find the declined transaction
+    2. Check the **Reason Code** column
+    3. Review the **Authentication Tab** for 3DS issues
+    4. Check the **Risk Tab** for fraud rule triggers
+  </Accordion>
+  
+  <Accordion title="View transaction lifecycle">
+    1. Find the transaction
+    2. Click the **Lifecycle** icon in the Linkage column
+    3. View all related transactions (auth, settle, refund)
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Chargebacks Report" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    View and manage chargebacks
+  </Card>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    View settlement details
+  </Card>
+</CardGroup>

@@ -1,0 +1,390 @@
+---
+title: '3DS Testing'
+description: 'Complete guide to testing 3D Secure authentication flows'
+---
+
+# 3DS Testing Guide
+
+Test all 3D Secure 2.x scenarios in the sandbox environment.
+
+---
+
+## 3DS Overview
+
+3D Secure 2 (EMV 3DS) adds an authentication layer to card transactions:
+
+<CardGroup cols={3}>
+  <Card title="Frictionless" icon="bolt">
+    Authentication completed automatically without cardholder interaction
+  </Card>
+  <Card title="Challenge" icon="shield-halved">
+    Cardholder must complete additional verification
+  </Card>
+  <Card title="Error" icon="triangle-exclamation">
+    Authentication fails or cannot be completed
+  </Card>
+</CardGroup>
+
+---
+
+## Test Methods
+
+### Method 1: cardHolderName Patterns
+
+The easiest way to control 3DS behavior is through the `cardHolderName` field:
+
+```json
+{
+  "cardHolderName": "FL-BRW1",  // Forces frictionless flow
+  "cardNumber": "4000020951595032",
+  "cardExpMonth": "12",
+  "cardExpYear": "2028",
+  "CVV": "217"
+}
+```
+
+### Method 2: Amount-Based Testing
+
+Use specific amounts with designated test cards:
+
+| Flow | Amount | Test Cards |
+|------|--------|------------|
+| Frictionless | `83.1` | `4567491000001113`, `5545060700001113` |
+| Challenge | `115.2` | `4567491000002228`, `5545060700002228` |
+
+### Method 3: Specific Test Cards
+
+Certain cards always trigger specific flows:
+
+| Card Number | 3DS Flow |
+|-------------|----------|
+| `4000020951595032` | Configurable via cardHolderName |
+| `4000027891380961` | Includes threeDSMethodURL |
+
+---
+
+## Frictionless Flow Testing
+
+Frictionless authentication completes automatically without cardholder interaction.
+
+### cardHolderName Values
+
+| Value | Result | transactionStatus |
+|-------|--------|-------------------|
+| `FL-BRW1` | Fully authenticated | `APPROVED` |
+| `FL-BRW2` | Attempts (proof of authentication attempt) | `APPROVED` |
+| `FL-BRW3` | Not authenticated | `DECLINED` |
+| `FL BRWA` | Same as FL-BRW1 (with space) | `APPROVED` |
+| `FL-BRW1-EXMPT` | With exemption applied | `APPROVED` |
+
+### Example: Frictionless Approved
+
+<CodeGroup>
+```json Request
+{
+  "sessionToken": "{{sessionToken}}",
+  "merchantId": "{{merchantId}}",
+  "merchantSiteId": "{{merchantSiteId}}",
+  "timeStamp": "{{timestamp}}",
+  "checksum": "{{checksum}}",
+  "currency": "USD",
+  "amount": "100",
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4000020951595032",
+      "cardHolderName": "FL-BRW1",
+      "expirationMonth": "12",
+      "expirationYear": "2028",
+      "CVV": "217"
+    }
+  },
+  "deviceDetails": {
+    "ipAddress": "192.168.1.1"
+  },
+  "billingAddress": {
+    "email": "test@example.com",
+    "country": "US"
+  }
+}
+```
+
+```json Response
+{
+  "transactionStatus": "APPROVED",
+  "transactionId": "2110000000000123456",
+  "transactionType": "Sale",
+  "threeDResult": "Y",
+  "threeDReason": "Authenticated",
+  "liabilityShift": "true"
+}
+```
+</CodeGroup>
+
+---
+
+## Challenge Flow Testing
+
+Challenge flow requires cardholder interaction in a popup or redirect.
+
+### cardHolderName Values
+
+| Value | Result | transactionStatus |
+|-------|--------|-------------------|
+| `CL-BRW1` | Challenge completed successfully | `APPROVED` |
+| `CL-BRW2` | Challenge with attempts | `APPROVED` |
+| `CL-BRW3` | Challenge failed | `DECLINED` |
+| `CL BRWA` | Same as CL-BRW1 (with space) | `APPROVED` |
+
+### Completing the Challenge
+
+When using challenge test values, the 3DS popup appears:
+
+1. User sees the challenge screen
+2. In sandbox, click "Submit" to complete
+3. No OTP or password needed in test environment
+
+<Info>
+Challenge completion is automatic in sandbox - just submit the form.
+</Info>
+
+### Example: Challenge Approved
+
+<CodeGroup>
+```json Request
+{
+  "sessionToken": "{{sessionToken}}",
+  "merchantId": "{{merchantId}}",
+  "merchantSiteId": "{{merchantSiteId}}",
+  "timeStamp": "{{timestamp}}",
+  "checksum": "{{checksum}}",
+  "currency": "USD",
+  "amount": "100",
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4000020951595032",
+      "cardHolderName": "CL-BRW1",
+      "expirationMonth": "12",
+      "expirationYear": "2028",
+      "CVV": "217"
+    }
+  },
+  "deviceDetails": {
+    "ipAddress": "192.168.1.1"
+  },
+  "billingAddress": {
+    "email": "test@example.com",
+    "country": "US"
+  }
+}
+```
+
+```json Response (Initial)
+{
+  "transactionStatus": "REDIRECT",
+  "transactionId": "2110000000000123456",
+  "threeDFlow": "challenge",
+  "acsUrl": "https://3dsn.sandbox.nuvei.com/...",
+  "cReq": "eyJ0aHJlZURTU..."
+}
+```
+</CodeGroup>
+
+---
+
+## Error Flow Testing
+
+Test error scenarios to ensure proper error handling.
+
+### cardHolderName Values
+
+| Value | Result | Description |
+|-------|--------|-------------|
+| `ERR-BRW1` | Authentication error | 3DS fails during authentication |
+| `ERR-BRW2` | Challenge error | Error during challenge |
+| `ERR-BRW3` | Protocol error | 3DS protocol failure |
+
+### Example: Error Response
+
+```json
+{
+  "transactionStatus": "ERROR",
+  "transactionId": "2110000000000123456",
+  "threeDResult": "N",
+  "threeDReason": "Technical or other problem",
+  "errCode": "2209",
+  "reason": "3DS Authentication Failed"
+}
+```
+
+---
+
+## Mobile App Testing (SDK)
+
+For mobile SDK integration, use app-specific cardHolderName values:
+
+### Frictionless App
+
+| Value | Result |
+|-------|--------|
+| `FL-APP1` | Frictionless, fully authenticated |
+| `FL-APP2` | Frictionless, attempts |
+| `FL-APP3` | Frictionless, not authenticated |
+
+### Challenge App
+
+| Value | Result |
+|-------|--------|
+| `CL-APP1` | Challenge, fully authenticated |
+| `CL-APP2` | Challenge, attempts |
+| `CL-APP3` | Challenge, not authenticated |
+
+---
+
+## 3DS Response Parameters
+
+### Key Response Fields
+
+| Parameter | Description | Values |
+|-----------|-------------|--------|
+| `threeDResult` | Authentication result | `Y` (success), `N` (failed), `U` (unavailable), `A` (attempts) |
+| `threeDReason` | Detailed reason | Text description |
+| `threeDFlow` | Flow type | `frictionless`, `challenge` |
+| `liabilityShift` | Liability shifted to issuer | `true`, `false` |
+| `eci` | E-commerce indicator | `05`/`02` (Visa/MC full), `06`/`01` (attempts) |
+| `cavv` | Cardholder Authentication Verification Value | Base64 encoded |
+| `dsTransId` | Directory Server Transaction ID | UUID |
+
+### ECI Values Explained
+
+| ECI | Visa | Mastercard | Meaning |
+|-----|------|------------|---------|
+| `05` | ✓ | | Fully authenticated |
+| `02` | | ✓ | Fully authenticated |
+| `06` | ✓ | | Attempts or non-3DS |
+| `01` | | ✓ | Attempts or non-3DS |
+| `07` | ✓ | | Non-3DS or failed |
+| `00` | | ✓ | Non-3DS or failed |
+
+---
+
+## Exemption Testing
+
+Test SCA exemptions with special cardHolderName values:
+
+### Exemption Patterns
+
+| cardHolderName | Exemption Type |
+|----------------|----------------|
+| `FL-BRW1-EXMPT` | Transaction Risk Analysis (TRA) |
+| `FL-BRW1-LOW` | Low Value (under €30) |
+| `FL-BRW1-MIT` | Merchant Initiated Transaction |
+| `FL-BRW1-CORP` | Corporate/B2B |
+
+### Exemption Request Example
+
+```json
+{
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4000020951595032",
+      "cardHolderName": "FL-BRW1-EXMPT"
+    },
+    "threeD": {
+      "externalMpi": {
+        "exemptionRequestReason": "TRA"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Testing Checklist
+
+<AccordionGroup>
+  <Accordion title="Frictionless Flow Checklist" icon="check">
+    - [ ] FL-BRW1: Fully authenticated → APPROVED
+    - [ ] FL-BRW2: Attempts → APPROVED
+    - [ ] FL-BRW3: Not authenticated → DECLINED
+    - [ ] Verify `liabilityShift: true` for FL-BRW1
+    - [ ] Verify proper ECI values
+  </Accordion>
+  
+  <Accordion title="Challenge Flow Checklist" icon="check">
+    - [ ] CL-BRW1: Challenge completed → APPROVED
+    - [ ] CL-BRW2: Challenge attempts → APPROVED
+    - [ ] CL-BRW3: Challenge failed → DECLINED
+    - [ ] Verify challenge popup displays correctly
+    - [ ] Test challenge on mobile browsers
+  </Accordion>
+  
+  <Accordion title="Error Handling Checklist" icon="check">
+    - [ ] ERR-BRW1: Proper error response
+    - [ ] ERR-BRW2: Challenge error handling
+    - [ ] ERR-BRW3: Protocol error handling
+    - [ ] UI gracefully handles errors
+    - [ ] Retry logic works correctly
+  </Accordion>
+  
+  <Accordion title="Mobile SDK Checklist" icon="check">
+    - [ ] FL-APP1: App frictionless
+    - [ ] CL-APP1: App challenge
+    - [ ] SDK properly handles native flow
+    - [ ] Activity/Fragment lifecycle correct
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Challenge not appearing" icon="question">
+    **Possible causes:**
+    - Using frictionless cardHolderName instead of CL-*
+    - Missing device/browser details
+    - Wrong card number
+    
+    **Solution:** Use CL-BRW1 cardHolderName and ensure deviceDetails are sent
+  </Accordion>
+  
+  <Accordion title="Always getting declined" icon="question">
+    **Possible causes:**
+    - Using *-BRW3 pattern (designed to fail)
+    - Card number is a decline test card
+    - Missing required 3DS parameters
+    
+    **Solution:** Use FL-BRW1 or CL-BRW1 for approved scenarios
+  </Accordion>
+  
+  <Accordion title="ECI showing 07/00" icon="question">
+    **Meaning:** 3DS not performed or failed
+    
+    **Possible causes:**
+    - Card not enrolled in 3DS
+    - Error during authentication
+    - 3DS timeout
+    
+    **Solution:** Check threeDReason for details
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Test Cards" icon="credit-card" href="/testing/test-cards">
+    Complete test card database
+  </Card>
+  <Card title="APM Testing" icon="building-columns" href="/testing/apm-testing">
+    Test alternative payment methods
+  </Card>
+  <Card title="Web SDK" icon="code" href="/integrations/methods/web-sdk">
+    Web SDK integration guide
+  </Card>
+  <Card title="Go Live" icon="rocket" href="/testing/overview#go-live-checklist">
+    Production readiness checklist
+  </Card>
+</CardGroup>

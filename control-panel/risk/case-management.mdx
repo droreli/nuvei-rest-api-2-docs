@@ -1,0 +1,238 @@
+---
+title: 'Case Management'
+description: 'Unified console for managing disputes and chargebacks'
+---
+
+# Case Management
+
+Case Management provides a unified console for handling all dispute-related operations, including chargebacks, pre-chargebacks, and fraud investigations.
+
+---
+
+## Accessing Case Management
+
+Navigate to **Risk > Case Management** in the Control Panel.
+
+---
+
+## Case Types
+
+| Type | Description |
+|------|-------------|
+| **Pre-Chargeback** | Early warning fraud alerts |
+| **Chargeback** | Formal disputes |
+| **Pre-Arbitration** | Second-stage disputes |
+| **Arbitration** | Network arbitration |
+| **Fraud Investigation** | Internal fraud cases |
+
+---
+
+## Case Dashboard
+
+### Overview Metrics
+
+| Metric | Description |
+|--------|-------------|
+| Open Cases | Currently active cases |
+| Due Today | Cases requiring action today |
+| Overdue | Cases past deadline |
+| Resolved This Month | Monthly resolution count |
+| Win Rate | Percentage of won disputes |
+
+### Case Queue
+
+| Column | Description |
+|--------|-------------|
+| Case ID | Unique case identifier |
+| Type | Case type |
+| Transaction ID | Related transaction |
+| Amount | Disputed amount |
+| Due Date | Response deadline |
+| Assigned To | Team member assigned |
+| Status | Case status |
+| Priority | High, Medium, Low |
+
+---
+
+## Case Workflow
+
+<Steps>
+  <Step title="Case Created">
+    Case enters queue (auto or manual)
+  </Step>
+  <Step title="Assignment">
+    Assign to team member
+  </Step>
+  <Step title="Investigation">
+    Gather evidence and information
+  </Step>
+  <Step title="Decision">
+    Accept, dispute, or escalate
+  </Step>
+  <Step title="Response">
+    Submit response with evidence
+  </Step>
+  <Step title="Resolution">
+    Track outcome
+  </Step>
+</Steps>
+
+---
+
+## Managing Cases
+
+### Assign Case
+
+<Steps>
+  <Step title="Select Case">
+    Click on case to open
+  </Step>
+  <Step title="Click Assign">
+    Click Assign button
+  </Step>
+  <Step title="Select User">
+    Choose team member
+  </Step>
+  <Step title="Add Notes">
+    Optional assignment notes
+  </Step>
+</Steps>
+
+### Add Evidence
+
+<Steps>
+  <Step title="Open Case">
+    Select case from queue
+  </Step>
+  <Step title="Go to Evidence Tab">
+    Click Evidence tab
+  </Step>
+  <Step title="Upload Files">
+    Add supporting documents
+  </Step>
+  <Step title="Add Notes">
+    Describe each piece of evidence
+  </Step>
+</Steps>
+
+### Submit Response
+
+<Steps>
+  <Step title="Review Evidence">
+    Verify all evidence is attached
+  </Step>
+  <Step title="Select Action">
+    Accept, Dispute, or Partial
+  </Step>
+  <Step title="Add Response Notes">
+    Explain your position
+  </Step>
+  <Step title="Submit">
+    Submit response to network
+  </Step>
+</Steps>
+
+---
+
+## Case Status
+
+| Status | Description |
+|--------|-------------|
+| **New** | Just created |
+| **Assigned** | Assigned to team member |
+| **In Progress** | Under investigation |
+| **Pending Response** | Awaiting response submission |
+| **Response Submitted** | Submitted to network |
+| **Resolved - Won** | Ruled in merchant favor |
+| **Resolved - Lost** | Ruled against merchant |
+| **Escalated** | Moved to next stage |
+| **Closed** | No further action |
+
+---
+
+## Case Priority
+
+| Priority | Criteria | SLA |
+|----------|----------|-----|
+| **High** | Large amount, deadline soon | Same day |
+| **Medium** | Standard case | 2 business days |
+| **Low** | Small amount, time available | 5 business days |
+
+---
+
+## Automation Rules
+
+Configure automatic case handling:
+
+### Auto-Accept Rules
+
+| Rule | Description |
+|------|-------------|
+| Amount threshold | Auto-accept under amount |
+| Reason code | Auto-accept specific codes |
+| Network | Auto-accept by network |
+
+### Auto-Assignment Rules
+
+| Rule | Description |
+|------|-------------|
+| Round robin | Distribute evenly |
+| By expertise | Route by case type |
+| By region | Route by geography |
+
+---
+
+## Reporting
+
+### Case Analytics
+
+| Report | Description |
+|--------|-------------|
+| Volume by Type | Case count by type |
+| Aging Report | Cases by age bracket |
+| Resolution Time | Average time to resolve |
+| Win Rate by Type | Success rate by category |
+| Team Performance | Metrics by team member |
+
+### Export Options
+
+| Format | Use Case |
+|--------|----------|
+| CSV | Data analysis |
+| PDF | Management reports |
+| Scheduled | Automated delivery |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Prioritize by deadline">
+    Always process cases nearing deadline first to avoid automatic losses.
+  </Accordion>
+  
+  <Accordion title="Use templates">
+    Create response templates for common scenarios to speed up processing.
+  </Accordion>
+  
+  <Accordion title="Track team performance">
+    Monitor individual metrics to identify training needs and optimize workflow.
+  </Accordion>
+  
+  <Accordion title="Review automation rules">
+    Regularly review auto-accept rules to balance efficiency and win rate.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Chargebacks" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    Chargeback details
+  </Card>
+  <Card title="Disputes" icon="gavel" href="/control-panel/risk/disputes">
+    Real-time disputes
+  </Card>
+</CardGroup>

@@ -1,0 +1,241 @@
+---
+title: 'Testing Overview'
+description: 'Guide to testing your Nuvei integration in the sandbox environment'
+---
+
+# Testing Overview
+
+Test your Nuvei integration thoroughly in the sandbox environment before going live.
+
+---
+
+## Test Environments
+
+| Environment | Purpose | URL |
+|-------------|---------|-----|
+| **Integration (Sandbox)** | Testing and development | `ppp-test.nuvei.com` |
+| **Production** | Live transactions | `secure.nuvei.com` |
+
+<Warning>
+Never use production credentials in the integration environment, and never use test credentials in production.
+</Warning>
+
+---
+
+## Sandbox Features
+
+| Feature | Description |
+|---------|-------------|
+| **Test Cards** | Simulate various card scenarios |
+| **Test APMs** | Test alternative payment methods |
+| **3DS Simulation** | Test all 3DS flows |
+| **No Real Transactions** | No actual funds moved |
+| **Full API Access** | All APIs available |
+| **Control Panel** | Full reporting and configuration |
+
+---
+
+## Getting Sandbox Credentials
+
+<Steps>
+  <Step title="Contact Nuvei">
+    Request sandbox account from your account manager
+  </Step>
+  <Step title="Receive Credentials">
+    You'll receive:
+    - Merchant ID
+    - Merchant Site ID
+    - Secret Key
+  </Step>
+  <Step title="Access Control Panel">
+    Log in at `ppp-test.nuvei.com`
+  </Step>
+</Steps>
+
+---
+
+## What to Test
+
+### Basic Payment Flow
+
+| Test | Description |
+|------|-------------|
+| Successful payment | Card approved, customer redirected |
+| Declined payment | Card declined, error displayed |
+| Pending payment | APM returns pending status |
+| Cancelled payment | Customer cancels and returns |
+
+### 3D Secure
+
+| Test | Description |
+|------|-------------|
+| Frictionless | 3DS passes without challenge |
+| Challenge | 3DS presents challenge to customer |
+| Failed authentication | 3DS authentication fails |
+| Not enrolled | Card not enrolled in 3DS |
+
+### Post-Transaction Operations
+
+| Test | Description |
+|------|-------------|
+| Refund | Full and partial refunds |
+| Void | Cancel before settlement |
+| Settle | Capture authorized transaction |
+
+### Error Handling
+
+| Test | Description |
+|------|-------------|
+| Network timeout | Simulate connection issues |
+| Invalid data | Submit malformed requests |
+| Expired session | Use old session token |
+
+### Webhooks
+
+| Test | Description |
+|------|-------------|
+| DMN receipt | Verify DMN reaches your server |
+| Checksum validation | Verify checksum calculation |
+| Status handling | Handle all status types |
+| Retry handling | Simulate failed delivery |
+
+---
+
+## Testing Checklist
+
+### Pre-Integration
+
+- [ ] Sandbox credentials received
+- [ ] API documentation reviewed
+- [ ] Test environment configured
+- [ ] Webhook endpoint ready
+
+### Payment Testing
+
+- [ ] Successful card payment
+- [ ] Declined card payment
+- [ ] 3DS frictionless flow
+- [ ] 3DS challenge flow
+- [ ] APM payment (if applicable)
+- [ ] Saved card payment
+- [ ] Recurring payment setup
+
+### Operations Testing
+
+- [ ] Full refund
+- [ ] Partial refund
+- [ ] Void transaction
+- [ ] Settlement capture
+- [ ] Transaction status check
+
+### Webhook Testing
+
+- [ ] Payment DMN received
+- [ ] Checksum validated
+- [ ] All statuses handled
+- [ ] Idempotency implemented
+- [ ] Retry scenarios tested
+
+### Error Handling
+
+- [ ] Declined cards handled gracefully
+- [ ] Network errors handled
+- [ ] Invalid input validated
+- [ ] Session expiry handled
+
+### UI/UX Testing
+
+- [ ] Mobile responsiveness
+- [ ] Error messages clear
+- [ ] Loading states visible
+- [ ] Success confirmation displayed
+
+---
+
+## Testing Best Practices
+
+<AccordionGroup>
+  <Accordion title="Test all scenarios">
+    Don't just test the happy path:
+    - Test declines with various reason codes
+    - Test 3DS failures
+    - Test network interruptions
+    - Test edge cases (max amounts, special characters)
+  </Accordion>
+  
+  <Accordion title="Use realistic test data">
+    Use test data that mirrors production:
+    - Realistic amounts
+    - Valid address formats
+    - Production-like customer data
+  </Accordion>
+  
+  <Accordion title="Test webhooks thoroughly">
+    Webhooks are critical for production:
+    - Verify all status types
+    - Test idempotency
+    - Simulate retries
+    - Validate checksums
+  </Accordion>
+  
+  <Accordion title="Document test cases">
+    Maintain a test case library:
+    - Reproducible scenarios
+    - Expected results
+    - Pass/fail criteria
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Going Live Checklist
+
+Before switching to production:
+
+### Technical Readiness
+
+- [ ] All test scenarios passing
+- [ ] Production credentials obtained
+- [ ] Production URLs configured
+- [ ] SSL certificates valid
+- [ ] Webhook URL accessible
+
+### Compliance
+
+- [ ] PCI compliance verified
+- [ ] Privacy policy updated
+- [ ] Terms of service updated
+- [ ] Required disclosures present
+
+### Monitoring
+
+- [ ] Error alerting configured
+- [ ] Transaction monitoring set up
+- [ ] Webhook failure alerts
+- [ ] Logging implemented
+
+### Operations
+
+- [ ] Support process defined
+- [ ] Refund process documented
+- [ ] Chargeback handling planned
+- [ ] Team trained
+
+---
+
+## Test Resources
+
+<CardGroup cols={2}>
+  <Card title="Test Cards" icon="credit-card" href="/testing/test-cards">
+    Full test card database
+  </Card>
+  <Card title="3DS Testing" icon="shield" href="/testing/3ds-testing">
+    3D Secure test scenarios
+  </Card>
+  <Card title="APM Testing" icon="building-columns" href="/testing/apm-testing">
+    APM test credentials
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/integrations/features/webhooks">
+    Webhook testing guide
+  </Card>
+</CardGroup>

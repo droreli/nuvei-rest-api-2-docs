@@ -1,0 +1,281 @@
+---
+title: 'Paylink'
+description: 'Create payment links and QR codes for Virtual POS and remote payments'
+---
+
+# Paylink (Virtual POS)
+
+Paylink allows you to create payment links and QR codes to collect payments without a website integration. Perfect for phone orders, email invoices, and in-person transactions.
+
+---
+
+## Accessing Paylink
+
+Navigate to **Operations > Paylink** in the Control Panel.
+
+---
+
+## What is Paylink?
+
+Paylink provides:
+
+| Feature | Description |
+|---------|-------------|
+| **Payment Links** | Shareable URLs for collecting payments |
+| **QR Codes** | Scannable codes that open payment pages |
+| **Virtual POS** | Process payments over phone or in-person |
+| **Email Invoices** | Send payment requests via email |
+
+---
+
+## Creating a Paylink
+
+<Steps>
+  <Step title="Click Create Paylink">
+    Click the **Create Paylink** button
+  </Step>
+  <Step title="Enter Amount">
+    Specify the payment amount and currency
+  </Step>
+  <Step title="Add Description">
+    Enter a description (shown to customer)
+  </Step>
+  <Step title="Configure Options">
+    Set expiration, payment methods, etc.
+  </Step>
+  <Step title="Generate">
+    Click Generate to create the link
+  </Step>
+</Steps>
+
+---
+
+## Paylink Options
+
+### Basic Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Amount** | Payment amount (required) |
+| **Currency** | Transaction currency |
+| **Description** | Order description shown to customer |
+| **Reference** | Your internal reference/order ID |
+
+### Expiration Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Expiration Date** | When the link becomes invalid |
+| **Single Use** | Link works only once |
+| **Multi-Use** | Link can be used multiple times |
+
+### Payment Options
+
+| Setting | Description |
+|---------|-------------|
+| **Payment Methods** | Which payment methods to show |
+| **Save Card Option** | Allow customer to save card |
+| **Recurring Setup** | Enable subscription setup |
+
+### Customer Pre-fill
+
+| Setting | Description |
+|---------|-------------|
+| **Email** | Pre-fill customer email |
+| **Name** | Pre-fill customer name |
+| **Phone** | Pre-fill phone number |
+| **Address** | Pre-fill billing address |
+
+---
+
+## Sharing Paylinks
+
+### Payment Link
+
+Copy and share the payment URL:
+
+```
+https://secure.safecharge.com/ppp/purchase.do?merchant_id=xxx&merchant_site_id=xxx&payment_token=xxx
+```
+
+### QR Code
+
+Download or display the QR code:
+
+| Format | Use Case |
+|--------|----------|
+| **PNG** | Digital display, email |
+| **SVG** | Print materials |
+| **PDF** | Invoice attachment |
+
+### Email
+
+Send directly from Control Panel:
+
+<Steps>
+  <Step title="Enter Recipient Email">
+    Type the customer's email address
+  </Step>
+  <Step title="Customize Message">
+    Add a personal message (optional)
+  </Step>
+  <Step title="Send">
+    Click Send to deliver the payment request
+  </Step>
+</Steps>
+
+---
+
+## Virtual POS Mode
+
+For phone orders and in-person transactions:
+
+<Steps>
+  <Step title="Open Virtual POS">
+    Click **Virtual POS** in the Paylink menu
+  </Step>
+  <Step title="Enter Transaction Details">
+    Amount, currency, customer info
+  </Step>
+  <Step title="Collect Card Details">
+    Enter card number, expiry, CVV (over phone)
+  </Step>
+  <Step title="Process Payment">
+    Submit the transaction
+  </Step>
+</Steps>
+
+<Warning>
+Virtual POS requires PCI compliance. Only use on secure, compliant workstations.
+</Warning>
+
+---
+
+## Paylink Report
+
+View all created Paylinks:
+
+| Column | Description |
+|--------|-------------|
+| Paylink ID | Unique identifier |
+| Amount | Payment amount |
+| Currency | Transaction currency |
+| Status | Active, Used, Expired, Cancelled |
+| Created | Creation date/time |
+| Expires | Expiration date/time |
+| Uses | Number of times used (multi-use) |
+
+### Paylink Status
+
+| Status | Description |
+|--------|-------------|
+| **Active** | Available for payment |
+| **Used** | Payment completed (single-use) |
+| **Expired** | Past expiration date |
+| **Cancelled** | Manually cancelled |
+
+---
+
+## Managing Paylinks
+
+### View Details
+
+Click on a Paylink to see:
+- Full configuration
+- QR code
+- Usage history
+- Associated transactions
+
+### Cancel Paylink
+
+Deactivate an active Paylink:
+
+<Steps>
+  <Step title="Find Paylink">
+    Search by ID or filter by status
+  </Step>
+  <Step title="Click Cancel">
+    Select the Paylink and click Cancel
+  </Step>
+  <Step title="Confirm">
+    Confirm cancellation
+  </Step>
+</Steps>
+
+### Resend
+
+Resend an active Paylink:
+
+| Option | Description |
+|--------|-------------|
+| **Same Email** | Resend to original recipient |
+| **New Email** | Send to different address |
+| **Copy Link** | Copy URL to clipboard |
+
+---
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Phone Orders">
+    Create a Paylink while on the phone with customer:
+    1. Enter order amount
+    2. Add customer email
+    3. Send link via email or SMS
+    4. Customer completes payment online
+  </Accordion>
+  
+  <Accordion title="Email Invoices">
+    Send professional payment requests:
+    1. Create Paylink with order details
+    2. Email directly from Control Panel
+    3. Track when payment is completed
+  </Accordion>
+  
+  <Accordion title="In-Store Payments">
+    Display QR codes for payment:
+    1. Generate Paylink with QR code
+    2. Display on screen or print
+    3. Customer scans and pays via phone
+  </Accordion>
+  
+  <Accordion title="Recurring Setup">
+    Set up subscriptions via link:
+    1. Create Paylink with recurring enabled
+    2. Customer pays and saves card
+    3. Recurring billing begins automatically
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Set appropriate expiration">
+    - Urgent payments: 24-48 hours
+    - Standard invoices: 7-14 days
+    - Quotes/estimates: 30 days
+  </Accordion>
+  
+  <Accordion title="Use descriptive references">
+    Include order numbers or invoice IDs for easy reconciliation.
+  </Accordion>
+  
+  <Accordion title="Pre-fill customer data">
+    Reduce friction by pre-filling known customer information.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Transactions Report" icon="receipt" href="/control-panel/operations/transactions-report">
+    View completed payments
+  </Card>
+  <Card title="Payment Page" icon="credit-card" href="/integrations/payment-page/overview">
+    Full checkout integration
+  </Card>
+</CardGroup>

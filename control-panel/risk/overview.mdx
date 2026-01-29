@@ -1,0 +1,214 @@
+---
+title: 'Risk Overview'
+description: 'Monitor fraud, chargebacks, and risk metrics from the Control Panel'
+---
+
+# Risk Management
+
+The Risk section provides tools for monitoring fraud, managing chargebacks, configuring fraud rules, and analyzing risk metrics.
+
+<Frame caption="Risk Dashboard showing key risk metrics">
+  ![Risk Dashboard](/images/control-panel/risk-dashboard.png)
+</Frame>
+
+---
+
+## Risk Menu
+
+<CardGroup cols={2}>
+  <Card title="Risk Dashboard" icon="chart-line" href="/control-panel/risk/dashboard">
+    KPI monitoring and risk metrics
+  </Card>
+  <Card title="Chargebacks Report" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    View and dispute chargebacks
+  </Card>
+  <Card title="Client Rules" icon="shield" href="/control-panel/risk/client-rules">
+    Configure fraud screening rules
+  </Card>
+  <Card title="Disputes" icon="gavel" href="/control-panel/risk/disputes">
+    Manage Visa/Mastercard disputes
+  </Card>
+</CardGroup>
+
+---
+
+## Available Reports & Tools
+
+| Report/Tool | Description |
+|-------------|-------------|
+| **Risk Dashboard** | KPI monitoring across three dashboard categories |
+| **3D Secure KPI Report** | 3DS metrics by version, issuing bank, country |
+| **Pre-chargebacks – Events** | Transactions flagged before chargeback |
+| **Pre-chargebacks – Data Enrichment** | Additional info for Visa VROL |
+| **Chargebacks Report** | Daily updated chargeback details |
+| **Fraud Transactions Report** | Issuer-reported fraud transactions |
+| **Client Rules** | Fraud screening and exemption rules |
+| **Disputes Report** | Real-time Visa/Mastercard disputes |
+| **Risk Configurations** | Ethoca Alerts, AVS, CVV settings |
+| **Risk Alerts – Dashboard** | Risk operator performance metrics |
+| **Risk Alerts – User** | Search by email/User ID/credit card |
+| **Risk Alerts – Transaction** | Suspicious transaction search |
+| **Case Management** | Unified dispute operations console |
+
+---
+
+## Key Risk Metrics
+
+### Chargeback Ratio
+
+Monitor your chargeback ratio against card network thresholds:
+
+| Network | Monitoring | Excessive | Program |
+|---------|------------|-----------|---------|
+| **Visa** | 0.65% | 0.90% | VDMP |
+| **Mastercard** | 0.50% | 1.00% | ECP |
+
+<Warning>
+Exceeding thresholds can result in fines, higher processing fees, or account termination.
+</Warning>
+
+### Fraud Ratio
+
+Track fraud as a percentage of total transactions:
+
+| Metric | Calculation |
+|--------|-------------|
+| **Fraud Count Ratio** | Fraud transactions / Total transactions |
+| **Fraud Amount Ratio** | Fraud amount / Total amount |
+
+---
+
+## Risk Dashboard Categories
+
+### Overview Dashboard
+
+| KPI | Description |
+|-----|-------------|
+| Total Chargebacks | Count over selected period |
+| Chargeback Amount | Total disputed amount |
+| Chargeback Ratio | % of transactions disputed |
+| Fraud Ratio | % flagged as fraud |
+| Dispute Win Rate | % of disputes won |
+
+### Performance Dashboard
+
+| KPI | Description |
+|-----|-------------|
+| Response Time | Average dispute response time |
+| Resolution Time | Average time to resolution |
+| Open Cases | Current open dispute cases |
+| Aging Analysis | Cases by age bracket |
+
+### Alerts Dashboard
+
+| KPI | Description |
+|-----|-------------|
+| Active Alerts | Current risk alerts |
+| Alert Trend | Alert volume over time |
+| Alert Categories | Distribution by type |
+
+---
+
+## Pre-Chargeback Prevention
+
+### Ethoca Alerts
+
+Real-time fraud alerts from issuers:
+
+| Feature | Benefit |
+|---------|---------|
+| **Early Warning** | Know about fraud before chargeback |
+| **Auto-Refund** | Automatically refund confirmed fraud |
+| **Deflection** | Prevent chargeback filing |
+
+Configure in **Risk > Risk Configurations > Ethoca Alerts**.
+
+### Visa Rapid Dispute Resolution (VRDR)
+
+| Feature | Description |
+|---------|-------------|
+| **Auto-Accept** | Automatically accept eligible disputes |
+| **Threshold Rules** | Set auto-accept amount limits |
+| **Liability Management** | Reduce representment costs |
+
+---
+
+## AVS/CVV Configuration
+
+Configure Address Verification (AVS) and CVV validation:
+
+### AVS Settings
+
+| Code | Meaning | Recommended Action |
+|------|---------|-------------------|
+| A | Address match, ZIP no match | Review |
+| N | No match | Decline |
+| Y | Full match | Accept |
+| Z | ZIP match, address no match | Review |
+| U | Unavailable | Accept with caution |
+
+### CVV Settings
+
+| Code | Meaning | Recommended Action |
+|------|---------|-------------------|
+| M | Match | Accept |
+| N | No match | Decline |
+| P | Not processed | Review |
+| U | Unknown | Review |
+
+Configure in **Risk > Risk Configurations**.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Monitor chargeback ratio weekly">
+    Track your ratio trend to catch issues before exceeding thresholds:
+    - Set up alerts at 0.5% (warning)
+    - Investigate immediately above 0.7%
+    - Implement action plan above 0.9%
+  </Accordion>
+  
+  <Accordion title="Enable pre-chargeback tools">
+    Use Ethoca and VRDR to prevent chargebacks before they're filed.
+  </Accordion>
+  
+  <Accordion title="Respond to disputes promptly">
+    - Visa: 30 days to respond
+    - Mastercard: 45 days to respond
+    - Missing deadlines = automatic loss
+  </Accordion>
+  
+  <Accordion title="Maintain transaction records">
+    Keep for dispute evidence:
+    - Customer communications
+    - Delivery confirmation
+    - IP addresses and device info
+    - 3DS authentication results
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Role Requirements
+
+| Report/Tool | Required Role |
+|-------------|---------------|
+| All Risk Reports | Risk_Actions or Management |
+| Disputes/Chargebacks only | Risk Dispute |
+| Risk Configurations | Management |
+| Client Rules (edit) | Management |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Chargebacks Report" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    View and manage chargebacks
+  </Card>
+  <Card title="Client Rules" icon="shield" href="/control-panel/risk/client-rules">
+    Configure fraud rules
+  </Card>
+</CardGroup>

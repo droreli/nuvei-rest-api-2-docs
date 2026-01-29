@@ -1,0 +1,272 @@
+---
+title: 'My Integration Settings'
+description: 'Configure DMN URLs, response URLs, credentials, and payment page settings'
+---
+
+# My Integration Settings
+
+Configure your integration settings including DMN (webhook) URLs, redirect URLs, and payment page options.
+
+<Warning>
+This page requires **Management role** access. Configuration changes directly affect production transactions.
+</Warning>
+
+---
+
+## Accessing Integration Settings
+
+Navigate to **Settings > My Integration Settings** in the Control Panel.
+
+<Frame caption="Integration Settings page in Control Panel">
+  ![Integration Settings](/images/control-panel/integration-settings.png)
+</Frame>
+
+---
+
+## Your Credentials
+
+At the top of the page, you'll find your API credentials:
+
+| Credential | Description | Visibility |
+|------------|-------------|------------|
+| **Merchant ID** | Your unique merchant identifier | Always visible |
+| **Merchant Site ID** | Site-specific identifier | Always visible |
+| **Secret Key** | Used for checksum calculation | Admin rights required |
+
+<Warning>
+**Never share your Secret Key.** It's used to authenticate API requests and calculate checksums. Exposure compromises your account security.
+</Warning>
+
+### Viewing the Secret Key
+
+<Steps>
+  <Step title="Ensure Admin Access">
+    Only users with **Admin rights** can view the Secret Key
+  </Step>
+  <Step title="Click Show">
+    Click the "Show" button next to the Secret Key field
+  </Step>
+  <Step title="Authenticate">
+    Enter your password or 2FA code if prompted
+  </Step>
+</Steps>
+
+---
+
+## Response URL Settings
+
+Configure where customers are redirected after payment attempts:
+
+| Setting | Description | Example |
+|---------|-------------|---------|
+| **Success URL** | Redirect after successful transaction | `https://yoursite.com/success` |
+| **Pending URL** | Redirect for PENDING status (most APMs) | `https://yoursite.com/pending` |
+| **Back URL** | Redirect when user cancels payment | `https://yoursite.com/cart` |
+| **Failure URL** | Redirect on transaction failure | `https://yoursite.com/failure` |
+
+### Testing URLs
+
+Click the **Test URLs** button to validate that your URLs respond correctly:
+
+| Test Result | Meaning |
+|-------------|---------|
+| ✅ Success | URL responds with 200 OK |
+| ❌ Failed | URL unreachable or returns error |
+
+<Tip>
+Ensure all URLs are HTTPS and publicly accessible. Internal/localhost URLs will fail validation.
+</Tip>
+
+---
+
+## DMN Settings (Webhooks)
+
+Configure server-to-server notifications for transaction updates:
+
+| Setting | Description |
+|---------|-------------|
+| **Use DMN Selector** | On/Off switch to enable DMN notifications |
+| **DMN URL** | Your server URL to receive DMN notifications |
+
+### Setting Up DMN
+
+<Steps>
+  <Step title="Enable DMN">
+    Toggle "Use DMN Selector" to **On**
+  </Step>
+  <Step title="Enter URL">
+    Enter your DMN endpoint URL (HTTPS required)
+  </Step>
+  <Step title="Whitelist IPs">
+    Add Nuvei's IP ranges to your firewall (see [Webhooks documentation](/integrations/features/webhooks))
+  </Step>
+  <Step title="Save">
+    Click Save to apply changes
+  </Step>
+</Steps>
+
+### Pre-deposit DMN
+
+For pre-authorization flows:
+
+| Setting | Description |
+|---------|-------------|
+| **Use Pre-deposit DMN** | Enable/disable pre-deposit notifications |
+| **Pre-deposit DMN URL** | Separate URL for pre-deposit events |
+
+---
+
+## Withdrawal Settings
+
+Configure withdrawal (payout) redirect and notification settings:
+
+| Setting | Description |
+|---------|-------------|
+| **Withdrawal Redirect After Submit** | Enable/disable redirects for withdrawals |
+| **Withdrawal Success URL** | Redirect after successful withdrawal |
+| **Withdrawal Failure URL** | Redirect on withdrawal failure |
+| **Withdrawal Back URL** | Redirect when user cancels withdrawal |
+| **Withdrawal Use DMN** | Enable withdrawal DMN notifications |
+| **Withdrawal DMN URL** | URL for withdrawal status notifications |
+
+---
+
+## Common Payment Page Settings
+
+### User Trap
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| **User Trap** | On/Off | Redirects user back to payment page on ERROR/DECLINE instead of failure URL |
+
+<Note>
+Enable User Trap to give customers another chance to complete payment with a different method.
+</Note>
+
+### Decline Recovery
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| **Decline Recovery** | On/Off | Shows alternative payment methods when a payment fails |
+
+When enabled:
+- Customer sees their failed payment notification
+- Alternative payment methods are displayed
+- Customer can retry without leaving the page
+
+### Relay Analytics Events
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| **Relay Analytics Events** | On/Off | Sends cashier events for analytics tracking |
+
+### Show Status Popup
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| **Show Status Popup** | On/Off | Displays transaction result information to customer |
+
+### Save Payment Options Toggle
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| **Show "Save Payment Options" Toggle** | On/Off | Allow customers to save payment methods for future use |
+
+### Default Payment Page Language
+
+Select the default language for your payment page:
+
+- English (en)
+- Spanish (es)
+- French (fr)
+- German (de)
+- Italian (it)
+- Portuguese (pt)
+- And 30+ more languages
+
+---
+
+## Environment-Specific Settings
+
+<Tabs>
+  <Tab title="Integration (Sandbox)">
+    Test environment settings at `ppp-test.nuvei.com`:
+    - Use test credentials
+    - No real transactions processed
+    - Test cards and APMs available
+  </Tab>
+  <Tab title="Production">
+    Live environment settings at `portal.nuvei.com`:
+    - Use production credentials
+    - Real transactions processed
+    - Live payment methods only
+  </Tab>
+</Tabs>
+
+<Warning>
+Always verify you're configuring the correct environment. Changes to production settings affect live transactions immediately.
+</Warning>
+
+---
+
+## Configuration Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always use HTTPS URLs">
+    All URLs must use HTTPS:
+    - Response URLs (success, failure, pending, back)
+    - DMN URLs
+    - Withdrawal URLs
+    
+    HTTP URLs will be rejected.
+  </Accordion>
+  
+  <Accordion title="Implement DMN handlers first">
+    Before going live:
+    1. Implement your DMN endpoint
+    2. Validate checksum on every DMN
+    3. Handle all status types (APPROVED, DECLINED, PENDING, ERROR)
+    4. Return HTTP 200 OK promptly
+    5. Test with sandbox transactions
+  </Accordion>
+  
+  <Accordion title="Use consistent response pages">
+    Create clear response pages for customers:
+    - **Success**: Order confirmation with details
+    - **Pending**: Explain APM processing times
+    - **Failure**: Clear error message with retry option
+    - **Back**: Return to cart with items preserved
+  </Accordion>
+  
+  <Accordion title="Rotate Secret Key periodically">
+    For security:
+    1. Generate new Secret Key from Control Panel
+    2. Update your server-side code
+    3. Test in sandbox first
+    4. Deploy to production during low-traffic period
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Secret Key not visible | Insufficient permissions | Request Admin role from your administrator |
+| URL test fails | URL not accessible | Verify URL is public and returns 200 |
+| DMN not received | IP not whitelisted | Add Nuvei IP ranges to firewall |
+| Wrong redirect | URL not saved | Verify settings were saved (check confirmation message) |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks Setup" icon="webhook" href="/integrations/features/webhooks">
+    Complete DMN implementation guide
+  </Card>
+  <Card title="Team Management" icon="users" href="/control-panel/settings/team-management">
+    Manage user access
+  </Card>
+</CardGroup>

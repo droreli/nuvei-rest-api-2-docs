@@ -1,0 +1,192 @@
+---
+title: 'Fees Report'
+description: 'View detailed processing fees breakdown'
+---
+
+# Fees Report
+
+The Fees Report provides a detailed breakdown of all processing fees charged to your account.
+
+---
+
+## Accessing the Report
+
+Navigate to **Finance > Fees Report** in the Control Panel.
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Fee Date | Date fee was charged |
+| Fee Type | Category of fee |
+| Description | Fee description |
+| Quantity | Number of items (transactions, etc.) |
+| Unit Price | Per-unit fee amount |
+| Total Amount | Total fee amount |
+| Currency | Fee currency |
+| Client Name | Merchant account |
+| Period | Billing period |
+
+---
+
+## Fee Types
+
+### Transaction Fees
+
+| Fee | Description |
+|-----|-------------|
+| **Per Transaction** | Fixed fee per transaction |
+| **Percentage Fee** | Percentage of transaction amount |
+| **Authorization Fee** | Fee for auth-only transactions |
+| **Capture Fee** | Fee for settling auth transactions |
+
+### Card Network Fees
+
+| Fee | Description |
+|-----|-------------|
+| **Interchange** | Card network interchange fee |
+| **Scheme Fee** | Visa/MC/Amex scheme fees |
+| **Cross-Border Fee** | International transaction fee |
+
+### Operational Fees
+
+| Fee | Description |
+|-----|-------------|
+| **Refund Fee** | Per-refund processing fee |
+| **Chargeback Fee** | Per-chargeback fee |
+| **Void Fee** | Per-void fee (if applicable) |
+| **Payout Fee** | Per-payout processing fee |
+
+### Service Fees
+
+| Fee | Description |
+|-----|-------------|
+| **Monthly Fee** | Fixed monthly service fee |
+| **PCI Fee** | PCI compliance fee |
+| **Statement Fee** | Monthly statement fee |
+| **Gateway Fee** | Gateway access fee |
+
+### Currency Fees
+
+| Fee | Description |
+|-----|-------------|
+| **FX Fee** | Currency conversion markup |
+| **DCC Fee** | Dynamic currency conversion fee |
+
+---
+
+## Viewing Fee Details
+
+### By Fee Type
+
+Group fees by category:
+
+1. Select **Group By: Fee Type**
+2. View totals per fee category
+3. Drill into specific fee types
+
+### By Period
+
+View fees over time:
+
+1. Select **Group By: Period**
+2. Compare fees month-over-month
+3. Identify trends
+
+### By Client
+
+View fees by merchant account:
+
+1. Select **Group By: Client**
+2. Allocate fees to business units
+3. Analyze profitability
+
+---
+
+## Fee Calculation Examples
+
+### Transaction Fee
+
+```
+Transaction Amount: $100.00
+Percentage Fee: 2.9%
+Per Transaction Fee: $0.30
+
+Fee = ($100.00 × 2.9%) + $0.30
+Fee = $2.90 + $0.30
+Fee = $3.20
+```
+
+### Cross-Border Fee
+
+```
+Transaction Amount: $100.00
+Cross-Border Fee: 1.0%
+
+Fee = $100.00 × 1.0%
+Fee = $1.00
+```
+
+---
+
+## Fee Optimization Tips
+
+<AccordionGroup>
+  <Accordion title="Reduce chargebacks">
+    Chargeback fees can be significant:
+    - Implement fraud prevention
+    - Use 3DS authentication
+    - Respond to disputes promptly
+  </Accordion>
+  
+  <Accordion title="Optimize refund costs">
+    Minimize unnecessary refunds:
+    - Clear product descriptions
+    - Good customer service
+    - Consider partial refunds
+  </Accordion>
+  
+  <Accordion title="Consider settlement currency">
+    FX fees can add up:
+    - Settle in local currency when possible
+    - Understand conversion rates
+    - Plan for currency fluctuations
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Export and Reporting
+
+### Scheduled Reports
+
+Set up automated fee reports:
+
+| Frequency | Use Case |
+|-----------|----------|
+| Weekly | Operational monitoring |
+| Monthly | Financial close |
+| Quarterly | Business review |
+
+### Export Formats
+
+| Format | Use Case |
+|--------|----------|
+| CSV | Accounting import |
+| XLSX | Analysis |
+| PDF | Documentation |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Balance Report" icon="scale-balanced" href="/control-panel/finance/balance-report">
+    View account balances
+  </Card>
+  <Card title="Movement Report" icon="arrow-right-arrow-left" href="/control-panel/finance/movement-report">
+    Track fund movements
+  </Card>
+</CardGroup>

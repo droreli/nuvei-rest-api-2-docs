@@ -1,0 +1,308 @@
+---
+title: 'Client Rules'
+description: 'Configure fraud screening and exemption rules'
+---
+
+# Client Rules
+
+Client Rules define your fraud screening logic and 3DS exemption rules. Configure rules to automatically approve, decline, or flag transactions based on risk indicators.
+
+---
+
+## Accessing Client Rules
+
+Navigate to **Risk > Client Rules** in the Control Panel.
+
+---
+
+## Rule Types
+
+### Fraud Rules Tab
+
+Rules that evaluate transactions for fraud risk:
+
+| Decision | Description |
+|----------|-------------|
+| **Approve** | Transaction passes risk check |
+| **Decline** | Transaction automatically declined |
+| **Manual Review** | Transaction flagged for human review |
+
+### Exemption Rules Tab
+
+Rules for 3DS authentication exemptions:
+
+| Exemption | Description |
+|-----------|-------------|
+| **TRA** | Transaction Risk Analysis |
+| **LVE** | Low Value Exemption |
+| **Trusted** | Trusted Beneficiary |
+| **Recurring** | Merchant-Initiated Recurring |
+
+---
+
+## Rule Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Client ID | Nuvei-assigned account ID |
+| Client Name | Merchant account name |
+| Rule ID | Custom fraud filter reason code |
+| Rule Name | Descriptive rule name |
+| Rule Category | Decline reason category |
+| Rule Impact | Rule decision (approve/decline/review) |
+| Status | active, inactive |
+| Priority | Rule evaluation order |
+
+---
+
+## Viewing Rules
+
+The Client Rules report shows all configured rules:
+
+| Column | Description |
+|--------|-------------|
+| Rule ID | Unique rule identifier |
+| Rule Name | Rule description |
+| Category | Rule category |
+| Impact | Approve, Decline, or Review |
+| Status | Active or Inactive |
+| Hit Count | Times rule triggered (period) |
+| Last Hit | Most recent trigger date |
+
+---
+
+## Common Rule Categories
+
+### Velocity Rules
+
+Limit transaction frequency:
+
+| Rule Example | Description |
+|--------------|-------------|
+| Max transactions per card per day | Limit daily card usage |
+| Max amount per card per day | Limit daily card spend |
+| Max transactions per email per hour | Limit rapid purchasing |
+| Max transactions per IP per day | Limit IP activity |
+
+### Geographic Rules
+
+Filter by location:
+
+| Rule Example | Description |
+|--------------|-------------|
+| Block high-risk countries | Decline specific countries |
+| IP/Billing country mismatch | Flag mismatches |
+| Shipping/Billing country mismatch | Flag suspicious shipping |
+
+### Card Rules
+
+Filter by card attributes:
+
+| Rule Example | Description |
+|--------------|-------------|
+| Block prepaid cards | Decline prepaid/gift cards |
+| Block specific BINs | Block known bad BINs |
+| Block anonymous cards | Decline anonymous cards |
+
+### Amount Rules
+
+Filter by transaction value:
+
+| Rule Example | Description |
+|--------------|-------------|
+| Maximum transaction amount | Cap single transactions |
+| Minimum transaction amount | Block micro-transactions |
+| Amount exceeds average | Flag unusual amounts |
+
+### Device/Identity Rules
+
+Filter by customer data:
+
+| Rule Example | Description |
+|--------------|-------------|
+| Block disposable emails | Decline temp email domains |
+| New email address | Flag recently created emails |
+| Device fingerprint mismatch | Flag device changes |
+| Multiple cards per device | Flag card testing |
+
+---
+
+## Rule Impact Returned in API
+
+When a rule triggers, the response includes:
+
+```json
+{
+  "transactionStatus": "DECLINED",
+  "gwErrorCode": "-1",
+  "gwExtendedErrorCode": "1234",
+  "gwErrorReason": "Declined by Fraud filter",
+  "paymentMethodErrorCode": "1234",
+  "paymentMethodErrorReason": "Rule: Block high-risk countries"
+}
+```
+
+The `gwExtendedErrorCode` corresponds to the Rule ID.
+
+---
+
+## Managing Rules
+
+### Request New Rule
+
+To add a new rule:
+
+<Steps>
+  <Step title="Contact Nuvei">
+    Reach out to your account manager or support
+  </Step>
+  <Step title="Define Rule Logic">
+    Specify the conditions and decision
+  </Step>
+  <Step title="Set Priority">
+    Determine evaluation order
+  </Step>
+  <Step title="Test in Sandbox">
+    Validate rule behavior
+  </Step>
+  <Step title="Deploy to Production">
+    Activate in live environment
+  </Step>
+</Steps>
+
+<Note>
+Rule creation and modification require Nuvei assistance. Contact support to request changes.
+</Note>
+
+### Activate/Deactivate Rule
+
+Toggle rule status:
+
+<Steps>
+  <Step title="Find Rule">
+    Locate the rule in the list
+  </Step>
+  <Step title="Toggle Status">
+    Click the status toggle
+  </Step>
+  <Step title="Confirm">
+    Confirm the change
+  </Step>
+</Steps>
+
+---
+
+## Rule Evaluation Order
+
+Rules are evaluated in priority order:
+
+1. **Whitelist rules** - Approve trusted patterns
+2. **Blacklist rules** - Decline known bad patterns
+3. **Velocity rules** - Check frequency limits
+4. **Risk score rules** - Evaluate combined risk
+5. **Default action** - Approve if no rule triggers
+
+<Tip>
+Place more specific rules at higher priority to avoid false positives.
+</Tip>
+
+---
+
+## 3DS Exemption Rules
+
+Configure when to request 3DS exemptions:
+
+### Transaction Risk Analysis (TRA)
+
+| Condition | Exemption Allowed |
+|-----------|-------------------|
+| Low risk score | Yes |
+| Trusted customer | Yes |
+| High-value transaction | Check thresholds |
+
+### Low Value Exemption (LVE)
+
+| Amount | Exemption Allowed |
+|--------|-------------------|
+| Under €30 | Yes (EEA) |
+| Cumulative under €100 | Yes (within period) |
+| 5+ consecutive | Not allowed |
+
+### Trusted Beneficiary
+
+| Condition | Exemption Allowed |
+|-----------|-------------------|
+| Customer opted in | Yes |
+| Stored with issuer | Yes |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with monitoring mode">
+    Deploy new rules in "monitor" mode first:
+    - Track would-be triggers
+    - Analyze false positive rate
+    - Adjust thresholds before enforcement
+  </Accordion>
+  
+  <Accordion title="Balance security and conversion">
+    Overly aggressive rules hurt legitimate sales:
+    - Monitor decline rates
+    - Track manual review volume
+    - Measure conversion impact
+  </Accordion>
+  
+  <Accordion title="Use rule combinations">
+    Single indicators are often insufficient:
+    - Combine velocity + geography
+    - Layer device + identity checks
+    - Use risk scores as tiebreakers
+  </Accordion>
+  
+  <Accordion title="Review regularly">
+    Fraud patterns evolve:
+    - Monthly rule performance review
+    - Adjust thresholds as needed
+    - Add rules for new attack vectors
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Reporting on Rules
+
+### Rule Hit Report
+
+Track rule effectiveness:
+
+| Metric | Description |
+|--------|-------------|
+| Hit Count | Times rule triggered |
+| Hit Rate | % of transactions triggering |
+| False Positive Rate | % of hits that were legitimate |
+| Fraud Prevention | Estimated fraud prevented |
+
+### Decline Analysis
+
+Review declines by rule:
+
+| Filter | Description |
+|--------|-------------|
+| By Rule ID | Declines from specific rule |
+| By Category | Declines by rule type |
+| By Time Period | Trend analysis |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Risk Overview" icon="shield" href="/control-panel/risk/overview">
+    Risk management overview
+  </Card>
+  <Card title="Chargebacks" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    View chargebacks
+  </Card>
+</CardGroup>

@@ -1,0 +1,193 @@
+---
+title: 'Balance Report'
+description: 'View current and historical account balances'
+---
+
+# Balance Report
+
+The Balance Report shows your current account balance and historical balance data.
+
+---
+
+## Accessing the Report
+
+Navigate to **Finance > Balance Report** in the Control Panel.
+
+---
+
+## Current Balance
+
+The top of the report shows your current available balance:
+
+| Field | Description |
+|-------|-------------|
+| **Available Balance** | Funds available for payout |
+| **Pending Balance** | Funds in processing |
+| **Reserve Balance** | Rolling reserve held |
+| **Total Balance** | Sum of all balances |
+
+---
+
+## Balance Components
+
+### Available Balance
+
+Funds you can withdraw or have paid out:
+
+| Source | Description |
+|--------|-------------|
+| Settled sales | Sales that have cleared |
+| Minus fees | Processing fees deducted |
+| Minus refunds | Refunds processed |
+| Minus chargebacks | Chargeback debits |
+| Minus payouts | Previous payouts |
+
+### Pending Balance
+
+Funds not yet available:
+
+| Status | Description |
+|--------|-------------|
+| Processing | Settlements in progress |
+| Held | Temporarily held for review |
+| Scheduled | Scheduled for future release |
+
+### Reserve Balance
+
+Funds held as security:
+
+| Reserve Type | Description |
+|--------------|-------------|
+| **Rolling Reserve** | Percentage of sales held for N days |
+| **Fixed Reserve** | Fixed amount held as deposit |
+| **Chargeback Reserve** | Held for potential chargebacks |
+
+---
+
+## Historical Balance
+
+View balance over time:
+
+### Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Date | Balance date |
+| Opening Balance | Balance at start of day |
+| Credits | Total credits (sales, reversals) |
+| Debits | Total debits (refunds, fees) |
+| Closing Balance | Balance at end of day |
+
+### Date Range
+
+Select historical period:
+- Last 7 days
+- Last 30 days
+- Last 90 days
+- Custom range (up to 14 months)
+
+---
+
+## Balance by Currency
+
+If you process multiple currencies:
+
+| Currency | Available | Pending | Reserve |
+|----------|-----------|---------|---------|
+| USD | $10,000 | $2,000 | $5,000 |
+| EUR | €8,000 | €1,500 | €4,000 |
+| GBP | £5,000 | £1,000 | £2,500 |
+
+---
+
+## Rolling Reserve Explained
+
+Rolling reserve is a percentage of sales held for a period:
+
+### How It Works
+
+```
+Day 1: Sale of $100, 10% reserve = $10 held
+Day 2: Sale of $150, 10% reserve = $15 held
+...
+Day 90: $10 from Day 1 released
+Day 91: $15 from Day 2 released
+```
+
+### Reserve Parameters
+
+| Parameter | Typical Value |
+|-----------|---------------|
+| Reserve Percentage | 5-10% |
+| Hold Period | 90-180 days |
+| Release Schedule | Daily rolling |
+
+---
+
+## Payout Scheduling
+
+### Automatic Payouts
+
+Configure automatic payouts:
+
+| Setting | Options |
+|---------|---------|
+| Frequency | Daily, Weekly, Monthly |
+| Minimum | Minimum balance to trigger |
+| Day of Week | For weekly payouts |
+| Day of Month | For monthly payouts |
+
+### Manual Payouts
+
+Request ad-hoc payouts:
+
+<Steps>
+  <Step title="Verify Balance">
+    Ensure sufficient available balance
+  </Step>
+  <Step title="Request Payout">
+    Click Request Payout button
+  </Step>
+  <Step title="Enter Amount">
+    Specify payout amount
+  </Step>
+  <Step title="Confirm">
+    Verify bank details and confirm
+  </Step>
+</Steps>
+
+---
+
+## Balance Alerts
+
+Set up notifications:
+
+| Alert | Trigger |
+|-------|---------|
+| Low Balance | Below threshold |
+| Large Movement | Single large debit |
+| Reserve Release | Reserve funds released |
+| Payout Completed | Payout transferred |
+
+---
+
+## Export Options
+
+| Format | Use Case |
+|--------|----------|
+| CSV | Historical analysis |
+| XLSX | Spreadsheet review |
+| PDF | Documentation |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Movement Report" icon="arrow-right-arrow-left" href="/control-panel/finance/movement-report">
+    Detailed movements
+  </Card>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    Settlement details
+  </Card>
+</CardGroup>

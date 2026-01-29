@@ -1,0 +1,326 @@
+---
+title: 'Reconciliation Guide'
+description: 'Best practices for reconciling Nuvei transactions with your accounting'
+---
+
+# Reconciliation Guide
+
+This guide covers best practices for reconciling Nuvei transactions with your accounting system.
+
+---
+
+## Overview
+
+Reconciliation ensures your financial records match Nuvei's records:
+
+| Reconciliation Type | Frequency | Purpose |
+|--------------------|-----------|---------|
+| **Transaction** | Daily | Match sales to orders |
+| **Settlement** | Daily | Match settlements to bank |
+| **Fee** | Monthly | Verify fee accuracy |
+| **Balance** | Monthly | Confirm account balance |
+
+---
+
+## Transaction Reconciliation
+
+Match transactions in Nuvei to your order system.
+
+### Process
+
+<Steps>
+  <Step title="Export Transactions">
+    Export daily transactions from Nuvei Control Panel
+  </Step>
+  <Step title="Export Orders">
+    Export orders from your system for same period
+  </Step>
+  <Step title="Match by Client Unique ID">
+    Match using your order ID (`clientUniqueId`)
+  </Step>
+  <Step title="Identify Discrepancies">
+    Flag unmatched or mismatched records
+  </Step>
+  <Step title="Investigate">
+    Research and resolve discrepancies
+  </Step>
+</Steps>
+
+### Matching Fields
+
+| Nuvei Field | Your System | Match Type |
+|-------------|-------------|------------|
+| `clientUniqueId` | Order ID | Exact |
+| `amount` | Order total | Exact |
+| `currency` | Order currency | Exact |
+| `transactionStatus` | Order status | Map |
+
+### Status Mapping
+
+| Nuvei Status | Typical Order Status |
+|--------------|---------------------|
+| APPROVED | Paid |
+| DECLINED | Failed |
+| PENDING | Processing |
+| REFUNDED | Refunded |
+| VOIDED | Cancelled |
+
+---
+
+## Settlement Reconciliation
+
+Match settlements to bank deposits.
+
+### Process
+
+<Steps>
+  <Step title="Get Settlement Summary">
+    Pull Settlement Summary for the period
+  </Step>
+  <Step title="Get Bank Statement">
+    Pull bank statement for same period
+  </Step>
+  <Step title="Match Deposits">
+    Match Nuvei payouts to bank deposits
+  </Step>
+  <Step title="Account for Timing">
+    Allow for settlement lag (T+2 to T+5)
+  </Step>
+  <Step title="Reconcile Differences">
+    Investigate unmatched items
+  </Step>
+</Steps>
+
+### Timing Considerations
+
+```
+Nuvei Settlement Date: Monday
+Expected Bank Deposit: Wednesday-Thursday (T+2 to T+3)
+```
+
+| Factor | Impact |
+|--------|--------|
+| Bank holidays | Add 1+ days |
+| Weekends | Add 2 days |
+| Large amounts | May have review delay |
+| New account | Initial delays possible |
+
+---
+
+## Fee Reconciliation
+
+Verify processing fees match your agreement.
+
+### Monthly Review
+
+<Steps>
+  <Step title="Export Fees Report">
+    Pull monthly Fees Report
+  </Step>
+  <Step title="Calculate Expected">
+    Calculate expected fees from your rate sheet
+  </Step>
+  <Step title="Compare">
+    Compare actual to expected
+  </Step>
+  <Step title="Investigate Variances">
+    Research significant differences
+  </Step>
+</Steps>
+
+### Fee Verification
+
+```
+Transaction Volume: $100,000
+Expected Rate: 2.9% + $0.30/txn
+Transaction Count: 1,000
+
+Expected Fees:
+- Percentage: $100,000 × 2.9% = $2,900
+- Per-Transaction: 1,000 × $0.30 = $300
+- Total: $3,200
+
+Actual Fees: $3,250
+Variance: $50 (investigate)
+```
+
+### Common Fee Variances
+
+| Variance | Possible Cause |
+|----------|---------------|
+| Higher than expected | Cross-border fees, downgrades |
+| Lower than expected | Volume discounts applied |
+| New fee types | Rate changes, new services |
+
+---
+
+## Balance Reconciliation
+
+Confirm account balance accuracy.
+
+### Monthly Review
+
+<Steps>
+  <Step title="Get Opening Balance">
+    Balance from previous month's close
+  </Step>
+  <Step title="Add Credits">
+    Sum all settlements for the month
+  </Step>
+  <Step title="Subtract Debits">
+    Sum all refunds, fees, chargebacks, payouts
+  </Step>
+  <Step title="Calculate Expected Closing">
+    Opening + Credits - Debits = Expected
+  </Step>
+  <Step title="Compare to Actual">
+    Match to Nuvei closing balance
+  </Step>
+</Steps>
+
+### Balance Formula
+
+```
+Closing Balance = Opening Balance
+                + Sales Settled
+                - Refunds
+                - Chargebacks
+                - Fees
+                - Payouts
+                +/- Adjustments
+```
+
+---
+
+## Webhook-Based Reconciliation
+
+Use DMN webhooks for real-time reconciliation.
+
+### Implementation
+
+```javascript
+// Handle transaction DMN
+app.post('/webhook/nuvei', (req, res) => {
+  const { 
+    PPP_TransactionID,
+    clientUniqueId,
+    totalAmount,
+    Status 
+  } = req.body;
+  
+  // Verify checksum
+  if (!verifyChecksum(req.body)) {
+    return res.status(400).send('Invalid checksum');
+  }
+  
+  // Update your system
+  updateOrderStatus(clientUniqueId, {
+    nuveiTransactionId: PPP_TransactionID,
+    amount: totalAmount,
+    status: mapStatus(Status)
+  });
+  
+  res.status(200).send('OK');
+});
+```
+
+### Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| Real-time | Update immediately |
+| Automated | No manual export needed |
+| Reliable | Server-to-server notification |
+| Auditable | Full transaction trail |
+
+---
+
+## Discrepancy Investigation
+
+### Common Issues
+
+| Issue | Possible Cause | Resolution |
+|-------|---------------|------------|
+| Missing transaction | Order not submitted | Check order flow |
+| Amount mismatch | Partial capture/refund | Review transaction lifecycle |
+| Status mismatch | Timing difference | Allow for propagation |
+| Duplicate | Retry after timeout | Refund duplicate |
+
+### Investigation Steps
+
+1. **Identify**: Note the discrepancy details
+2. **Research**: Check both systems for related records
+3. **Timeline**: Review event sequence
+4. **Root Cause**: Determine why it happened
+5. **Resolve**: Take corrective action
+6. **Prevent**: Implement fix to prevent recurrence
+
+---
+
+## Automation Tools
+
+### Reconciliation Report API
+
+```bash
+GET /api/v1/reconciliation/transactions
+?startDate=2024-01-01
+&endDate=2024-01-31
+&format=csv
+```
+
+### Scheduled Reports
+
+Configure automated exports:
+
+| Report | Frequency | Format |
+|--------|-----------|--------|
+| Transactions | Daily | CSV |
+| Settlements | Daily | CSV |
+| Fees | Monthly | XLSX |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Reconcile daily">
+    Don't let discrepancies accumulate:
+    - Easier to investigate while fresh
+    - Smaller dataset to review
+    - Catch issues early
+  </Accordion>
+  
+  <Accordion title="Use unique order IDs">
+    Always pass `clientUniqueId`:
+    - Enables easy matching
+    - Prevents duplicates
+    - Supports investigation
+  </Accordion>
+  
+  <Accordion title="Implement webhooks">
+    Real-time updates reduce reconciliation effort:
+    - Immediate status sync
+    - Automated updates
+    - Reduced manual work
+  </Accordion>
+  
+  <Accordion title="Document exceptions">
+    Keep records of resolved issues:
+    - Audit trail
+    - Pattern identification
+    - Process improvement
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="webhook" href="/integrations/features/webhooks">
+    Set up DMN webhooks
+  </Card>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    View settlements
+  </Card>
+</CardGroup>

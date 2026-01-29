@@ -1,0 +1,180 @@
+---
+title: 'Control Panel Overview'
+description: 'Navigate the Nuvei Control Panel for transaction management, reporting, and configuration'
+---
+
+# Control Panel
+
+The Nuvei Control Panel is your central hub for managing payments, viewing reports, configuring settings, and monitoring your business performance.
+
+<Card title="Access Control Panel" icon="arrow-up-right-from-square" href="https://portal.nuvei.com">
+  Log in to portal.nuvei.com
+</Card>
+
+## Main Sections
+
+<CardGroup cols={2}>
+  <Card title="Dashboard" icon="chart-line" href="/control-panel/dashboard">
+    KPIs, statistics, and performance graphs to monitor your business
+  </Card>
+  <Card title="Operations" icon="gears" href="/control-panel/operations/transactions-report">
+    Transaction reports, refunds, voids, withdrawals, and bulk operations
+  </Card>
+  <Card title="Finance" icon="building-columns" href="/control-panel/finance/overview">
+    Settlement reports, balance statements, and financial reconciliation
+  </Card>
+  <Card title="Risk" icon="shield-halved" href="/control-panel/risk/overview">
+    Chargebacks, fraud rules, disputes, and risk monitoring
+  </Card>
+  <Card title="Settings" icon="gear" href="/control-panel/settings/integration-settings">
+    Integration settings, DMN URLs, team management, and credentials
+  </Card>
+</CardGroup>
+
+---
+
+## Navigation Structure
+
+```
+Control Panel
+├── Dashboard
+│   ├── Main Dashboard (KPIs, projections)
+│   ├── Comparison Graphs
+│   └── Overview Dashboard (12 charts)
+│
+├── Operations
+│   ├── Transactions Report
+│   ├── Exceptions Report
+│   ├── Withdrawal Requests
+│   ├── Withdrawal Orders
+│   ├── Bulk Upload
+│   ├── User Payment Options (UPOs)
+│   ├── Paylink (QR codes, Virtual POS)
+│   ├── Conversion Rates
+│   ├── Recurring Plans
+│   ├── Recurring Subscriptions
+│   └── Card Account Updater
+│
+├── Finance
+│   ├── Movement Report
+│   ├── Fees Report
+│   ├── Balance Report
+│   ├── Statistic Report
+│   ├── Settlement Summary
+│   ├── Merchant Statement
+│   └── Balance Statements
+│
+├── Risk
+│   ├── Risk Dashboard
+│   ├── 3D Secure KPI Report
+│   ├── Pre-chargebacks
+│   ├── Chargebacks Report
+│   ├── Fraud Transactions
+│   ├── Client Rules
+│   ├── Disputes Report
+│   ├── Risk Configurations
+│   ├── Risk Alerts
+│   └── Case Management
+│
+└── Settings
+    ├── Team (Users & Roles)
+    ├── Audit Trace
+    ├── My Account
+    ├── My Integration Settings
+    └── APM Pricing Management
+```
+
+---
+
+## User Roles & Permissions
+
+Access to Control Panel features depends on your assigned role:
+
+| Role | Access Level |
+|------|--------------|
+| **Management** | Full access to all menu items, reports, and actions |
+| **Finance_Actions** | Finance section + Transaction/Batch ID/Withdrawal reports |
+| **Operations_Actions** | Operations menu, execute refunds/payouts/voids |
+| **Risk_Actions** | Transaction data, risk reports, risk-related actions |
+| **Risk Dispute** | Chargeback, Case Management, Disputes Reports only |
+| **Developer only** | REST API 2.0 management, technical configuration |
+| **Finance_ReadOnly** | View-only access to finance reports |
+| **Operations_ReadOnly** | View-only access to operations reports |
+| **Risk_ReadOnly** | View-only access to risk reports |
+
+<Note>
+Custom roles can be created by administrators from the **Settings > Team > Roles** tab.
+</Note>
+
+---
+
+## Getting Your Credentials
+
+Your API credentials are located in **Settings > My Integration Settings**:
+
+<Steps>
+  <Step title="Navigate to Settings">
+    Click on **Settings** in the left navigation menu
+  </Step>
+  <Step title="Open Integration Settings">
+    Select **My Integration Settings**
+  </Step>
+  <Step title="Find Your Credentials">
+    - **Merchant ID**: Displayed at the top
+    - **Merchant Site ID**: Listed for each site
+    - **Secret Key**: Click "Show" (requires Admin rights)
+  </Step>
+</Steps>
+
+<Warning>
+Never share your Secret Key. It's used to authenticate API requests and calculate checksums.
+</Warning>
+
+---
+
+## Environment Indicator
+
+The Control Panel header displays your current environment:
+
+| Environment | URL | Purpose |
+|-------------|-----|---------|
+| **Integration** | `ppp-test.nuvei.com` | Testing and development |
+| **Production** | `portal.nuvei.com` | Live transactions |
+
+<Tip>
+Always test in the Integration environment before deploying to production.
+</Tip>
+
+---
+
+## Quick Actions
+
+Common tasks you can perform:
+
+| Task | Location | Description |
+|------|----------|-------------|
+| Search transactions | Operations > Transactions | Find by ID, date, amount, status |
+| Issue refund | Transaction details > Actions | Refund after settlement |
+| Void transaction | Transaction details > Actions | Cancel before settlement |
+| Configure webhooks | Settings > Integration Settings | Set DMN URLs |
+| View chargebacks | Risk > Chargebacks | Monitor and dispute chargebacks |
+| Generate reports | Any report page | Export to CSV/XLSX |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Dashboard" icon="chart-pie" href="/control-panel/dashboard">
+    Monitor your KPIs
+  </Card>
+  <Card title="Transactions" icon="receipt" href="/control-panel/operations/transactions-report">
+    Search and manage transactions
+  </Card>
+  <Card title="Integration Settings" icon="plug" href="/control-panel/settings/integration-settings">
+    Configure your integration
+  </Card>
+  <Card title="Team Management" icon="users" href="/control-panel/settings/team-management">
+    Manage users and roles
+  </Card>
+</CardGroup>

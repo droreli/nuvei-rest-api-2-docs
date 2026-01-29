@@ -1,0 +1,168 @@
+---
+title: 'Disputes Report'
+description: 'Manage real-time Visa and Mastercard disputes'
+---
+
+# Disputes Report
+
+The Disputes Report shows real-time dispute data from Visa and Mastercard networks, allowing you to respond to disputes before they become chargebacks.
+
+---
+
+## Accessing the Report
+
+Navigate to **Risk > Disputes Report** in the Control Panel.
+
+---
+
+## Dispute vs Chargeback
+
+| Stage | Description | Action Window |
+|-------|-------------|---------------|
+| **Dispute** | Initial customer complaint | Immediate response possible |
+| **Chargeback** | Formal dispute filed | 30-45 days to respond |
+
+<Tip>
+Responding to disputes early can prevent chargebacks and associated fees.
+</Tip>
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Dispute ID | Network dispute identifier |
+| Transaction ID | Original transaction ID |
+| ARN | Acquirer Reference Number |
+| Network | Visa or Mastercard |
+| Dispute Date | Date dispute was filed |
+| Response Due | Deadline for response |
+| Amount | Disputed amount |
+| Currency | Transaction currency |
+| Reason Code | Network reason code |
+| Status | Open, Resolved, Won, Lost |
+
+---
+
+## Dispute Status
+
+| Status | Description |
+|--------|-------------|
+| **Open** | Awaiting response |
+| **Pending** | Response submitted, awaiting decision |
+| **Resolved** | Resolved in your favor |
+| **Lost** | Resolved against you |
+| **Escalated** | Moved to next stage (pre-arb/arb) |
+
+---
+
+## Responding to Disputes
+
+<Steps>
+  <Step title="Review Dispute">
+    Click on dispute to view details
+  </Step>
+  <Step title="Gather Evidence">
+    Collect relevant documentation
+  </Step>
+  <Step title="Submit Response">
+    Upload evidence and submit
+  </Step>
+  <Step title="Monitor Outcome">
+    Track dispute resolution
+  </Step>
+</Steps>
+
+### Response Options
+
+| Option | When to Use |
+|--------|-------------|
+| **Accept** | Customer claim is valid |
+| **Dispute** | Submit evidence to contest |
+| **Partial Accept** | Accept portion of claim |
+
+---
+
+## Evidence Guidelines
+
+### Fraud Disputes
+
+| Document | Purpose |
+|----------|---------|
+| 3DS authentication | Prove customer authenticated |
+| Device fingerprint | Match to previous purchases |
+| AVS/CVV match | Prove verification passed |
+| Delivery confirmation | Prove goods delivered |
+
+### Service Disputes
+
+| Document | Purpose |
+|----------|---------|
+| Terms of service | Show agreed terms |
+| Service records | Prove service delivered |
+| Communication logs | Show customer interaction |
+| Refund policy | Demonstrate policy compliance |
+
+---
+
+## Dispute Resolution Programs
+
+### Visa Rapid Dispute Resolution (RDR)
+
+Automatically resolve eligible disputes:
+
+| Configuration | Description |
+|---------------|-------------|
+| Auto-accept threshold | Accept disputes under amount |
+| Rule-based acceptance | Accept based on reason code |
+| Merchant-preferred | Custom acceptance logic |
+
+### Verifi CDRN (Cardholder Dispute Resolution Network)
+
+| Feature | Benefit |
+|---------|---------|
+| Real-time alerts | Know about disputes immediately |
+| Auto-refund option | Prevent chargeback filing |
+| Customer resolution | Resolve before escalation |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Respond quickly">
+    Faster responses have higher win rates:
+    - Same-day response ideal
+    - Never miss deadlines
+    - Automated responses for eligible cases
+  </Accordion>
+  
+  <Accordion title="Use pre-chargeback tools">
+    Prevent disputes from escalating:
+    - Enable Ethoca alerts
+    - Configure Visa RDR
+    - Implement Verifi CDRN
+  </Accordion>
+  
+  <Accordion title="Document everything">
+    Maintain comprehensive records:
+    - Transaction details
+    - Customer communications
+    - Delivery confirmations
+    - Service completion proof
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Chargebacks" icon="credit-card" href="/control-panel/risk/chargebacks-report">
+    View chargebacks
+  </Card>
+  <Card title="Case Management" icon="briefcase" href="/control-panel/risk/case-management">
+    Unified dispute console
+  </Card>
+</CardGroup>

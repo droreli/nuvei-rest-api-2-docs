@@ -1,0 +1,229 @@
+---
+title: 'Finance Overview'
+description: 'Financial reports, settlements, and reconciliation in the Control Panel'
+---
+
+# Finance
+
+The Finance section provides comprehensive financial reporting, settlement tracking, and reconciliation tools.
+
+---
+
+## Finance Menu
+
+<CardGroup cols={2}>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    View settlement summaries and details
+  </Card>
+  <Card title="Movement Report" icon="arrow-right-arrow-left" href="/control-panel/finance/movement-report">
+    Track fund movements
+  </Card>
+  <Card title="Fees Report" icon="receipt" href="/control-panel/finance/fees-report">
+    View processing fees
+  </Card>
+  <Card title="Balance Report" icon="scale-balanced" href="/control-panel/finance/balance-report">
+    Current balance overview
+  </Card>
+</CardGroup>
+
+---
+
+## Available Reports
+
+| Report | Description | Data Retention |
+|--------|-------------|----------------|
+| **Movement Report** | All account fund movements | 14 months |
+| **Fees Report** | Processing fees breakdown | 14 months |
+| **Balance Report** | Current and historical balances | 14 months |
+| **Statistic Report** | Transaction statistics | 14 months |
+| **Settlement Summary** | Settlement overview | 14 months |
+| **Merchant Statement** | Periodic statements | 14 months |
+| **Balance Statements** | Basic and advanced balance | 14 months |
+| **IBT Reports** | Interbank transfer details | 14 months |
+| **NA Reconciliation** | North America reconciliation | 14 months |
+
+<Note>
+Financial reports retain data for up to **14 months**. Export and archive older data as needed.
+</Note>
+
+---
+
+## Key Financial Metrics
+
+### Settlement Cycle
+
+| Stage | Description |
+|-------|-------------|
+| **Authorization** | Funds authorized on card |
+| **Capture** | Transaction submitted for settlement |
+| **Settlement** | Funds settled with acquirer |
+| **Payout** | Funds transferred to merchant |
+
+### Settlement Timeline
+
+| Region | Typical Payout |
+|--------|----------------|
+| Europe | T+1 to T+3 |
+| North America | T+2 to T+3 |
+| APAC | T+3 to T+5 |
+| LATAM | T+3 to T+7 |
+
+<Note>
+Actual timelines vary by acquirer, currency, and merchant agreement.
+</Note>
+
+---
+
+## Currency Handling
+
+### Multi-Currency Processing
+
+| Currency Type | Description |
+|---------------|-------------|
+| **Transaction Currency** | Currency customer paid in |
+| **Settlement Currency** | Currency funds settle in |
+| **Payout Currency** | Currency transferred to you |
+
+### Conversion Points
+
+| Point | Description |
+|-------|-------------|
+| At transaction | DCC offered to customer |
+| At settlement | Acquirer conversion rate |
+| At payout | Nuvei conversion rate |
+
+---
+
+## Fee Types
+
+| Fee Type | Description |
+|----------|-------------|
+| **Transaction Fee** | Per-transaction processing fee |
+| **Percentage Fee** | Percentage of transaction amount |
+| **Monthly Fee** | Fixed monthly service fee |
+| **Chargeback Fee** | Per-chargeback fee |
+| **Refund Fee** | Per-refund fee |
+| **Currency Conversion** | FX markup fee |
+| **PCI Fee** | PCI compliance fee |
+
+See [Fees Report](/control-panel/finance/fees-report) for detailed breakdown.
+
+---
+
+## Report Scheduling
+
+Schedule automated report delivery:
+
+<Steps>
+  <Step title="Open Report">
+    Navigate to desired report
+  </Step>
+  <Step title="Configure Filters">
+    Set your filter parameters
+  </Step>
+  <Step title="Click Schedule">
+    Click the Schedule button
+  </Step>
+  <Step title="Set Frequency">
+    Daily, weekly, or monthly
+  </Step>
+  <Step title="Add Recipients">
+    Enter email addresses
+  </Step>
+  <Step title="Save Schedule">
+    Save the scheduled report
+  </Step>
+</Steps>
+
+---
+
+## Export Formats
+
+| Format | Best For |
+|--------|----------|
+| **CSV** | Data analysis, imports |
+| **XLSX** | Spreadsheet analysis |
+| **PDF** | Sharing, archiving |
+
+### Export Limits
+
+| Export Type | Limit |
+|-------------|-------|
+| On-screen | 10,000 rows |
+| CSV/XLSX | 100,000 rows |
+
+---
+
+## Role Requirements
+
+| Report | Required Role |
+|--------|---------------|
+| Settlement Summary | Finance_Actions or Management |
+| Movement Report | Finance_Actions or Management |
+| Fees Report | Finance_Actions or Management |
+| Balance Report | Finance_Actions or Management |
+| Read-only access | Finance_ReadOnly |
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Daily reconciliation">
+    Match settlements to transactions daily:
+    - Compare expected vs actual settlements
+    - Investigate discrepancies promptly
+    - Maintain audit trail
+  </Accordion>
+  
+  <Accordion title="Monitor fee trends">
+    Track fees over time:
+    - Identify optimization opportunities
+    - Verify contractual rates
+    - Budget for seasonal variations
+  </Accordion>
+  
+  <Accordion title="Archive financial data">
+    Export and archive before 14-month limit:
+    - Monthly exports recommended
+    - Secure storage required
+    - Maintain for tax/audit purposes
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Integration with Accounting
+
+### Webhook Notifications
+
+Set up DMN webhooks for automated reconciliation:
+
+| Event | Use Case |
+|-------|----------|
+| Settlement completed | Update accounting system |
+| Refund processed | Record credit |
+| Chargeback received | Create dispute record |
+
+### API Access
+
+Use the Reporting API for programmatic access:
+
+```bash
+GET /api/v1/reports/settlements
+GET /api/v1/reports/movements
+GET /api/v1/reports/fees
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    View settlements
+  </Card>
+  <Card title="Reconciliation Guide" icon="check-double" href="/control-panel/finance/reconciliation-guide">
+    Reconciliation best practices
+  </Card>
+</CardGroup>

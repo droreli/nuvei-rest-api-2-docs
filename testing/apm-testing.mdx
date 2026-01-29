@@ -1,0 +1,458 @@
+---
+title: 'APM Testing'
+description: 'Test credentials and scenarios for Alternative Payment Methods'
+---
+
+# APM Testing Guide
+
+Test Alternative Payment Methods (APMs) in the sandbox environment.
+
+<Warning>
+APM test credentials only work in the integration environment. Ensure your merchantSiteId is configured for APM testing.
+</Warning>
+
+---
+
+## APM Testing Overview
+
+Each APM has specific test credentials and flows:
+
+<CardGroup cols={3}>
+  <Card title="Redirect APMs" icon="arrow-right">
+    User redirected to provider page
+  </Card>
+  <Card title="Popup APMs" icon="window-restore">
+    Provider opens in popup window
+  </Card>
+  <Card title="Direct APMs" icon="bolt">
+    Payment completed directly
+  </Card>
+</CardGroup>
+
+---
+
+## PayPal
+
+### Test Credentials
+
+| Environment | Account Type | Credentials |
+|-------------|--------------|-------------|
+| Sandbox | Buyer | Email: `sb-buyer@business.example.com` |
+| Sandbox | Buyer | Password: Contact Nuvei for test password |
+
+### Test Flow
+
+1. Select PayPal as payment method
+2. Redirect to PayPal sandbox
+3. Log in with test buyer credentials
+4. Approve payment
+5. Redirect back to merchant
+
+### Test Scenarios
+
+| Scenario | How to Trigger |
+|----------|----------------|
+| Approved | Complete normal flow with test buyer |
+| Cancelled | Click "Cancel" on PayPal page |
+| Pending | Use pending test account (contact Nuvei) |
+
+---
+
+## Apple Pay (Sandbox)
+
+### Prerequisites
+
+- Apple Developer account
+- Sandbox Apple ID
+- Safari on macOS/iOS
+
+### Test Setup
+
+1. Create sandbox tester in App Store Connect
+2. Sign in to device with sandbox Apple ID
+3. Add test card to Apple Wallet
+
+### Test Cards for Apple Pay
+
+| Card Type | Card Number | Notes |
+|-----------|-------------|-------|
+| Visa | `4761120010000492` | Apple Pay test card |
+| Mastercard | `5204245250460049` | Apple Pay test card |
+
+### Test Flow
+
+1. Click Apple Pay button
+2. Authenticate with Face ID/Touch ID (simulated in sandbox)
+3. Transaction completes
+
+---
+
+## Google Pay (Sandbox)
+
+### Test Setup
+
+1. Join Google Pay test group
+2. Use Chrome browser
+3. Configure `environment: 'TEST'` in Google Pay API
+
+### Test Configuration
+
+```javascript
+const paymentDataRequest = {
+  environment: 'TEST',  // Use 'PRODUCTION' for live
+  merchantInfo: {
+    merchantId: 'YOUR_MERCHANT_ID',
+    merchantName: 'Your Store Name'
+  },
+  // ... other configuration
+};
+```
+
+### Test Flow
+
+1. Click Google Pay button
+2. Select test card from wallet
+3. Authenticate
+4. Transaction completes
+
+---
+
+## Skrill
+
+### Test Credentials
+
+| Field | Value |
+|-------|-------|
+| Email | `demoqco@sun-fish.com` |
+| Password | `skrill123` |
+
+### Test Flow
+
+1. Select Skrill
+2. Redirect to Skrill test page
+3. Enter test credentials
+4. Approve payment
+5. Redirect back
+
+---
+
+## Neteller
+
+### Test Credentials
+
+| Field | Value |
+|-------|-------|
+| Account ID | `453501020503` |
+| Secure ID | `908379` |
+
+### Test Flow
+
+1. Select Neteller
+2. Enter test credentials
+3. Approve payment
+4. Complete transaction
+
+---
+
+## iDEAL (Netherlands)
+
+### Test Setup
+
+No credentials needed for sandbox testing.
+
+### Test Banks
+
+| Bank | Behavior |
+|------|----------|
+| INGBNL2A | Approved |
+| RABONL2U | Approved |
+| ABNANL2A | Declined |
+
+### Test Flow
+
+1. Select iDEAL
+2. Choose test bank
+3. Simulate approval/decline
+4. Redirect back
+
+---
+
+## Sofort/Klarna (Germany)
+
+### Test Bank Credentials
+
+| Field | Value |
+|-------|-------|
+| Bank Code | `88888888` |
+| Account | `12345678` |
+| PIN | `12345` |
+| TAN | `12345` |
+
+### Test Flow
+
+1. Select Sofort
+2. Enter test bank credentials
+3. Complete authentication
+4. Redirect back
+
+---
+
+## Giropay (Germany)
+
+### Test Credentials
+
+| Field | Value |
+|-------|-------|
+| BIC | `TESTDETT421` |
+| Username | `sepatest1` |
+| Password | `sepatest1` |
+| TAN | `123456` |
+
+---
+
+## Trustly (Nordic)
+
+### Test Setup
+
+Trustly provides a sandbox environment:
+
+1. Select Trustly
+2. Choose test bank
+3. Use test credentials provided by Trustly
+4. Complete authentication
+
+### Test Banks
+
+| Country | Bank |
+|---------|------|
+| Sweden | Swedbank (test) |
+| Finland | Nordea (test) |
+| Germany | Test Bank |
+
+---
+
+## Paysafecard
+
+### Test PINs
+
+| PIN | Amount | Result |
+|-----|--------|--------|
+| `0000000001200000` | €10.00 | Approved |
+| `0000000001200001` | €10.00 | Declined |
+| `0000000001200002` | €25.00 | Approved |
+
+### Test Flow
+
+1. Select Paysafecard
+2. Enter test PIN
+3. Complete transaction
+
+---
+
+## EPS (Austria)
+
+### Test Credentials
+
+| Field | Value |
+|-------|-------|
+| BIC | `BAWAATWW` |
+| Username | Test provided on redirect |
+| Password | Test provided on redirect |
+
+---
+
+## Multibanco (Portugal)
+
+### Test Flow
+
+1. Select Multibanco
+2. Receive reference number
+3. Use reference to simulate payment
+4. DMN confirms payment
+
+### Test Reference
+
+References generated in sandbox can be "paid" using the sandbox control panel.
+
+---
+
+## Boleto (Brazil)
+
+### Test Setup
+
+Boleto generates a payment slip. In sandbox:
+
+1. Generate Boleto
+2. Receive barcode/reference
+3. Simulate payment in sandbox control panel
+4. DMN confirms payment
+
+---
+
+## PIX (Brazil)
+
+### Test Flow
+
+1. Generate PIX code
+2. Scan QR code (simulated in sandbox)
+3. Payment confirmed via DMN
+
+### Test Scenarios
+
+| Scenario | How to Trigger |
+|----------|----------------|
+| Instant approval | Complete scan/payment |
+| Expired | Wait for expiration time |
+| Cancelled | Cancel before payment |
+
+---
+
+## UPI (India)
+
+### Test VPA
+
+| VPA | Result |
+|-----|--------|
+| `success@ybl` | Approved |
+| `failure@ybl` | Declined |
+
+---
+
+## WeChat Pay
+
+### Test Setup
+
+WeChat Pay testing requires:
+
+1. Sandbox merchant ID from Nuvei
+2. WeChat test app or simulator
+3. QR code scanning capability
+
+### Test Flow
+
+1. Generate payment QR code
+2. Scan with WeChat test app
+3. Confirm payment
+4. Transaction completes
+
+---
+
+## Alipay
+
+### Test Credentials
+
+| Field | Value |
+|-------|-------|
+| Account | `13800138000` |
+| Password | `111111` |
+| Payment Password | `111111` |
+
+### Test Flow
+
+1. Select Alipay
+2. Redirect to Alipay sandbox
+3. Enter test credentials
+4. Confirm payment
+5. Redirect back
+
+---
+
+## Bank Transfer
+
+### Test Scenarios
+
+| Scenario | Amount |
+|----------|--------|
+| Approved | Any amount |
+| Pending | Amounts ending in .01 |
+
+### Test Flow
+
+1. Initiate bank transfer
+2. Receive bank details
+3. Simulate transfer in sandbox
+4. DMN confirms receipt
+
+---
+
+## General APM Testing Tips
+
+<AccordionGroup>
+  <Accordion title="Handling Redirects" icon="arrow-right">
+    - Test with `urlDetails.successUrl`, `failureUrl`, `pendingUrl`
+    - Verify user returns to correct page based on outcome
+    - Test browser back button behavior
+  </Accordion>
+  
+  <Accordion title="Testing DMN (Webhooks)" icon="bell">
+    - APMs often complete asynchronously via DMN
+    - Configure DMN URL in Control Panel
+    - Use webhook testing tools (ngrok, webhook.site)
+    - Verify DMN signature validation
+  </Accordion>
+  
+  <Accordion title="Currency Testing" icon="coins">
+    - Test with APM's supported currencies
+    - Some APMs only support specific currencies
+    - Currency conversion may apply
+  </Accordion>
+  
+  <Accordion title="Mobile Testing" icon="mobile">
+    - Test APM flows on mobile browsers
+    - Some APMs have mobile-specific flows
+    - Test deep linking for app-based APMs
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## APM Testing Checklist
+
+<AccordionGroup>
+  <Accordion title="Pre-Testing" icon="list-check">
+    - [ ] APM enabled for merchantSiteId
+    - [ ] Test credentials obtained
+    - [ ] DMN URL configured
+    - [ ] Return URLs configured
+  </Accordion>
+  
+  <Accordion title="Happy Path Testing" icon="check">
+    - [ ] Successful payment completes
+    - [ ] User redirected to successUrl
+    - [ ] DMN received with correct parameters
+    - [ ] Transaction visible in Control Panel
+  </Accordion>
+  
+  <Accordion title="Error Path Testing" icon="xmark">
+    - [ ] User cancellation handled
+    - [ ] Declined transactions handled
+    - [ ] Timeout scenarios handled
+    - [ ] Error messages displayed correctly
+  </Accordion>
+  
+  <Accordion title="Edge Cases" icon="asterisk">
+    - [ ] Browser back button
+    - [ ] Page refresh during payment
+    - [ ] Multiple tab/window handling
+    - [ ] Session expiry handling
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Test Cards" icon="credit-card" href="/testing/test-cards">
+    Card payment testing
+  </Card>
+  <Card title="3DS Testing" icon="shield" href="/testing/3ds-testing">
+    3D Secure scenarios
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/integrations/features/webhooks">
+    DMN configuration
+  </Card>
+  <Card title="APM List" icon="building-columns" href="/payment-methods/alternative-payment-methods">
+    All supported APMs
+  </Card>
+</CardGroup>

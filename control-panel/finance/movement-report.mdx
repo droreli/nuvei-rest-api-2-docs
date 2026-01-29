@@ -1,0 +1,150 @@
+---
+title: 'Movement Report'
+description: 'Track all fund movements in your account'
+---
+
+# Movement Report
+
+The Movement Report tracks all fund movements in your Nuvei account, including sales, refunds, fees, chargebacks, and payouts.
+
+---
+
+## Accessing the Report
+
+Navigate to **Finance > Movement Report** in the Control Panel.
+
+---
+
+## Generating a Report
+
+<Steps>
+  <Step title="Set Date Range">
+    Select movement date range (up to 14 months)
+  </Step>
+  <Step title="Apply Filters">
+    Filter by movement type, currency, client
+  </Step>
+  <Step title="Run Report">
+    Click **Run Report** to generate
+  </Step>
+</Steps>
+
+---
+
+## Report Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| Movement Date | Date of fund movement |
+| Movement ID | Unique movement identifier |
+| Movement Type | Type of movement |
+| Transaction ID | Related transaction (if applicable) |
+| Amount | Movement amount |
+| Currency | Movement currency |
+| Balance Before | Account balance before movement |
+| Balance After | Account balance after movement |
+| Reference | Reference information |
+| Client Name | Merchant account |
+
+---
+
+## Movement Types
+
+### Credit Movements (Positive)
+
+| Type | Description |
+|------|-------------|
+| **Sale** | Settled sales revenue |
+| **Chargeback Reversal** | Won chargeback returned |
+| **Adjustment Credit** | Manual credit adjustment |
+| **Reserve Release** | Rolling reserve released |
+| **Transfer In** | Funds transferred in |
+
+### Debit Movements (Negative)
+
+| Type | Description |
+|------|-------------|
+| **Refund** | Processed refund |
+| **Chargeback** | Chargeback debit |
+| **Fee** | Processing fee |
+| **Payout** | Funds paid to merchant |
+| **Reserve** | Rolling reserve hold |
+| **Adjustment Debit** | Manual debit adjustment |
+| **Transfer Out** | Funds transferred out |
+
+---
+
+## Fee Breakdowns
+
+When movement type is **Fee**, view breakdown:
+
+| Fee Type | Description |
+|----------|-------------|
+| Transaction Fee | Per-transaction fee |
+| Percentage Fee | Volume-based fee |
+| Monthly Fee | Recurring service fee |
+| Chargeback Fee | Per-chargeback fee |
+| Refund Fee | Per-refund fee |
+| FX Fee | Currency conversion fee |
+
+---
+
+## Filtering Options
+
+| Filter | Options |
+|--------|---------|
+| **Date Range** | Custom, Today, Week, Month |
+| **Movement Type** | Sale, Refund, Fee, Chargeback, etc. |
+| **Currency** | USD, EUR, GBP, etc. |
+| **Client** | Merchant account |
+| **Amount Range** | Min and max amount |
+
+---
+
+## Export Options
+
+| Format | Use Case |
+|--------|----------|
+| **CSV** | Data analysis |
+| **XLSX** | Spreadsheet review |
+| **PDF** | Audit documentation |
+
+---
+
+## Common Use Cases
+
+<AccordionGroup>
+  <Accordion title="Track daily revenue">
+    1. Filter by Movement Type = Sale
+    2. Set date range to today
+    3. View total settled revenue
+    4. Compare to expected
+  </Accordion>
+  
+  <Accordion title="Analyze fee impact">
+    1. Filter by Movement Type = Fee
+    2. Set date range for month
+    3. Export and categorize
+    4. Calculate fee percentage
+  </Accordion>
+  
+  <Accordion title="Verify payout received">
+    1. Filter by Movement Type = Payout
+    2. Find specific payout
+    3. Match to bank statement
+    4. Reconcile discrepancies
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Fees Report" icon="receipt" href="/control-panel/finance/fees-report">
+    Detailed fee breakdown
+  </Card>
+  <Card title="Settlement Summary" icon="building-columns" href="/control-panel/finance/settlement-summary">
+    Settlement overview
+  </Card>
+</CardGroup>

@@ -1,0 +1,176 @@
+---
+title: 'Withdrawal Requests'
+description: 'Manage customer withdrawal and payout requests'
+---
+
+# Withdrawal Requests Report
+
+The Withdrawal Requests Report tracks customer payout requests, allowing you to review, approve, and process withdrawals.
+
+---
+
+## Accessing the Report
+
+Navigate to **Operations > Withdrawal Request Report** in the Control Panel.
+
+---
+
+## Withdrawal States
+
+| Status | Description |
+|--------|-------------|
+| **Pending** | Request submitted, awaiting review |
+| **Approved** | Request approved, ready for processing |
+| **Processing** | Payout in progress |
+| **Completed** | Funds delivered to customer |
+| **Declined** | Request rejected |
+| **Cancelled** | Request cancelled by merchant or customer |
+
+---
+
+## Report Parameters
+
+### Request Details
+
+| Parameter | Description |
+|-----------|-------------|
+| Request ID | Unique withdrawal request identifier |
+| Request Date | Date request was submitted |
+| User Token ID | Customer identifier |
+| Email | Customer email address |
+| Amount | Requested withdrawal amount |
+| Currency | Withdrawal currency |
+| Status | Current request status |
+| Payment Method | Destination payment method |
+
+### Payout Details
+
+| Parameter | Description |
+|-----------|-------------|
+| UPO ID | User Payment Option ID (saved method) |
+| Card Number | Masked card number (if card payout) |
+| Bank Account | Masked bank account (if bank transfer) |
+| Processing Bank | Bank processing the payout |
+
+---
+
+## Managing Withdrawal Requests
+
+### Approve Request
+
+<Steps>
+  <Step title="Review Request">
+    Verify customer and amount details
+  </Step>
+  <Step title="Click Approve">
+    Select the request and click Approve
+  </Step>
+  <Step title="Confirm Amount">
+    Confirm or adjust the approved amount
+  </Step>
+  <Step title="Process">
+    The request moves to processing queue
+  </Step>
+</Steps>
+
+### Decline Request
+
+<Steps>
+  <Step title="Select Request">
+    Check the box next to the request
+  </Step>
+  <Step title="Click Decline">
+    Click the Decline button
+  </Step>
+  <Step title="Select Reason">
+    Choose decline reason:
+    - Insufficient balance
+    - Fraud suspicion
+    - KYC incomplete
+    - Other (with note)
+  </Step>
+</Steps>
+
+### Cancel Request
+
+Cancel pending requests that are no longer needed:
+
+| Scenario | Action |
+|----------|--------|
+| Customer request | Cancel with customer's consent |
+| Duplicate request | Cancel the duplicate |
+| Error in request | Cancel and resubmit |
+
+---
+
+## Withdrawal Methods
+
+| Method | Speed | Availability |
+|--------|-------|--------------|
+| **Visa Direct** | 30 minutes | Visa debit cards |
+| **Mastercard Send** | 30 minutes | Mastercard debit cards |
+| **Bank Transfer** | 1-3 business days | Bank accounts |
+| **APM Payout** | Varies | Supported APMs |
+
+---
+
+## Withdrawal Limits
+
+Configure withdrawal limits in **Settings > Withdrawal Configuration**:
+
+| Limit Type | Description |
+|------------|-------------|
+| **Minimum** | Minimum withdrawal amount |
+| **Maximum** | Maximum single withdrawal |
+| **Daily** | Maximum per day per customer |
+| **Weekly** | Maximum per week per customer |
+| **Monthly** | Maximum per month per customer |
+
+---
+
+## DMN Notifications
+
+Withdrawal status changes trigger DMN notifications:
+
+| Event | DMN Type |
+|-------|----------|
+| Request submitted | `withdrawal_request` |
+| Request approved | `withdrawal_approved` |
+| Payout completed | `withdrawal_completed` |
+| Request declined | `withdrawal_declined` |
+
+See [Webhooks documentation](/integrations/features/webhooks) for DMN setup.
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Implement KYC before withdrawals">
+    Verify customer identity before processing withdrawals to prevent fraud.
+  </Accordion>
+  
+  <Accordion title="Set appropriate limits">
+    Configure withdrawal limits based on your business model and risk tolerance.
+  </Accordion>
+  
+  <Accordion title="Monitor for suspicious patterns">
+    Watch for:
+    - Multiple withdrawals to different accounts
+    - Immediate withdrawal after deposit
+    - Unusual withdrawal amounts
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Withdrawal Orders" icon="money-bill-transfer" href="/control-panel/operations/withdrawal-orders">
+    View processed withdrawals
+  </Card>
+  <Card title="Payouts API" icon="code" href="/api-reference/rest-1/payouts/payout">
+    Payout API reference
+  </Card>
+</CardGroup>

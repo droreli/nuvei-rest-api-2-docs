@@ -11,6 +11,8 @@ Direct Merchant Notification (DMN) is Nuvei's webhook system that sends real-tim
   DMN is also known as IPN (Instant Payment Notification) or callbacks.
 </Note>
 
+---
+
 ## Why Use Webhooks?
 
 <CardGroup cols={2}>
@@ -75,7 +77,38 @@ Your endpoint must:
 - Be publicly accessible (no authentication required)
 - Use HTTPS in production
 
-## DMN Payload
+---
+
+## IP Whitelisting
+
+<Warning>
+  If you restrict incoming requests by IP, you **must** whitelist Nuvei's DMN server IPs.
+</Warning>
+
+### Nuvei DMN IP Ranges
+
+Add these IP ranges to your firewall/security group allowlist:
+
+| IP Range | Environment |
+|----------|-------------|
+| `194.247.167.0/24` | Production |
+| `195.28.166.0/24` | Production |
+| `195.28.167.0/24` | Production |
+| `87.120.10.0/24` | Production |
+| `87.120.11.0/24` | Production |
+| `217.74.240.0/24` | Production |
+| `217.74.241.0/24` | Production |
+| `209.115.219.0/24` | Production |
+| `3.127.31.0/24` | Production (AWS) |
+| `52.212.190.0/24` | Production (AWS) |
+| `18.156.155.0/24` | Production (AWS) |
+| `52.49.143.0/24` | Production (AWS) |
+
+<Tip>
+  Contact Nuvei support for the most up-to-date IP list as these may change.
+</Tip>
+
+--- DMN Payload
 
 ### Example Payment DMN
 
@@ -133,6 +166,100 @@ ppp_status=OK
 | `currency` | Transaction currency |
 | `payment_method` | Payment method used |
 | `advanceResponseChecksum` | Security checksum for verification |
+
+### Complete DMN Parameters
+
+<AccordionGroup>
+  <Accordion title="Transaction Parameters" icon="credit-card">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `TransactionID` | Nuvei transaction ID |
+    | `PPP_TransactionID` | Payment page transaction ID |
+    | `relatedTransactionId` | Original transaction (for refunds) |
+    | `totalAmount` | Transaction amount |
+    | `currency` | 3-letter currency code |
+    | `type` | Transaction type (DEPOSIT, etc.) |
+    | `transactionType` | Sale, Auth, Credit |
+    | `Status` | APPROVED, DECLINED, ERROR, PENDING |
+    | `authCode` | Authorization code |
+    | `responseTimeStamp` | Response timestamp |
+  </Accordion>
+  
+  <Accordion title="Payment Method Parameters" icon="wallet">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `payment_method` | Payment method used |
+    | `cardNumber` | Masked card number |
+    | `cardType` | Card brand (Visa, Mastercard) |
+    | `cardExpiration` | Card expiration (masked) |
+    | `cardToken` | Tokenized card (if requested) |
+    | `userPaymentOptionId` | Saved payment option ID |
+    | `externalAccountId` | APM account identifier |
+    | `APMReferenceID` | APM reference number |
+  </Accordion>
+  
+  <Accordion title="Customer Parameters" icon="user">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `first_name` | Customer first name |
+    | `last_name` | Customer last name |
+    | `email` | Customer email |
+    | `phone` | Customer phone |
+    | `address` | Billing address |
+    | `city` | Billing city |
+    | `country` | Billing country |
+    | `state` | Billing state |
+    | `zip` | Billing postal code |
+    | `userid` | Your customer ID |
+    | `clientUniqueId` | Your unique order ID |
+  </Accordion>
+  
+  <Accordion title="3DS Parameters" icon="shield">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `threeDResult` | 3DS result (Y, N, U, A) |
+    | `threeDReason` | 3DS result description |
+    | `cavv` | Cardholder Authentication Value |
+    | `eci` | E-commerce Indicator |
+    | `dsTransId` | DS Transaction ID |
+    | `liabilityShift` | true/false |
+  </Accordion>
+  
+  <Accordion title="Risk Parameters" icon="exclamation-triangle">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `fraudType` | Fraud system decision |
+    | `fraudReason` | Fraud decline reason |
+    | `riskScore` | Risk score (if available) |
+    | `avsCode` | AVS result code |
+    | `cvv2Reply` | CVV verification result |
+  </Accordion>
+  
+  <Accordion title="Error Parameters" icon="triangle-exclamation">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `ErrCode` | Error code |
+    | `ExErrCode` | Extended error code |
+    | `errApmCode` | APM error code |
+    | `errApmDescription` | APM error description |
+    | `errScCode` | Smart Cascade error code |
+    | `Reason` | Decline reason |
+    | `ReasonCode` | Decline reason code |
+  </Accordion>
+  
+  <Accordion title="Merchant Parameters" icon="building">
+    | Parameter | Description |
+    |-----------|-------------|
+    | `merchantId` | Your merchant ID |
+    | `merchantSiteId` | Your site ID |
+    | `merchant_unique_id` | Your order reference |
+    | `productId` | Product identifier |
+    | `customData` | Custom field data |
+    | `clientRequestId` | Your request ID |
+  </Accordion>
+</AccordionGroup>
+
+---
 
 ## Verifying DMN Signature
 
@@ -226,15 +353,65 @@ app.post('/webhooks/nuvei', (req, res) => {
 
 ## DMN Types
 
-| Type | Trigger |
-|------|---------|
-| `DEPOSIT` | Payment/deposit completed |
-| `WITHDRAWAL` | Withdrawal completed |
-| `REFUND` | Refund processed |
-| `CHARGEBACK` | Chargeback received |
-| `CHARGEBACK_REVERSAL` | Chargeback reversed |
+Nuvei sends different DMN types for various events:
 
-## Handling Different Statuses
+<Tabs>
+  <Tab title="Payment DMN">
+    Sent for all payment-related events:
+    
+    | Type | Description |
+    |------|-------------|
+    | `DEPOSIT` | Payment/deposit completed |
+    | `AUTH` | Authorization completed |
+    | `SALE` | Sale (Auth + Capture) completed |
+    | `SETTLE` | Capture/settlement completed |
+    | `VOID` | Transaction voided |
+    | `CREDIT` | Refund processed |
+  </Tab>
+  <Tab title="Withdrawal DMN">
+    Sent when withdrawals are processed:
+    
+    | Type | Description |
+    |------|-------------|
+    | `WITHDRAWAL` | Payout/withdrawal initiated |
+    | `WITHDRAWAL_PENDING` | Withdrawal pending approval |
+    | `WITHDRAWAL_APPROVED` | Withdrawal approved |
+    | `WITHDRAWAL_DECLINED` | Withdrawal declined |
+    | `WITHDRAWAL_CANCELLED` | Withdrawal cancelled |
+  </Tab>
+  <Tab title="Chargeback DMN">
+    Sent for dispute events:
+    
+    | Type | Description |
+    |------|-------------|
+    | `CHARGEBACK` | Chargeback received |
+    | `CHARGEBACK_REVERSAL` | Chargeback reversed |
+    | `CHARGEBACK_ALERT` | Chargeback alert (Ethoca/VRDR) |
+    | `RETRIEVAL` | Retrieval request received |
+  </Tab>
+  <Tab title="Subscription DMN">
+    Sent for recurring billing events:
+    
+    | Type | Description |
+    |------|-------------|
+    | `SUBSCRIPTION_CREATED` | New subscription created |
+    | `SUBSCRIPTION_CANCELLED` | Subscription cancelled |
+    | `REBILLING_SUCCESS` | Recurring charge successful |
+    | `REBILLING_FAILED` | Recurring charge failed |
+    | `REBILLING_RETRY` | Retry scheduled |
+  </Tab>
+  <Tab title="Control Panel DMN">
+    Sent for manual actions in Control Panel:
+    
+    | Type | Description |
+    |------|-------------|
+    | `MANUAL_REFUND` | Refund from Control Panel |
+    | `MANUAL_VOID` | Void from Control Panel |
+    | `MANUAL_SETTLE` | Settlement from Control Panel |
+  </Tab>
+</Tabs>
+
+--- Handling Different Statuses
 
 ```javascript
 app.post('/webhooks/nuvei', (req, res) => {
@@ -272,46 +449,121 @@ app.post('/webhooks/nuvei', (req, res) => {
 
 If your endpoint doesn't return HTTP `200 OK`, Nuvei retries:
 
-| Attempt | Delay |
-|---------|-------|
-| 1 | Immediate |
-| 2 | 1 minute |
-| 3 | 5 minutes |
-| 4 | 30 minutes |
-| 5 | 2 hours |
-| 6 | 12 hours |
+| Attempt | Delay | Total Time Elapsed |
+|---------|-------|--------------------|
+| 1 | Immediate | 0 |
+| 2 | 1 minute | 1 minute |
+| 3 | 5 minutes | 6 minutes |
+| 4 | 30 minutes | 36 minutes |
+| 5 | 2 hours | 2.5 hours |
+| 6 | 12 hours | 14.5 hours |
+| 7 | 24 hours | 38.5 hours |
+
+<Warning>
+  After 24 hours of failed delivery, the DMN is marked as failed. Review failed DMNs in the Control Panel under **Operations > Transactions**.
+</Warning>
 
 <Tip>
   Implement idempotency - handle the same DMN multiple times gracefully using `TransactionID` as a unique key.
 </Tip>
 
+---
+
+---
+
 ## Best Practices
 
 <AccordionGroup>
   <Accordion title="Always verify checksum" icon="shield">
-    Never process a DMN without verifying the `advanceResponseChecksum`.
+    Never process a DMN without verifying the `advanceResponseChecksum`. This prevents replay attacks and ensures the DMN is authentic.
   </Accordion>
   
   <Accordion title="Respond quickly" icon="bolt">
-    Return HTTP 200 within 10 seconds. Process heavy operations asynchronously.
+    Return HTTP 200 within 10 seconds. Process heavy operations asynchronously:
+    
+    ```javascript
+    app.post('/webhook', (req, res) => {
+      // Respond immediately
+      res.status(200).send('OK');
+      
+      // Process asynchronously
+      processPaymentAsync(req.body);
+    });
+    ```
   </Accordion>
   
   <Accordion title="Implement idempotency" icon="clone">
-    The same DMN may be sent multiple times. Use `TransactionID` to detect duplicates.
+    The same DMN may be sent multiple times. Use `TransactionID` to detect duplicates:
+    
+    ```javascript
+    const processed = await db.get(`dmn:${TransactionID}`);
+    if (processed) return; // Already handled
+    await db.set(`dmn:${TransactionID}`, true);
+    ```
   </Accordion>
   
   <Accordion title="Log all DMNs" icon="file-lines">
-    Log the full DMN payload for debugging and audit purposes.
+    Log the full DMN payload for debugging and audit purposes. Mask sensitive fields.
   </Accordion>
   
   <Accordion title="Use HTTPS" icon="lock">
-    Always use HTTPS for your webhook endpoint in production.
+    Always use HTTPS for your webhook endpoint in production. Self-signed certificates are not accepted.
   </Accordion>
   
   <Accordion title="Handle all statuses" icon="list-check">
-    Implement handling for APPROVED, DECLINED, PENDING, and ERROR statuses.
+    Implement handling for APPROVED, DECLINED, PENDING, and ERROR statuses. Don't assume only successful transactions trigger DMNs.
+  </Accordion>
+  
+  <Accordion title="Whitelist IPs" icon="shield-halved">
+    For additional security, only accept DMNs from Nuvei's IP ranges (see IP Whitelisting section above).
   </Accordion>
 </AccordionGroup>
+
+---
+
+## Troubleshooting DMN Issues
+
+<AccordionGroup>
+  <Accordion title="Not receiving DMNs" icon="question">
+    **Check:**
+    1. DMN URL configured in Control Panel
+    2. Endpoint is publicly accessible
+    3. Firewall allows Nuvei IPs
+    4. HTTPS certificate is valid
+    5. Endpoint returns HTTP 200
+    
+    **Test:** Use curl or Postman to hit your endpoint
+  </Accordion>
+  
+  <Accordion title="Checksum verification failing" icon="question">
+    **Check:**
+    1. Using correct Secret Key
+    2. Field order is correct
+    3. Using SHA-256 (lowercase hex)
+    4. Handling empty `productId` correctly
+    5. No encoding issues with special characters
+  </Accordion>
+  
+  <Accordion title="Duplicate DMNs received" icon="question">
+    **Cause:** Your endpoint didn't return HTTP 200, or network timeout occurred.
+    
+    **Solution:** Implement idempotency using `TransactionID`:
+    - Store processed TransactionIDs
+    - Check before processing
+    - Update order status atomically
+  </Accordion>
+  
+  <Accordion title="DMN arriving late" icon="question">
+    **Cause:** For APMs, DMN arrives when the actual payment completes (may be hours later).
+    
+    **Solution:** Design your flow to handle async payments:
+    - Show "pending" status to customer
+    - Fulfill order only after DMN confirms APPROVED
+    - Set expiration for pending orders
+  </Accordion>
+</AccordionGroup>
+
+---
 
 ## Testing Webhooks
 

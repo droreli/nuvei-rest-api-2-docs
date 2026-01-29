@@ -1,0 +1,201 @@
+---
+title: 'Bulk Upload'
+description: 'Process batch operations via CSV file upload'
+---
+
+# Bulk Upload
+
+The Bulk Upload feature allows you to process batch operations by uploading CSV files containing transaction instructions.
+
+---
+
+## Accessing Bulk Upload
+
+Navigate to **Operations > Bulk Upload** in the Control Panel.
+
+---
+
+## Supported Operations
+
+| Operation | Description |
+|-----------|-------------|
+| **Bulk Refund** | Refund multiple transactions |
+| **Bulk Void** | Void multiple unsettled transactions |
+| **Bulk Settle** | Capture multiple authorized transactions |
+| **Bulk Payout** | Process multiple payouts |
+| **Bulk Credit** | Issue credits to customers |
+
+---
+
+## File Format
+
+### CSV Requirements
+
+| Requirement | Specification |
+|-------------|---------------|
+| Format | CSV (comma-separated) |
+| Encoding | UTF-8 |
+| Header Row | Required (column names) |
+| Max Rows | 10,000 per file |
+| Max File Size | 5 MB |
+
+### Column Structure
+
+<Tabs>
+  <Tab title="Bulk Refund">
+    | Column | Required | Description |
+    |--------|----------|-------------|
+    | `transaction_id` | Yes | Original transaction ID |
+    | `amount` | No | Refund amount (defaults to full) |
+    | `currency` | No | Currency code |
+    | `reason` | No | Refund reason |
+    | `client_unique_id` | No | Your reference |
+  </Tab>
+  <Tab title="Bulk Void">
+    | Column | Required | Description |
+    |--------|----------|-------------|
+    | `transaction_id` | Yes | Transaction to void |
+    | `reason` | No | Void reason |
+  </Tab>
+  <Tab title="Bulk Settle">
+    | Column | Required | Description |
+    |--------|----------|-------------|
+    | `transaction_id` | Yes | Authorization to capture |
+    | `amount` | No | Capture amount (defaults to auth amount) |
+  </Tab>
+  <Tab title="Bulk Payout">
+    | Column | Required | Description |
+    |--------|----------|-------------|
+    | `user_token_id` | Yes | Customer identifier |
+    | `upo_id` | Yes | Payment method ID |
+    | `amount` | Yes | Payout amount |
+    | `currency` | Yes | Currency code |
+    | `client_unique_id` | No | Your reference |
+  </Tab>
+</Tabs>
+
+---
+
+## Upload Process
+
+<Steps>
+  <Step title="Prepare CSV File">
+    Create CSV with required columns and data
+  </Step>
+  <Step title="Select Operation Type">
+    Choose the bulk operation from the dropdown
+  </Step>
+  <Step title="Upload File">
+    Click **Browse** and select your CSV file
+  </Step>
+  <Step title="Validate">
+    System validates file format and data
+  </Step>
+  <Step title="Review">
+    Preview the operations to be performed
+  </Step>
+  <Step title="Execute">
+    Click **Execute** to process the batch
+  </Step>
+</Steps>
+
+---
+
+## Validation Errors
+
+| Error | Cause | Resolution |
+|-------|-------|------------|
+| Invalid format | File is not CSV | Save as CSV with UTF-8 encoding |
+| Missing header | First row doesn't contain column names | Add header row |
+| Missing required column | Required column not found | Add missing column |
+| Invalid transaction ID | Transaction not found | Verify transaction IDs |
+| Invalid amount | Amount exceeds original or is negative | Correct amount values |
+| Row limit exceeded | More than 10,000 rows | Split into multiple files |
+
+---
+
+## Processing Results
+
+After execution, download the results file:
+
+| Column | Description |
+|--------|-------------|
+| `row_number` | Original row in upload file |
+| `transaction_id` | Transaction identifier |
+| `status` | SUCCESS or FAILED |
+| `error_code` | Error code if failed |
+| `error_message` | Error description if failed |
+| `new_transaction_id` | New transaction ID (for refunds/credits) |
+
+---
+
+## Sample Files
+
+### Bulk Refund Example
+
+```csv
+transaction_id,amount,currency,reason
+110000000012345678,50.00,USD,Customer request
+110000000012345679,,USD,Full refund
+110000000012345680,25.50,EUR,Partial refund
+```
+
+### Bulk Settle Example
+
+```csv
+transaction_id,amount
+110000000012345681,100.00
+110000000012345682,
+110000000012345683,75.00
+```
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Test with small batches first">
+    Start with 5-10 rows to verify format and processing before uploading large batches.
+  </Accordion>
+  
+  <Accordion title="Keep backup of original file">
+    Save the original CSV before uploading in case you need to reference or reprocess.
+  </Accordion>
+  
+  <Accordion title="Schedule during low-traffic periods">
+    Large batches may take time to process. Schedule during off-peak hours.
+  </Accordion>
+  
+  <Accordion title="Review results immediately">
+    Download and review results file to identify and address any failures.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Batch Status
+
+Monitor batch processing status:
+
+| Status | Description |
+|--------|-------------|
+| **Pending** | File uploaded, validation in progress |
+| **Validating** | Checking file format and data |
+| **Ready** | Validated, awaiting execution |
+| **Processing** | Batch operations in progress |
+| **Completed** | All operations processed |
+| **Partial** | Some operations failed |
+| **Failed** | Batch processing failed |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Transactions Report" icon="receipt" href="/control-panel/operations/transactions-report">
+    View processed transactions
+  </Card>
+  <Card title="Refund API" icon="code" href="/api-reference/rest-1/payments/refund-transaction">
+    Programmatic refunds
+  </Card>
+</CardGroup>
