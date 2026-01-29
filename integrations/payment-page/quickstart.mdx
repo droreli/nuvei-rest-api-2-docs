@@ -1,0 +1,290 @@
+---
+title: "Payment Page Quick Start"
+description: "Get started with Nuvei Payment Page in minutes"
+---
+
+# Quick Start to Payment Page
+
+This guide walks you through integrating Nuvei's hosted Payment Page solution.
+
+<Info>
+  **Time to complete**: ~15 minutes
+</Info>
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- Nuvei merchant account (sandbox for testing)
+- Your credentials: `merchantId`, `merchantSiteId`, `secretKey`
+- Server-side code capability (PHP, Node.js, Java, C#, etc.)
+
+<Tip>
+  Find your credentials in the [Control Panel](https://sandbox.nuvei.com/settings/my_payment_settings)
+</Tip>
+
+## Integration Flow
+
+<Steps>
+  <Step title="Generate Payment Page URL">
+    Call `/getPaymentPageUrl` from your server to get a unique checkout URL
+  </Step>
+  <Step title="Redirect Customer">
+    Redirect customer to the Payment Page URL (IFrame or full redirect)
+  </Step>
+  <Step title="Customer Completes Payment">
+    Customer enters payment details on Nuvei-hosted page
+  </Step>
+  <Step title="Handle Response">
+    Receive result via redirect URL or DMN webhook
+  </Step>
+</Steps>
+
+---
+
+## 1. Generate Payment Page URL
+
+Call the `/getPaymentPageUrl` endpoint from your backend server.
+
+<Warning>
+  This request must be made server-side. Never expose your `secretKey` on the frontend.
+</Warning>
+
+### Calculate Checksum
+
+Concatenate the following fields (no spaces, no separators) and calculate SHA-256:
+
+```
+merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey
+```
+
+### Example Request
+
+<CodeGroup>
+```json Request
+{
+  "merchantId": "<your merchantId>",
+  "merchantSiteId": "<your merchantSiteId>",
+  "clientRequestId": "<unique request ID>",
+  "clientUniqueId": "<unique transaction ID>",
+  "currency": "USD",
+  "amount": "100",
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<calculated SHA-256 checksum>",
+  "urlDetails": {
+    "successUrl": "https://yoursite.com/success",
+    "failureUrl": "https://yoursite.com/failure",
+    "pendingUrl": "https://yoursite.com/pending",
+    "notificationUrl": "https://yoursite.com/webhook"
+  }
+}
+```
+
+```php PHP
+<?php
+$merchantId = "your_merchant_id";
+$merchantSiteId = "your_site_id";
+$secretKey = "your_secret_key";
+$clientRequestId = uniqid();
+$amount = "100";
+$currency = "USD";
+$timeStamp = date("YmdHis");
+
+// Calculate checksum
+$checksumString = $merchantId . $merchantSiteId . $clientRequestId . $amount . $currency . $timeStamp . $secretKey;
+$checksum = hash('sha256', $checksumString);
+
+$payload = [
+    "merchantId" => $merchantId,
+    "merchantSiteId" => $merchantSiteId,
+    "clientRequestId" => $clientRequestId,
+    "clientUniqueId" => "order_" . time(),
+    "currency" => $currency,
+    "amount" => $amount,
+    "timeStamp" => $timeStamp,
+    "checksum" => $checksum,
+    "urlDetails" => [
+        "successUrl" => "https://yoursite.com/success",
+        "failureUrl" => "https://yoursite.com/failure",
+        "notificationUrl" => "https://yoursite.com/webhook"
+    ]
+];
+
+$ch = curl_init("https://secure.safecharge.com/ppp/api/v1/getPaymentPageUrl.do");
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+$paymentPageUrl = $result['paymentPageUrl'];
+?>
+```
+
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+const merchantId = 'your_merchant_id';
+const merchantSiteId = 'your_site_id';
+const secretKey = 'your_secret_key';
+const clientRequestId = Date.now().toString();
+const amount = '100';
+const currency = 'USD';
+const timeStamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+// Calculate checksum
+const checksumString = merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + secretKey;
+const checksum = crypto.createHash('sha256').update(checksumString).digest('hex');
+
+const payload = {
+  merchantId,
+  merchantSiteId,
+  clientRequestId,
+  clientUniqueId: `order_${Date.now()}`,
+  currency,
+  amount,
+  timeStamp,
+  checksum,
+  urlDetails: {
+    successUrl: 'https://yoursite.com/success',
+    failureUrl: 'https://yoursite.com/failure',
+    notificationUrl: 'https://yoursite.com/webhook'
+  }
+};
+
+const response = await axios.post(
+  'https://secure.safecharge.com/ppp/api/v1/getPaymentPageUrl.do',
+  payload,
+  { headers: { 'Content-Type': 'application/json' } }
+);
+
+const paymentPageUrl = response.data.paymentPageUrl;
+```
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "paymentPageUrl": "https://secure.safecharge.com/ppp/purchase.do?...",
+  "orderId": "123456",
+  "sessionToken": "abc123-def456-...",
+  "merchantId": "<your merchantId>",
+  "merchantSiteId": "<your merchantSiteId>",
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+---
+
+## 2. Redirect Customer
+
+Use the returned `paymentPageUrl` to redirect your customer:
+
+<Tabs>
+  <Tab title="Full Page Redirect">
+    ```html
+    <script>
+      window.location.href = "<?php echo $paymentPageUrl; ?>";
+    </script>
+    ```
+  </Tab>
+  <Tab title="IFrame Embed">
+    ```html
+    <iframe 
+      src="<?php echo $paymentPageUrl; ?>" 
+      width="100%" 
+      height="600" 
+      frameborder="0">
+    </iframe>
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## 3. Handle Response
+
+### Redirect Response
+
+After payment, the customer is redirected to your `successUrl`, `failureUrl`, or `pendingUrl` with transaction details as URL parameters.
+
+### DMN Webhook (Recommended)
+
+Configure a webhook URL in `notificationUrl` to receive real-time payment notifications.
+
+<Warning>
+  Always verify payments using DMN webhooks. Client-side redirects can be manipulated.
+</Warning>
+
+Example DMN payload:
+
+```
+ppp_status=OK
+&PPP_TransactionID=1110000000004146935
+&Status=APPROVED
+&totalAmount=100
+&currency=USD
+&responseTimeStamp=20260129143022
+&advanceResponseChecksum=<checksum>
+```
+
+### Verify DMN Checksum
+
+```php
+<?php
+$secretKey = "your_secret_key";
+$expectedChecksum = hash('sha256', 
+    $secretKey . 
+    $_POST['ppp_status'] . 
+    $_POST['PPP_TransactionID'] . 
+    $_POST['totalAmount'] . 
+    $_POST['currency'] . 
+    $_POST['responseTimeStamp']
+);
+
+if ($expectedChecksum === $_POST['advanceResponseChecksum']) {
+    // Valid notification - process the payment
+} else {
+    // Invalid - reject
+}
+?>
+```
+
+---
+
+## Test Your Integration
+
+Use these test cards in sandbox:
+
+| Card Number | Result |
+|-------------|--------|
+| `4000027891380961` | Approved |
+| `4000020951595032` | Declined |
+| `4012001038443335` | 3DS Required |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization" icon="paintbrush" href="/integrations/payment-page/customization">
+    Customize the look and feel
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/integrations/features/webhooks">
+    Configure DMN notifications
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/rest-1/get-payment-page-url">
+    Full endpoint documentation
+  </Card>
+  <Card title="Go Live" icon="rocket" href="/resources/go-live">
+    Production checklist
+  </Card>
+</CardGroup>

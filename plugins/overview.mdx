@@ -1,0 +1,153 @@
+---
+title: "Plugins & Extensions"
+description: "Pre-built integrations for popular e-commerce platforms"
+---
+
+# Plugins & Extensions
+
+Integrate Nuvei payments into your e-commerce platform with our official plugins. Get up and running quickly without custom development.
+
+## Supported Platforms
+
+<CardGroup cols={2}>
+  <Card title="Magento 2" icon="magento" href="/plugins/magento">
+    Adobe Commerce / Magento Open Source
+  </Card>
+  <Card title="WooCommerce" icon="wordpress" href="/plugins/woocommerce">
+    WordPress e-commerce
+  </Card>
+  <Card title="Shopify" icon="shopify" href="/plugins/shopify">
+    Hosted e-commerce platform
+  </Card>
+  <Card title="PrestaShop" icon="store" href="/plugins/prestashop">
+    Open source e-commerce
+  </Card>
+  <Card title="OpenCart" icon="cart-shopping" href="/plugins/opencart">
+    PHP-based shopping cart
+  </Card>
+  <Card title="Salesforce Commerce" icon="salesforce" href="/plugins/salesforce">
+    B2C Commerce Cloud
+  </Card>
+</CardGroup>
+
+## Plugin Features
+
+All Nuvei plugins include:
+
+| Feature | Description |
+|---------|-------------|
+| Card Payments | Visa, Mastercard, Amex, and more |
+| 3D Secure 2.0 | PSD2 compliant authentication |
+| APMs | Local payment methods by region |
+| Tokenization | Save cards for returning customers |
+| Refunds | Process refunds from admin panel |
+| Webhooks | Automatic order status updates |
+| Multi-currency | Accept payments in local currencies |
+| Sandbox Mode | Test before going live |
+
+## Installation Overview
+
+<Steps>
+  <Step title="Download Plugin">
+    Get the plugin from your platform's marketplace or Nuvei's GitHub
+  </Step>
+  <Step title="Install">
+    Upload via your platform's admin panel or composer/npm
+  </Step>
+  <Step title="Configure">
+    Enter your Nuvei credentials (Merchant ID, Site ID, Secret Key)
+  </Step>
+  <Step title="Test">
+    Enable sandbox mode and process test transactions
+  </Step>
+  <Step title="Go Live">
+    Switch to production credentials
+  </Step>
+</Steps>
+
+## Platform-Specific Guides
+
+### Magento 2
+
+```bash
+# Install via Composer
+composer require nuvei/payments-magento-2
+bin/magento module:enable Nuvei_Payments
+bin/magento setup:upgrade
+bin/magento cache:flush
+```
+
+Configuration: **Stores** → **Configuration** → **Sales** → **Payment Methods** → **Nuvei**
+
+### WooCommerce
+
+1. Download from WordPress Plugin Directory
+2. Upload via **Plugins** → **Add New** → **Upload Plugin**
+3. Activate the plugin
+4. Configure at **WooCommerce** → **Settings** → **Payments** → **Nuvei**
+
+### Shopify
+
+1. Visit Shopify App Store
+2. Search for "Nuvei"
+3. Click **Add app**
+4. Follow the installation wizard
+5. Enter API credentials
+
+## Requirements
+
+<AccordionGroup>
+  <Accordion title="Magento 2" icon="magento">
+    - Magento 2.3.x or 2.4.x
+    - PHP 7.4+ or 8.1+
+    - OpenSSL extension
+    - cURL extension
+  </Accordion>
+  
+  <Accordion title="WooCommerce" icon="wordpress">
+    - WordPress 5.6+
+    - WooCommerce 5.0+
+    - PHP 7.4+
+    - SSL certificate
+  </Accordion>
+  
+  <Accordion title="Shopify" icon="shopify">
+    - Shopify Basic plan or higher
+    - Custom payment app approval
+  </Accordion>
+  
+  <Accordion title="PrestaShop" icon="store">
+    - PrestaShop 1.7.x or 8.x
+    - PHP 7.4+
+    - MySQL 5.6+
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="https://docs.nuvei.com/plugins">
+    Platform-specific guides
+  </Card>
+  <Card title="GitHub" icon="github" href="https://github.com/Nuvei">
+    Source code & issues
+  </Card>
+  <Card title="Support Portal" icon="headset" href="https://support.nuvei.com">
+    Technical support
+  </Card>
+  <Card title="Slack Community" icon="slack" href="https://nuvei-developers.slack.com">
+    Developer community
+  </Card>
+</CardGroup>
+
+## Coming Soon
+
+<Info>
+  Detailed plugin documentation for each platform is being added, including:
+  
+  - Step-by-step installation guides
+  - Configuration screenshots
+  - Troubleshooting common issues
+  - Customization options
+  - Upgrade guides
+</Info>

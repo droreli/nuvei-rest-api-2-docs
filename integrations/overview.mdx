@@ -1,0 +1,127 @@
+---
+title: "Integration Overview"
+description: "Choose the right Nuvei integration method for your business"
+---
+
+# Integration Overview
+
+Nuvei offers multiple integration methods to fit every use case, from quick launch to full customization.
+
+<CardGroup cols={2}>
+  <Card title="Payment Page" icon="browser" href="/integrations/payment-page/overview">
+    **Fastest integration** - Fully hosted checkout with IFrame or redirect
+  </Card>
+  <Card title="Simply Connect" icon="puzzle-piece" href="/integrations/simply-connect/overview">
+    **Embedded checkout** - Out-of-the-box UI hosted on your page
+  </Card>
+  <Card title="Web SDK" icon="code" href="/integrations/web-sdk-1/overview">
+    **Full UX control** - Embed Nuvei fields in your custom UI
+  </Card>
+  <Card title="REST API" icon="server" href="/integrations/rest-api-1/overview">
+    **Direct integration** - Server-to-server for full control
+  </Card>
+</CardGroup>
+
+## Integration Comparison
+
+| Feature | Payment Page | Simply Connect | Web SDK | REST API |
+|---------|-------------|----------------|---------|----------|
+| **Complexity** | Very Low | Low | Medium | High |
+| **UI Control** | Limited | Good | Full | N/A (backend) |
+| **PCI Scope** | None | None | None | SAQ-D Required |
+| **Time to Launch** | Days | Days | Weeks | Weeks |
+| **3DS Handling** | Automatic | Automatic | Automatic | Manual |
+| **APM Support** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+
+## Which Integration Should You Choose?
+
+<AccordionGroup>
+  <Accordion title="I want the fastest integration" icon="rocket">
+    **Use Payment Page (Cashier)**
+    
+    - Entire checkout hosted by Nuvei
+    - IFrame or full page redirect
+    - Basic customization via Page Builder
+    - Perfect for: Gaming, Forex, quick launches
+    
+    [Get Started →](/integrations/payment-page/overview)
+  </Accordion>
+  
+  <Accordion title="I want embedded checkout with easy customization" icon="wand-magic-sparkles">
+    **Use Simply Connect**
+    
+    - Hosted directly on your page (no redirect)
+    - Full CSS customization
+    - Event callbacks for payment flow control
+    - Perfect for: E-commerce, SaaS, subscriptions
+    
+    [Get Started →](/integrations/simply-connect/overview)
+  </Accordion>
+  
+  <Accordion title="I want full control over checkout UX" icon="paintbrush">
+    **Use Web SDK**
+    
+    - Embed Nuvei-hosted card fields in your HTML
+    - Complete control over payment page design
+    - PCI descoped with Nuvei Fields
+    - Perfect for: Custom checkouts, branded experiences
+    
+    [Get Started →](/integrations/web-sdk-1/overview)
+  </Accordion>
+  
+  <Accordion title="I need server-to-server integration" icon="server">
+    **Use REST API (Server-to-Server)**
+    
+    - Direct API calls from your backend
+    - Full control over entire payment flow
+    - Requires PCI SAQ-D compliance
+    - Perfect for: Multi-PSP setups, complex workflows
+    
+    [Get Started →](/integrations/rest-api-1/overview)
+  </Accordion>
+</AccordionGroup>
+
+## API Versions
+
+Nuvei offers two API versions:
+
+<Tabs>
+  <Tab title="REST API 1.0 (Stable)">
+    The primary production API used by Payment Page, Simply Connect, and Web SDK 1.0.
+    
+    **Authentication**: Session token via `/openOrder` or `/getSessionToken`
+    
+    **Base URL**: `https://secure.safecharge.com/ppp/api/v1/`
+    
+    [REST API 1.0 Docs →](/integrations/rest-api-1/overview)
+  </Tab>
+  <Tab title="REST API 2.0 (Beta)">
+    Modern RESTful API with simplified authentication, used with Web SDK 2.0.
+    
+    **Authentication**: API key in header (`x-api-key`)
+    
+    **Base URL**: `https://api.nuvei.com/`
+    
+    [REST API 2.0 Docs →](/rest-2/introduction)
+  </Tab>
+</Tabs>
+
+## SDK Versions
+
+| SDK | API Backend | Status |
+|-----|------------|--------|
+| **Web SDK 1.0** | REST API 1.0 | Stable (Production) |
+| **Web SDK 2.0** | REST API 2.0 | Beta |
+
+## Common Features
+
+All integration methods support these features:
+
+- **3D Secure 2.0** - Automatic or manual 3DS flows
+- **Tokenization** - Save cards for returning customers
+- **APMs** - 200+ alternative payment methods
+- **Digital Wallets** - Apple Pay, Google Pay, PayPal
+- **Recurring Payments** - Subscriptions and rebilling
+- **Webhooks (DMN)** - Real-time payment notifications
+
+[Learn about common features →](/integrations/features/3ds)

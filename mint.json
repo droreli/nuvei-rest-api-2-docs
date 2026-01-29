@@ -27,6 +27,10 @@
   },
   "tabs": [
     {
+      "name": "Integrations",
+      "url": "integrations"
+    },
+    {
       "name": "REST API 2.0",
       "url": "rest-2"
     },
@@ -35,8 +39,16 @@
       "url": "api-reference"
     },
     {
-      "name": "Legacy Docs",
-      "url": "legacy"
+      "name": "APMs",
+      "url": "apms"
+    },
+    {
+      "name": "Plugins",
+      "url": "plugins"
+    },
+    {
+      "name": "Resources",
+      "url": "resources"
     }
   ],
   "anchors": [
@@ -56,6 +68,58 @@
       "group": "Home",
       "pages": [
         "portal/choose-integration"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/overview"
+      ]
+    },
+    {
+      "group": "Payment Page",
+      "pages": [
+        "integrations/payment-page/overview",
+        "integrations/payment-page/quickstart"
+      ]
+    },
+    {
+      "group": "Simply Connect",
+      "pages": [
+        "integrations/simply-connect/overview",
+        "integrations/simply-connect/quickstart"
+      ]
+    },
+    {
+      "group": "Web SDK 1.0",
+      "pages": [
+        "integrations/web-sdk-1/overview",
+        "integrations/web-sdk-1/quickstart"
+      ]
+    },
+    {
+      "group": "Web SDK 2.0",
+      "pages": [
+        "integrations/web-sdk-2/overview",
+        "integrations/web-sdk-2/quickstart"
+      ]
+    },
+    {
+      "group": "REST API 1.0",
+      "pages": [
+        "integrations/rest-api-1/overview",
+        "integrations/rest-api-1/quickstart",
+        "integrations/rest-api-1/3ds"
+      ]
+    },
+    {
+      "group": "Features",
+      "pages": [
+        "integrations/features/3ds",
+        "integrations/features/tokenization",
+        "integrations/features/recurring",
+        "integrations/features/webhooks",
+        "integrations/features/payouts"
       ]
     },
     {
@@ -119,7 +183,7 @@
       ]
     },
     {
-      "group": "Resources",
+      "group": "REST 2.0 Resources",
       "pages": [
         "rest-2/testing",
         "rest-2/error-codes",
@@ -150,11 +214,23 @@
       ]
     },
     {
-      "group": "Legacy Documentation",
+      "group": "Alternative Payment Methods",
       "pages": [
-        "legacy/rest-1",
-        "legacy/web-sdk",
-        "legacy/simply-connect"
+        "apms/overview"
+      ]
+    },
+    {
+      "group": "Plugins & Extensions",
+      "pages": [
+        "plugins/overview"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "resources/testing",
+        "resources/troubleshooting",
+        "resources/glossary"
       ]
     }
   ],

@@ -1,0 +1,404 @@
+---
+title: "Simply Connect Quick Start"
+description: "Integrate Simply Connect checkout in 10 minutes"
+---
+
+# Quick Start to Simply Connect
+
+This guide walks you through integrating Simply Connect's `checkout()` method into your payment page.
+
+<Info>
+  **Time to complete**: ~10 minutes
+</Info>
+
+## Prerequisites
+
+- Nuvei merchant account (sandbox for testing)
+- Your credentials: `merchantId`, `merchantSiteId`, `secretKey`
+- Basic HTML/JavaScript knowledge
+
+<Tip>
+  Find your credentials in the [Control Panel](https://sandbox.nuvei.com/settings/my_payment_settings)
+</Tip>
+
+<Card title="Try the Demo" icon="play" href="https://demos.nuvei.com/simplyconnectdemo/">
+  Visit our Simply Connect demo site to see it in action
+</Card>
+
+---
+
+## 1. Initiate a Session (Backend)
+
+The customer begins the payment process by pressing your Checkout button. First, initiate a session by calling `/openOrder` from your **backend server**.
+
+<Warning>
+  This call must be performed server-side. Never expose your `secretKey` on the frontend.
+</Warning>
+
+### Calculate Checksum
+
+Concatenate these fields (no spaces/separators) and calculate SHA-256:
+
+```
+merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey
+```
+
+### Example Request
+
+<CodeGroup>
+```json JSON
+{
+  "merchantId": "<your merchantId>",
+  "merchantSiteId": "<your merchantSiteId>",
+  "clientUniqueId": "<unique transaction ID in your system>",
+  "clientRequestId": "<unique request ID>",
+  "currency": "USD",
+  "amount": "200",
+  "timeStamp": "<YYYYMMDDHHmmss>",
+  "checksum": "<calculated checksum>"
+}
+```
+
+```php PHP
+<?php
+$merchantId = "your_merchant_id";
+$merchantSiteId = "your_site_id";
+$secretKey = "your_secret_key";
+$clientRequestId = uniqid();
+$amount = "200";
+$currency = "USD";
+$timeStamp = date("YmdHis");
+
+// Calculate checksum
+$checksumString = $merchantId . $merchantSiteId . $clientRequestId . $amount . $currency . $timeStamp . $secretKey;
+$checksum = hash('sha256', $checksumString);
+
+$payload = [
+    "merchantId" => $merchantId,
+    "merchantSiteId" => $merchantSiteId,
+    "clientRequestId" => $clientRequestId,
+    "clientUniqueId" => "order_" . time(),
+    "currency" => $currency,
+    "amount" => $amount,
+    "timeStamp" => $timeStamp,
+    "checksum" => $checksum
+];
+
+$ch = curl_init("https://ppp-test.nuvei.com/ppp/api/v1/openOrder.do");
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$result = json_decode($response, true);
+
+// Return sessionToken to frontend
+echo json_encode(['sessionToken' => $result['sessionToken']]);
+?>
+```
+
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+const merchantId = 'your_merchant_id';
+const merchantSiteId = 'your_site_id';
+const secretKey = 'your_secret_key';
+const clientRequestId = Date.now().toString();
+const amount = '200';
+const currency = 'USD';
+const timeStamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+// Calculate checksum
+const checksumString = merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + secretKey;
+const checksum = crypto.createHash('sha256').update(checksumString).digest('hex');
+
+const payload = {
+  merchantId,
+  merchantSiteId,
+  clientRequestId,
+  clientUniqueId: `order_${Date.now()}`,
+  currency,
+  amount,
+  timeStamp,
+  checksum
+};
+
+const response = await axios.post(
+  'https://ppp-test.nuvei.com/ppp/api/v1/openOrder.do',
+  payload,
+  { headers: { 'Content-Type': 'application/json' } }
+);
+
+// Return sessionToken to frontend
+const sessionToken = response.data.sessionToken;
+```
+</CodeGroup>
+
+### Example Response
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "orderId": "39272",
+  "merchantId": "<your merchantId>",
+  "merchantSiteId": "<your merchantSiteId>",
+  "clientUniqueId": "12345",
+  "clientRequestId": "1484759782197",
+  "internalRequestId": 866,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+---
+
+## 2. Create HTML Placeholder (Frontend)
+
+Add the Simply Connect JavaScript library and create a container for the checkout UI.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <meta charset="utf-8" />
+  <!-- Import Simply Connect library -->
+  <script src="https://cdn.safecharge.com/safecharge_resources/v1/checkout/checkout.js"></script>
+</head>
+<body>
+  
+  <!-- Checkout container -->
+  <div id="checkout" style="width: 400px; height: 600px; border: 1px solid #d3dce6;">
+    <p>Loading checkout...</p>
+  </div>
+  
+  <script>
+    // checkout() will be called here (Step 3)
+  </script>
+  
+</body>
+</html>
+```
+
+<Tip>
+  Customize the container with CSS to match your site's design. Simply Connect will render the payment form inside this container.
+</Tip>
+
+---
+
+## 3. Call `checkout()` (Frontend)
+
+Invoke the `checkout()` method with the `sessionToken` from Step 1:
+
+```javascript
+// Clear the container
+document.getElementById('checkout').innerHTML = "";
+
+// Call checkout
+checkout({
+  sessionToken: "<sessionToken from /openOrder>",
+  env: 'int',  // 'int' for sandbox, 'prod' for production
+  merchantId: '<your merchantId>',
+  merchantSiteId: '<your merchantSiteId>',
+  
+  // Transaction details
+  country: 'US',
+  locale: 'en_US',
+  currency: 'USD',
+  amount: 200,
+  
+  // Customer info
+  fullName: 'John Smith',
+  email: 'john.smith@email.com',
+  billingAddress: {
+    email: 'john.smith@email.com',
+    country: 'US'
+  },
+  
+  // Render to container
+  renderTo: '#checkout',
+  
+  // Handle result
+  onResult: function(result) {
+    console.log('Payment result:', result);
+    if (result.result === 'APPROVED') {
+      alert('Payment successful!');
+      // Send to your server for verification
+    } else {
+      alert('Payment failed: ' + result.errorDescription);
+    }
+  }
+});
+```
+
+### Full Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <meta charset="utf-8" />
+  <script src="https://cdn.safecharge.com/safecharge_resources/v1/checkout/checkout.js"></script>
+</head>
+<body>
+  
+  <h1>Complete Your Purchase</h1>
+  <div id="checkout" style="width: 400px; height: 600px; border: 1px solid #d3dce6;"></div>
+  
+  <script>
+    // Get sessionToken from your backend
+    fetch('/api/create-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: 200, currency: 'USD' })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Initialize checkout
+      checkout({
+        sessionToken: data.sessionToken,
+        env: 'int',
+        merchantId: data.merchantId,
+        merchantSiteId: data.merchantSiteId,
+        country: 'US',
+        locale: 'en_US',
+        currency: 'USD',
+        amount: 200,
+        fullName: 'John Smith',
+        email: 'john.smith@email.com',
+        billingAddress: {
+          email: 'john.smith@email.com',
+          country: 'US'
+        },
+        renderTo: '#checkout',
+        onResult: function(result) {
+          console.log('Payment result:', result);
+          // Verify payment on server side
+          fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              sessionToken: data.sessionToken,
+              transactionId: result.transactionId 
+            })
+          });
+        }
+      });
+    });
+  </script>
+  
+</body>
+</html>
+```
+
+---
+
+## 4. Response Verification (Backend)
+
+<Warning>
+  **Critical**: Always verify payments server-side. Client-side responses can be manipulated.
+</Warning>
+
+### Option A: DMN Webhook (Recommended)
+
+Configure a webhook URL to receive Direct Merchant Notifications:
+
+```
+ppp_status=OK
+&PPP_TransactionId=547
+&TransactionId=1110000000004146935
+&totalAmount=200
+&currency=USD
+&Status=APPROVED
+```
+
+<Tip>
+  DMNs are especially important for async APM transactions, which may return results hours later.
+</Tip>
+
+### Option B: `/getPaymentStatus` API
+
+Call `/getPaymentStatus` using the `sessionToken`:
+
+<CodeGroup>
+```json Request
+{
+  "sessionToken": "274ff0d9-c859-42f5-ae57-997641f93471"
+}
+```
+
+```json Response
+{
+  "transactionStatus": "APPROVED",
+  "gwExtendedErrorCode": 0,
+  "errorCode": 0,
+  "reason": "",
+  "authCode": "075449",
+  "clientRequestId": "9WD9JCZW9",
+  "transactionId": "2110000000001496240",
+  "amount": "200",
+  "currency": "USD",
+  "merchantId": "<your merchantId>",
+  "merchantSiteId": "<your merchantSiteId>",
+  "version": "1.0"
+}
+```
+</CodeGroup>
+
+<Note>
+  `/getPaymentStatus` can only be called while the session is open. Use DMN for reliable verification.
+</Note>
+
+---
+
+## Test Cards
+
+| Card Number | Result |
+|-------------|--------|
+| `4000027891380961` | Approved |
+| `4000020951595032` | Declined |
+| `4012001038443335` | 3DS Required |
+
+---
+
+## `checkout()` Response
+
+```json
+{
+  "result": "APPROVED",
+  "errCode": 0,
+  "errorDescription": "",
+  "userPaymentOptionId": "14958143",
+  "ccCardNumber": "5****5761",
+  "bin": "511142",
+  "last4Digits": "5761",
+  "ccExpMonth": "09",
+  "ccExpYear": "26",
+  "transactionId": "1110000000004146935",
+  "transactionStatus": "APPROVED"
+}
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="UI Customization" icon="paintbrush" href="/integrations/simply-connect/ui-customization">
+    Style checkout to match your brand
+  </Card>
+  <Card title="Payment Customization" icon="credit-card" href="/integrations/simply-connect/payment-customization">
+    Control payment methods and flow
+  </Card>
+  <Card title="Event Callbacks" icon="bell" href="/integrations/simply-connect/event-callbacks">
+    Hook into payment events
+  </Card>
+  <Card title="JSFiddle Examples" icon="code" href="/integrations/simply-connect/examples">
+    Interactive code examples
+  </Card>
+</CardGroup>

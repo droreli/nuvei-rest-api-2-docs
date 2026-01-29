@@ -1,0 +1,284 @@
+---
+title: "Testing Guide"
+description: "Test your Nuvei integration in sandbox environment"
+---
+
+# Testing Guide
+
+Test your Nuvei integration thoroughly before going live. Use sandbox credentials and test cards to simulate various payment scenarios.
+
+## Sandbox Environment
+
+| Environment | Base URL |
+|-------------|----------|
+| REST API 1.0 | `https://ppp-test.nuvei.com/ppp/api/v1` |
+| REST API 2.0 | `https://api-sandbox.nuvei.com` |
+| Payment Page | `https://ppp-test.nuvei.com` |
+
+<Note>
+  Sandbox credentials are different from production. Contact your account manager or use the Control Panel to get sandbox credentials.
+</Note>
+
+## Test Cards
+
+### Successful Transactions
+
+| Card Number | Brand | Scenario |
+|-------------|-------|----------|
+| 4111111111111111 | Visa | Approved |
+| 5111111111111118 | Mastercard | Approved |
+| 374245455400126 | Amex | Approved |
+| 36000000000008 | Diners | Approved |
+
+### Decline Scenarios
+
+| Card Number | Brand | Scenario |
+|-------------|-------|----------|
+| 4000000000000002 | Visa | Generic Decline |
+| 4000000000000069 | Visa | Expired Card |
+| 4000000000000119 | Visa | Insufficient Funds |
+| 4000000000000127 | Visa | Invalid CVV |
+| 4000000000000036 | Visa | Lost Card |
+| 4000000000000044 | Visa | Stolen Card |
+
+### 3D Secure Test Cards
+
+| Card Number | Scenario | Challenge |
+|-------------|----------|-----------|
+| 4012001037141112 | Frictionless - Authenticated | None |
+| 4012001038443335 | Challenge - Authenticated | Yes |
+| 4012001037167778 | Frictionless - Not Authenticated | None |
+| 4012001037461114 | Challenge - Not Authenticated | Yes |
+
+### Card Details
+
+For all test cards:
+- **Expiration Date**: Any future date (e.g., 12/2030)
+- **CVV**: Any 3 digits (e.g., 123), 4 digits for Amex
+- **Cardholder Name**: Any name
+
+## Testing Scenarios
+
+### Basic Payment Flow
+
+<Steps>
+  <Step title="Create Session">
+    Call `/openOrder` or `POST /orders` to get a session token
+  </Step>
+  <Step title="Process Payment">
+    Submit a payment with test card 4111111111111111
+  </Step>
+  <Step title="Verify Response">
+    Check `transactionStatus: "APPROVED"`
+  </Step>
+  <Step title="Check DMN">
+    Verify webhook received with matching transaction details
+  </Step>
+</Steps>
+
+### 3D Secure Testing
+
+<AccordionGroup>
+  <Accordion title="Frictionless Flow" icon="bolt">
+    1. Use card 4012001037141112
+    2. Submit payment with 3DS enabled
+    3. Transaction completes without customer challenge
+    4. Verify `threeDSAuthenticatorAuthenticationResponse: "Y"`
+  </Accordion>
+  
+  <Accordion title="Challenge Flow" icon="shield">
+    1. Use card 4012001038443335
+    2. Submit payment with 3DS enabled
+    3. Customer redirected to challenge page
+    4. Complete OTP (use any 6 digits in sandbox)
+    5. Verify successful authentication
+  </Accordion>
+  
+  <Accordion title="Authentication Failure" icon="xmark">
+    1. Use card 4012001037167778
+    2. Submit payment with 3DS enabled
+    3. Authentication fails
+    4. Transaction may still process (liability on merchant)
+  </Accordion>
+</AccordionGroup>
+
+### Error Testing
+
+Test error handling by triggering specific scenarios:
+
+```javascript
+// Test insufficient funds
+const result = await processPayment({
+  cardNumber: '4000000000000119',
+  // ... other details
+});
+
+if (result.transactionStatus === 'DECLINED') {
+  // Handle decline properly
+  console.log('Reason:', result.gwErrorReason);
+}
+```
+
+## APM Testing
+
+### iDEAL (Netherlands)
+
+1. Select iDEAL as payment method
+2. Redirected to test bank selection
+3. Choose any bank
+4. Use test credentials (usually auto-filled)
+5. Complete authorization
+6. Redirected back to merchant
+
+### PayPal
+
+1. Use PayPal sandbox account
+2. Login with sandbox buyer credentials
+3. Complete payment
+4. Verify webhook received
+
+## Webhook Testing
+
+### Local Development
+
+Use tools like ngrok to receive webhooks locally:
+
+```bash
+# Install ngrok
+brew install ngrok
+
+# Expose local port
+ngrok http 3000
+
+# Use the generated URL as your notificationUrl
+# https://abc123.ngrok.io/webhooks/nuvei
+```
+
+### Webhook Verification
+
+Always verify the checksum:
+
+```javascript
+function verifyWebhook(params, secretKey) {
+  const expectedChecksum = crypto
+    .createHash('sha256')
+    .update(
+      secretKey +
+      params.totalAmount +
+      params.currency +
+      params.responseTimeStamp +
+      params.PPP_TransactionID +
+      params.Status +
+      (params.productId || '')
+    )
+    .digest('hex');
+  
+  return expectedChecksum === params.advanceResponseChecksum;
+}
+```
+
+## Testing Checklist
+
+Before going live, verify:
+
+<AccordionGroup>
+  <Accordion title="Payment Processing" icon="credit-card">
+    - [ ] Successful card payment
+    - [ ] Card decline handling
+    - [ ] 3DS frictionless flow
+    - [ ] 3DS challenge flow
+    - [ ] APM payments (if applicable)
+  </Accordion>
+  
+  <Accordion title="Post-Payment Operations" icon="rotate">
+    - [ ] Full refund
+    - [ ] Partial refund
+    - [ ] Void/Cancel
+    - [ ] Settlement (for Auth transactions)
+  </Accordion>
+  
+  <Accordion title="Webhooks" icon="bell">
+    - [ ] Receive and verify DMN
+    - [ ] Handle duplicate DMNs (idempotency)
+    - [ ] Process async APM notifications
+    - [ ] Return HTTP 200 properly
+  </Accordion>
+  
+  <Accordion title="Error Handling" icon="triangle-exclamation">
+    - [ ] Display user-friendly error messages
+    - [ ] Log errors for debugging
+    - [ ] Handle timeout scenarios
+    - [ ] Retry logic for network failures
+  </Accordion>
+  
+  <Accordion title="Security" icon="lock">
+    - [ ] Checksum verification
+    - [ ] HTTPS everywhere
+    - [ ] No sensitive data in logs
+    - [ ] PCI compliance verified
+  </Accordion>
+</AccordionGroup>
+
+## Debug Tools
+
+### Transaction Lookup
+
+Use the Control Panel or API to look up transactions:
+
+```json
+POST /ppp/api/v1/getPaymentStatus.do
+
+{
+  "sessionToken": "<sessionToken>"
+}
+```
+
+### Logging Best Practices
+
+```javascript
+// Log request (sanitized)
+console.log('Payment request:', {
+  amount: payload.amount,
+  currency: payload.currency,
+  clientUniqueId: payload.clientUniqueId,
+  cardLast4: payload.paymentOption?.card?.cardNumber?.slice(-4)
+});
+
+// Log response
+console.log('Payment response:', {
+  transactionId: response.transactionId,
+  status: response.transactionStatus,
+  errorCode: response.gwErrorCode,
+  errorReason: response.gwErrorReason
+});
+```
+
+## Going Live
+
+<Warning>
+  Before switching to production:
+  
+  1. Complete all testing scenarios
+  2. Replace sandbox credentials with production
+  3. Update base URLs to production endpoints
+  4. Enable 3D Secure for all transactions
+  5. Set up production webhook URLs
+  6. Test one small transaction in production
+</Warning>
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="Error Codes" icon="code" href="/resources/troubleshooting">
+    Common errors and solutions
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/integrations/features/webhooks">
+    DMN configuration
+  </Card>
+  <Card title="3D Secure" icon="shield" href="/integrations/features/3ds">
+    3DS testing details
+  </Card>
+  <Card title="Control Panel" icon="gear" href="https://sandbox.nuvei.com">
+    Sandbox management
+  </Card>
+</CardGroup>

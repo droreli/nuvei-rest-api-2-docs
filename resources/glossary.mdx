@@ -1,0 +1,277 @@
+---
+title: "Glossary"
+description: "Payment industry terminology and Nuvei-specific terms"
+---
+
+# Glossary
+
+A comprehensive guide to payment industry terminology and Nuvei-specific terms.
+
+## A
+
+<AccordionGroup>
+  <Accordion title="Acquirer" icon="building-columns">
+    A financial institution (bank) that processes card payments on behalf of merchants. Also called "acquiring bank" or "merchant bank." Nuvei acts as an acquirer in many regions.
+  </Accordion>
+  
+  <Accordion title="APM (Alternative Payment Method)" icon="wallet">
+    Any payment method other than traditional credit/debit cards. Includes bank transfers (iDEAL, SEPA), digital wallets (PayPal, Apple Pay), Buy Now Pay Later (Klarna), and cash-based methods (OXXO).
+  </Accordion>
+  
+  <Accordion title="Auth (Authorization)" icon="shield-check">
+    A transaction type that reserves funds on a cardholder's account without capturing them. The merchant can later settle (capture) the full or partial amount.
+  </Accordion>
+  
+  <Accordion title="AVS (Address Verification Service)" icon="map-location">
+    A fraud prevention measure that verifies the billing address provided by the customer matches the address on file with the card issuer.
+  </Accordion>
+</AccordionGroup>
+
+## B
+
+<AccordionGroup>
+  <Accordion title="BIN (Bank Identification Number)" icon="hashtag">
+    The first 6-8 digits of a card number that identify the issuing bank and card type. Example: 411111 identifies Visa cards issued by certain banks.
+  </Accordion>
+  
+  <Accordion title="BNPL (Buy Now Pay Later)" icon="clock">
+    A payment method allowing customers to split purchases into installments, often interest-free. Examples: Klarna, Afterpay, Affirm.
+  </Accordion>
+</AccordionGroup>
+
+## C
+
+<AccordionGroup>
+  <Accordion title="Capture" icon="hand-holding-dollar">
+    The process of collecting funds from an authorized transaction. Also called "settlement."
+  </Accordion>
+  
+  <Accordion title="Card Not Present (CNP)" icon="globe">
+    A transaction where the physical card is not present, typically e-commerce or phone orders. Higher fraud risk than Card Present transactions.
+  </Accordion>
+  
+  <Accordion title="Chargeback" icon="rotate-left">
+    A transaction reversal initiated by the cardholder's bank, typically due to fraud claims or disputes. Merchants may lose the transaction amount plus fees.
+  </Accordion>
+  
+  <Accordion title="Checksum" icon="shield">
+    A hash value calculated from request parameters and a secret key. Used by Nuvei REST API 1.0 to verify request authenticity.
+  </Accordion>
+  
+  <Accordion title="CIT (Customer-Initiated Transaction)" icon="user">
+    A transaction initiated by the customer in real-time, typically requiring 3DS authentication.
+  </Accordion>
+  
+  <Accordion title="CVV/CVC" icon="lock">
+    Card Verification Value/Code - the 3-4 digit security code on the back (or front for Amex) of a card.
+  </Accordion>
+</AccordionGroup>
+
+## D
+
+<AccordionGroup>
+  <Accordion title="DMN (Direct Merchant Notification)" icon="bell">
+    Nuvei's webhook system that sends real-time notifications to merchants when payment events occur. Also called IPN or callback.
+  </Accordion>
+  
+  <Accordion title="Dynamic Descriptor" icon="tag">
+    The merchant name and details that appear on customer bank statements. Can be customized per transaction.
+  </Accordion>
+</AccordionGroup>
+
+## E
+
+<AccordionGroup>
+  <Accordion title="EMV" icon="microchip">
+    Europay, Mastercard, Visa - the global standard for chip-based card payments. Named after the three companies that developed it.
+  </Accordion>
+</AccordionGroup>
+
+## F
+
+<AccordionGroup>
+  <Accordion title="Frictionless Flow" icon="bolt">
+    A 3DS 2.0 authentication flow where the customer is authenticated without a challenge, based on risk analysis. Results in a seamless checkout experience.
+  </Accordion>
+</AccordionGroup>
+
+## G
+
+<AccordionGroup>
+  <Accordion title="Gateway" icon="door-open">
+    A service that securely transmits payment data between merchant and processor/acquirer. Nuvei provides gateway services.
+  </Accordion>
+</AccordionGroup>
+
+## I
+
+<AccordionGroup>
+  <Accordion title="Issuer" icon="credit-card">
+    The bank that issued the payment card to the customer. Responsible for approving/declining transactions.
+  </Accordion>
+</AccordionGroup>
+
+## L
+
+<AccordionGroup>
+  <Accordion title="Liability Shift" icon="scale-balanced">
+    When fraud liability transfers from merchant to issuer upon successful 3DS authentication.
+  </Accordion>
+</AccordionGroup>
+
+## M
+
+<AccordionGroup>
+  <Accordion title="MCC (Merchant Category Code)" icon="store">
+    A 4-digit code assigned to businesses based on their primary goods or services. Affects interchange rates and card restrictions.
+  </Accordion>
+  
+  <Accordion title="MIT (Merchant-Initiated Transaction)" icon="server">
+    A transaction initiated by the merchant without customer interaction, such as recurring payments or delayed charges. Often exempt from SCA.
+  </Accordion>
+  
+  <Accordion title="MOR (Merchant of Record)" icon="receipt">
+    The entity responsible for processing payments and appearing on customer statements. Takes on financial responsibility for transactions.
+  </Accordion>
+</AccordionGroup>
+
+## N
+
+<AccordionGroup>
+  <Accordion title="Network Token" icon="key">
+    A card number replacement provided by card networks (Visa, Mastercard) for secure recurring transactions. Automatically updates when cards are reissued.
+  </Accordion>
+</AccordionGroup>
+
+## O
+
+<AccordionGroup>
+  <Accordion title="OCT (Original Credit Transaction)" icon="arrow-right">
+    A transaction that pushes funds to a card (payout) rather than pulling funds. Used for refunds to different cards, marketplace payouts, etc.
+  </Accordion>
+</AccordionGroup>
+
+## P
+
+<AccordionGroup>
+  <Accordion title="PAN (Primary Account Number)" icon="hashtag">
+    The full card number (typically 16 digits) embossed on a payment card.
+  </Accordion>
+  
+  <Accordion title="Payout" icon="money-bill-transfer">
+    Sending funds to a customer via their card or bank account. Opposite of a payment/deposit.
+  </Accordion>
+  
+  <Accordion title="PCI DSS" icon="shield-halved">
+    Payment Card Industry Data Security Standard - security requirements for handling card data. Compliance level depends on transaction volume and card data handling.
+  </Accordion>
+  
+  <Accordion title="PSD2" icon="landmark">
+    Payment Services Directive 2 - European regulation requiring Strong Customer Authentication (SCA) for electronic payments.
+  </Accordion>
+</AccordionGroup>
+
+## R
+
+<AccordionGroup>
+  <Accordion title="Recurring Payment" icon="repeat">
+    A scheduled, repeat transaction charged to a customer at regular intervals (subscriptions).
+  </Accordion>
+  
+  <Accordion title="Refund" icon="rotate-left">
+    Returning funds to a customer after a successful transaction. Can be full or partial.
+  </Accordion>
+</AccordionGroup>
+
+## S
+
+<AccordionGroup>
+  <Accordion title="Sale" icon="shopping-cart">
+    A transaction type that authorizes and captures funds in a single request.
+  </Accordion>
+  
+  <Accordion title="SCA (Strong Customer Authentication)" icon="user-shield">
+    PSD2 requirement for two-factor authentication using: something you know (PIN), something you have (phone), or something you are (biometrics).
+  </Accordion>
+  
+  <Accordion title="Session Token" icon="ticket">
+    A temporary token from Nuvei's `/openOrder` endpoint used to authenticate payment requests.
+  </Accordion>
+  
+  <Accordion title="Settlement" icon="building-columns">
+    The process of transferring funds from the customer's bank to the merchant's bank. Also refers to capturing an authorized transaction.
+  </Accordion>
+  
+  <Accordion title="Simply Connect" icon="code">
+    Nuvei's embedded checkout solution that provides a customizable payment form within your site.
+  </Accordion>
+</AccordionGroup>
+
+## T
+
+<AccordionGroup>
+  <Accordion title="3D Secure (3DS)" icon="shield">
+    A security protocol for authenticating online card transactions. Version 2.0 supports frictionless authentication and is required for PSD2/SCA compliance.
+  </Accordion>
+  
+  <Accordion title="Tokenization" icon="key">
+    Replacing sensitive card data with a non-sensitive token. Enables recurring payments without storing actual card numbers.
+  </Accordion>
+  
+  <Accordion title="Transaction ID" icon="fingerprint">
+    Unique identifier assigned by Nuvei to each transaction. Used for lookups, refunds, and support inquiries.
+  </Accordion>
+</AccordionGroup>
+
+## U
+
+<AccordionGroup>
+  <Accordion title="UPO (User Payment Option)" icon="wallet">
+    Nuvei's term for a saved payment method (tokenized card or APM) associated with a user. Identified by `userPaymentOptionId`.
+  </Accordion>
+</AccordionGroup>
+
+## V
+
+<AccordionGroup>
+  <Accordion title="Void" icon="ban">
+    Canceling an authorized transaction before settlement. No funds are captured.
+  </Accordion>
+</AccordionGroup>
+
+## W
+
+<AccordionGroup>
+  <Accordion title="Webhook" icon="bell">
+    Server-to-server HTTP notification sent when events occur. Also called DMN, IPN, or callback.
+  </Accordion>
+  
+  <Accordion title="Web SDK" icon="code">
+    Nuvei's JavaScript library for building custom payment forms while maintaining PCI compliance by handling card data securely.
+  </Accordion>
+</AccordionGroup>
+
+## Nuvei-Specific Terms
+
+| Term | Description |
+|------|-------------|
+| `merchantId` | Your unique Nuvei merchant identifier |
+| `merchantSiteId` | Identifier for a specific website/app under your merchant account |
+| `clientRequestId` | Your unique identifier for each API request |
+| `clientUniqueId` | Your unique identifier for each transaction (order) |
+| `userTokenId` | Identifier for a customer in your system |
+| `userPaymentOptionId` | ID of a saved payment method (UPO) |
+| `transactionId` | Nuvei's unique transaction identifier |
+| `authCode` | Authorization code from the issuer |
+| `sessionToken` | Temporary authentication token from /openOrder |
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="Integration Overview" icon="book" href="/integrations/overview">
+    Choose your integration method
+  </Card>
+  <Card title="Testing Guide" icon="vial" href="/resources/testing">
+    Test cards and scenarios
+  </Card>
+</CardGroup>

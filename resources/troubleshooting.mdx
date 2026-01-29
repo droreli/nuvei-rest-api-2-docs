@@ -1,0 +1,273 @@
+---
+title: "Troubleshooting"
+description: "Common issues and solutions for Nuvei integrations"
+---
+
+# Troubleshooting
+
+Find solutions to common integration issues and error codes.
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Payment Declined" icon="credit-card">
+    **Symptoms**: `transactionStatus: "DECLINED"`
+    
+    **Possible Causes**:
+    - Insufficient funds on card
+    - Card expired
+    - Invalid CVV
+    - Card blocked by issuer
+    - Exceeds velocity limits
+    
+    **Solutions**:
+    1. Check `gwErrorReason` and `paymentMethodErrorReason` for details
+    2. Display user-friendly message asking to try another card
+    3. For test cards, ensure using correct test card number
+  </Accordion>
+  
+  <Accordion title="Invalid Checksum" icon="shield">
+    **Symptoms**: `errCode: -1`, `reason: "Invalid checksum"`
+    
+    **Possible Causes**:
+    - Wrong order of parameters in checksum
+    - Using wrong secret key
+    - Encoding issues in string concatenation
+    - Extra spaces or characters
+    
+    **Solutions**:
+    1. Verify parameter order matches documentation
+    2. Ensure using correct secret key for environment
+    3. Check for UTF-8 encoding issues
+    4. Log the raw checksum string before hashing
+    
+    ```javascript
+    // Debug checksum
+    const checksumString = merchantId + merchantSiteId + clientRequestId + 
+                          amount + currency + timeStamp + secretKey;
+    console.log('Checksum input:', checksumString);
+    console.log('Generated:', crypto.createHash('sha256').update(checksumString).digest('hex'));
+    ```
+  </Accordion>
+  
+  <Accordion title="Session Token Expired" icon="clock">
+    **Symptoms**: `errCode: -6`, `reason: "Invalid session token"`
+    
+    **Possible Causes**:
+    - Session token expired (15 minutes default)
+    - Session already used
+    - Wrong environment credentials
+    
+    **Solutions**:
+    1. Generate new session token via `/openOrder`
+    2. Don't reuse session tokens
+    3. Verify using sandbox credentials for sandbox URL
+  </Accordion>
+  
+  <Accordion title="3DS Challenge Not Appearing" icon="shield-halved">
+    **Symptoms**: Customer not redirected to 3DS, or blank iframe
+    
+    **Possible Causes**:
+    - Missing `threeD` parameters
+    - Invalid `notificationURL`
+    - Browser blocking iframe
+    - CORS issues
+    
+    **Solutions**:
+    1. Include all required 3DS parameters
+    2. Ensure notification URL is HTTPS
+    3. Check browser console for blocked frame errors
+    4. Test with different browsers
+  </Accordion>
+  
+  <Accordion title="Webhook Not Received" icon="bell">
+    **Symptoms**: DMN not delivered to your server
+    
+    **Possible Causes**:
+    - URL not publicly accessible
+    - Server returning non-200 status
+    - Firewall blocking Nuvei IPs
+    - SSL certificate issues
+    
+    **Solutions**:
+    1. Verify URL accessible externally
+    2. Check server responds with HTTP 200
+    3. Whitelist Nuvei IP ranges
+    4. Ensure valid SSL certificate
+    5. Check server logs for incoming requests
+  </Accordion>
+  
+  <Accordion title="Duplicate Charges" icon="clone">
+    **Symptoms**: Customer charged multiple times
+    
+    **Possible Causes**:
+    - Resubmitting payment form on error
+    - Not using unique `clientUniqueId`
+    - Retrying on network timeout
+    
+    **Solutions**:
+    1. Always use unique `clientUniqueId` per transaction
+    2. Disable submit button after click
+    3. Implement idempotency checks
+    4. Use transaction lookup before retry
+  </Accordion>
+</AccordionGroup>
+
+## Error Codes
+
+### Gateway Error Codes (gwErrorCode)
+
+| Code | Description | Resolution |
+|------|-------------|------------|
+| 0 | Success | Transaction approved |
+| -1 | Invalid checksum | Verify checksum calculation |
+| -2 | Invalid request | Check required fields |
+| -3 | Invalid merchant | Verify credentials |
+| -4 | Invalid amount | Check amount format |
+| -5 | Invalid currency | Use valid ISO currency |
+| -6 | Invalid session | Get new session token |
+| -7 | Invalid card | Verify card number |
+| -8 | Card expired | Use valid expiration |
+| -9 | Invalid CVV | Check CVV format |
+
+### Payment Method Error Codes
+
+| Code | Description | Resolution |
+|------|-------------|------------|
+| 0 | Approved | Success |
+| 1 | Declined | Generic decline, try another card |
+| 2 | Suspected fraud | Contact issuer |
+| 3 | Card expired | Use valid card |
+| 4 | Insufficient funds | Try different card |
+| 5 | Invalid card | Check card number |
+| 6 | Invalid CVV | Re-enter CVV |
+| 7 | Transaction not allowed | Contact issuer |
+| 8 | Velocity exceeded | Wait and retry |
+| 9 | 3DS failed | Authentication failed |
+
+### HTTP Status Codes
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| 200 | Success | Process response |
+| 400 | Bad request | Check request format |
+| 401 | Unauthorized | Verify API key |
+| 403 | Forbidden | Check permissions |
+| 404 | Not found | Verify endpoint URL |
+| 429 | Rate limited | Implement backoff |
+| 500 | Server error | Retry with backoff |
+
+## Debugging Tips
+
+### Enable Debug Logging
+
+```javascript
+// Log all API requests
+axios.interceptors.request.use(request => {
+  console.log('API Request:', {
+    url: request.url,
+    method: request.method,
+    // Don't log full payload with card data
+    clientUniqueId: request.data?.clientUniqueId
+  });
+  return request;
+});
+
+// Log all responses
+axios.interceptors.response.use(
+  response => {
+    console.log('API Response:', {
+      status: response.status,
+      transactionId: response.data?.transactionId,
+      transactionStatus: response.data?.transactionStatus,
+      gwErrorCode: response.data?.gwErrorCode,
+      gwErrorReason: response.data?.gwErrorReason
+    });
+    return response;
+  },
+  error => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    throw error;
+  }
+);
+```
+
+### Verify Webhook Checksum
+
+```javascript
+app.post('/webhooks/nuvei', (req, res) => {
+  const params = req.body;
+  
+  // Log for debugging
+  console.log('DMN Received:', {
+    transactionId: params.TransactionID,
+    status: params.Status,
+    amount: params.totalAmount,
+    timestamp: params.responseTimeStamp
+  });
+  
+  // Verify checksum
+  const checksumInput = secretKey + 
+    params.totalAmount + 
+    params.currency + 
+    params.responseTimeStamp + 
+    params.PPP_TransactionID + 
+    params.Status + 
+    (params.productId || '');
+  
+  console.log('Checksum input:', checksumInput);
+  
+  const expectedChecksum = crypto
+    .createHash('sha256')
+    .update(checksumInput)
+    .digest('hex');
+  
+  console.log('Expected:', expectedChecksum);
+  console.log('Received:', params.advanceResponseChecksum);
+  
+  if (expectedChecksum !== params.advanceResponseChecksum) {
+    console.error('CHECKSUM MISMATCH!');
+    return res.status(400).send('Invalid checksum');
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+### Test Connectivity
+
+```bash
+# Test API connectivity
+curl -X POST https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken.do \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantId": "YOUR_MERCHANT_ID",
+    "merchantSiteId": "YOUR_SITE_ID",
+    "clientRequestId": "test123",
+    "timeStamp": "20240129120000",
+    "checksum": "YOUR_CHECKSUM"
+  }'
+```
+
+## Contact Support
+
+If issues persist:
+
+<CardGroup cols={2}>
+  <Card title="Support Portal" icon="headset" href="https://support.nuvei.com">
+    Submit a support ticket
+  </Card>
+  <Card title="Integration Team" icon="code" href="mailto:integration@nuvei.com">
+    Technical integration help
+  </Card>
+</CardGroup>
+
+When contacting support, include:
+- Transaction ID(s)
+- Timestamp of issue
+- Request/response logs (sanitized)
+- Environment (sandbox/production)
+- Integration method used

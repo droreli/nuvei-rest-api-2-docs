@@ -1,0 +1,458 @@
+---
+title: "Web SDK 1.0 Quick Start"
+description: "Build a custom checkout with Nuvei Fields in 15 minutes"
+---
+
+# Web SDK 1.0 Quick Start
+
+Build a fully custom checkout page with Nuvei's secure card fields.
+
+<Info>
+  **Time to complete**: ~15 minutes
+</Info>
+
+## Prerequisites
+
+- Nuvei merchant account (sandbox for testing)
+- Your credentials: `merchantId`, `merchantSiteId`, `secretKey`
+- Basic HTML/JavaScript knowledge
+
+<Tip>
+  Find your credentials in the [Control Panel](https://sandbox.nuvei.com/settings/my_payment_settings)
+</Tip>
+
+---
+
+## 1. Get Session Token (Backend)
+
+Initialize a session by calling `/openOrder` from your backend:
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+async function createSession(amount, currency) {
+  const merchantId = 'your_merchant_id';
+  const merchantSiteId = 'your_site_id';
+  const secretKey = 'your_secret_key';
+  const clientRequestId = Date.now().toString();
+  const timeStamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+  // Calculate checksum
+  const checksumString = merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + secretKey;
+  const checksum = crypto.createHash('sha256').update(checksumString).digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/openOrder.do',
+    {
+      merchantId,
+      merchantSiteId,
+      clientRequestId,
+      clientUniqueId: `order_${Date.now()}`,
+      currency,
+      amount,
+      timeStamp,
+      checksum
+    }
+  );
+
+  return response.data.sessionToken;
+}
+```
+
+```php PHP
+<?php
+function createSession($amount, $currency) {
+    $merchantId = "your_merchant_id";
+    $merchantSiteId = "your_site_id";
+    $secretKey = "your_secret_key";
+    $clientRequestId = uniqid();
+    $timeStamp = date("YmdHis");
+
+    $checksumString = $merchantId . $merchantSiteId . $clientRequestId . $amount . $currency . $timeStamp . $secretKey;
+    $checksum = hash('sha256', $checksumString);
+
+    $payload = [
+        "merchantId" => $merchantId,
+        "merchantSiteId" => $merchantSiteId,
+        "clientRequestId" => $clientRequestId,
+        "clientUniqueId" => "order_" . time(),
+        "currency" => $currency,
+        "amount" => $amount,
+        "timeStamp" => $timeStamp,
+        "checksum" => $checksum
+    ];
+
+    $ch = curl_init("https://ppp-test.nuvei.com/ppp/api/v1/openOrder.do");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    $result = json_decode($response, true);
+    
+    return $result['sessionToken'];
+}
+?>
+```
+</CodeGroup>
+
+---
+
+## 2. Load Web SDK (Frontend)
+
+Include the SDK and create your checkout HTML:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkout</title>
+  <meta charset="utf-8" />
+  <!-- Load Web SDK -->
+  <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js"></script>
+  <style>
+    .field-container {
+      margin-bottom: 15px;
+    }
+    .field-container label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .nuvei-field {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      height: 40px;
+    }
+    #pay-button {
+      background: #00D09C;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    #pay-button:disabled {
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Payment</h1>
+  
+  <form id="payment-form">
+    <div class="field-container">
+      <label>Card Number</label>
+      <div id="card-number" class="nuvei-field"></div>
+    </div>
+    
+    <div class="field-container">
+      <label>Expiry Date</label>
+      <div id="card-expiry" class="nuvei-field"></div>
+    </div>
+    
+    <div class="field-container">
+      <label>CVV</label>
+      <div id="card-cvc" class="nuvei-field"></div>
+    </div>
+    
+    <div class="field-container">
+      <label>Cardholder Name</label>
+      <input type="text" id="card-holder-name" placeholder="John Smith" />
+    </div>
+    
+    <button type="submit" id="pay-button">Pay $100.00</button>
+  </form>
+  
+  <div id="result"></div>
+
+  <script>
+    // Initialize in next step
+  </script>
+
+</body>
+</html>
+```
+
+---
+
+## 3. Initialize SDK and Create Fields
+
+```javascript
+// Get sessionToken from your backend
+fetch('/api/create-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ amount: '100', currency: 'USD' })
+})
+.then(response => response.json())
+.then(data => {
+  
+  // Initialize SafeCharge SDK
+  const safecharge = SafeCharge({
+    env: 'int', // 'int' for sandbox, 'prod' for production
+    merchantId: data.merchantId,
+    merchantSiteId: data.merchantSiteId
+  });
+  
+  // Store sessionToken for payment
+  window.sessionToken = data.sessionToken;
+  
+  // Create Nuvei Fields
+  const ScFields = safecharge.fields({
+    fonts: [{ cssUrl: 'https://fonts.googleapis.com/css?family=Roboto' }]
+  });
+  
+  // Card Number Field
+  const cardNumber = ScFields.create('ccNumber', {
+    style: {
+      base: {
+        fontFamily: 'Roboto, sans-serif',
+        fontSize: '16px',
+        color: '#333'
+      }
+    }
+  });
+  cardNumber.attach('#card-number');
+  
+  // Expiry Date Field
+  const cardExpiry = ScFields.create('ccExpiration', {
+    style: {
+      base: {
+        fontFamily: 'Roboto, sans-serif',
+        fontSize: '16px',
+        color: '#333'
+      }
+    }
+  });
+  cardExpiry.attach('#card-expiry');
+  
+  // CVV Field
+  const cardCvc = ScFields.create('ccCvc', {
+    style: {
+      base: {
+        fontFamily: 'Roboto, sans-serif',
+        fontSize: '16px',
+        color: '#333'
+      }
+    }
+  });
+  cardCvc.attach('#card-cvc');
+  
+  // Store for payment
+  window.safecharge = safecharge;
+  window.cardNumber = cardNumber;
+  
+});
+```
+
+---
+
+## 4. Process Payment
+
+Handle form submission and call `createPayment()`:
+
+```javascript
+document.getElementById('payment-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const payButton = document.getElementById('pay-button');
+  payButton.disabled = true;
+  payButton.textContent = 'Processing...';
+  
+  try {
+    const result = await safecharge.createPayment({
+      sessionToken: window.sessionToken,
+      cardHolderName: document.getElementById('card-holder-name').value,
+      paymentOption: cardNumber, // Pass the card number field
+      billingAddress: {
+        email: 'customer@email.com',
+        country: 'US'
+      }
+    }, function(response) {
+      // Handle response
+      console.log('Payment response:', response);
+      
+      if (response.result === 'APPROVED') {
+        document.getElementById('result').innerHTML = `
+          <h3 style="color: green;">Payment Successful!</h3>
+          <p>Transaction ID: ${response.transactionId}</p>
+        `;
+      } else if (response.result === 'DECLINED') {
+        document.getElementById('result').innerHTML = `
+          <h3 style="color: red;">Payment Declined</h3>
+          <p>${response.errorDescription || 'Please try another card.'}</p>
+        `;
+      } else {
+        document.getElementById('result').innerHTML = `
+          <h3 style="color: orange;">Payment Pending</h3>
+          <p>Status: ${response.transactionStatus}</p>
+        `;
+      }
+      
+      payButton.disabled = false;
+      payButton.textContent = 'Pay $100.00';
+    });
+    
+  } catch (error) {
+    console.error('Payment error:', error);
+    document.getElementById('result').innerHTML = `
+      <h3 style="color: red;">Error</h3>
+      <p>${error.message}</p>
+    `;
+    payButton.disabled = false;
+    payButton.textContent = 'Pay $100.00';
+  }
+});
+```
+
+---
+
+## 5. Complete Example
+
+Here's the full working example:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web SDK Checkout</title>
+  <meta charset="utf-8" />
+  <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; }
+    .field-container { margin-bottom: 15px; }
+    .field-container label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .nuvei-field { border: 1px solid #ccc; border-radius: 4px; padding: 10px; height: 40px; }
+    input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+    #pay-button { background: #00D09C; color: white; border: none; padding: 15px 30px; font-size: 16px; cursor: pointer; border-radius: 4px; width: 100%; margin-top: 20px; }
+    #pay-button:disabled { background: #ccc; }
+    #result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>Payment</h1>
+  
+  <form id="payment-form">
+    <div class="field-container">
+      <label>Card Number</label>
+      <div id="card-number" class="nuvei-field"></div>
+    </div>
+    <div class="field-container">
+      <label>Expiry Date</label>
+      <div id="card-expiry" class="nuvei-field"></div>
+    </div>
+    <div class="field-container">
+      <label>CVV</label>
+      <div id="card-cvc" class="nuvei-field"></div>
+    </div>
+    <div class="field-container">
+      <label>Cardholder Name</label>
+      <input type="text" id="card-holder-name" placeholder="John Smith" required />
+    </div>
+    <button type="submit" id="pay-button">Pay $100.00</button>
+  </form>
+  
+  <div id="result"></div>
+
+  <script>
+    let safecharge, cardNumber, sessionToken;
+    
+    // Initialize on page load
+    async function init() {
+      // Get session from backend (replace with your endpoint)
+      const response = await fetch('/api/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: '100', currency: 'USD' })
+      });
+      const data = await response.json();
+      sessionToken = data.sessionToken;
+      
+      // Initialize SDK
+      safecharge = SafeCharge({
+        env: 'int',
+        merchantId: data.merchantId,
+        merchantSiteId: data.merchantSiteId
+      });
+      
+      // Create fields
+      const ScFields = safecharge.fields();
+      
+      cardNumber = ScFields.create('ccNumber');
+      cardNumber.attach('#card-number');
+      
+      const cardExpiry = ScFields.create('ccExpiration');
+      cardExpiry.attach('#card-expiry');
+      
+      const cardCvc = ScFields.create('ccCvc');
+      cardCvc.attach('#card-cvc');
+    }
+    
+    // Handle payment
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const payButton = document.getElementById('pay-button');
+      payButton.disabled = true;
+      payButton.textContent = 'Processing...';
+      
+      safecharge.createPayment({
+        sessionToken: sessionToken,
+        cardHolderName: document.getElementById('card-holder-name').value,
+        paymentOption: cardNumber,
+        billingAddress: { email: 'test@test.com', country: 'US' }
+      }, function(response) {
+        if (response.result === 'APPROVED') {
+          document.getElementById('result').innerHTML = '<p style="color:green">Payment Successful! ID: ' + response.transactionId + '</p>';
+        } else {
+          document.getElementById('result').innerHTML = '<p style="color:red">Payment Failed: ' + (response.errorDescription || response.result) + '</p>';
+        }
+        payButton.disabled = false;
+        payButton.textContent = 'Pay $100.00';
+      });
+    });
+    
+    init();
+  </script>
+
+</body>
+</html>
+```
+
+---
+
+## Test Cards
+
+| Card Number | Result |
+|-------------|--------|
+| `4000027891380961` | Approved |
+| `4000020951595032` | Declined |
+| `4012001038443335` | 3DS Required |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling Fields" icon="paintbrush" href="/integrations/web-sdk-1/nuvei-fields">
+    Customize Nuvei Fields appearance
+  </Card>
+  <Card title="3D Secure" icon="lock" href="/integrations/web-sdk-1/3ds">
+    Handle 3DS authentication
+  </Card>
+  <Card title="Apple Pay" icon="apple" href="/integrations/web-sdk-1/apple-pay">
+    Add Apple Pay support
+  </Card>
+  <Card title="Google Pay" icon="google" href="/integrations/web-sdk-1/google-pay">
+    Add Google Pay support
+  </Card>
+</CardGroup>
