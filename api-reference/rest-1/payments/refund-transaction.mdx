@@ -1,0 +1,210 @@
+---
+title: 'refundTransaction'
+openapi: 'POST /refundTransaction'
+---
+
+<Info>
+  Refunds a previously **settled** transaction. Supports both full and partial refunds. The funds are returned to the original payment method.
+</Info>
+
+## When to Use
+
+- Processing customer returns
+- Issuing partial refunds (damaged goods, service credits)
+- Correcting billing errors
+- Canceling orders after settlement
+
+<Warning>
+  Refunds can only be processed on **settled** transactions. For unsettled Auth transactions, use [voidTransaction](/api-reference/rest-1/payments/void-transaction) instead.
+</Warning>
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + clientUniqueId + amount + currency + relatedTransactionId + authCode + comment + urlDetails + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "REFUND-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "50.00",
+  "currency": "USD",
+  "authCode": "111344",
+  "comment": "Customer return - damaged item",
+  "urlDetails": {
+    "notificationUrl": "https://example.com/webhook"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "transactionId": "2110000000001208911",
+  "transactionStatus": "APPROVED",
+  "authCode": "111345",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Refund Types
+
+### Full Refund
+
+```json
+{
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "200.00",  // Same as original amount
+  "currency": "USD",
+  "authCode": "111344",
+  "comment": "Full order refund - order cancelled"
+}
+```
+
+### Partial Refund
+
+```json
+{
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "50.00",  // Less than original $200
+  "currency": "USD",
+  "authCode": "111344",
+  "comment": "Partial refund - 1 item returned"
+}
+```
+
+### Multiple Partial Refunds
+
+You can issue multiple refunds against the same transaction:
+
+```javascript
+// First refund: $50
+await refundTransaction({
+  relatedTransactionId: '2110000000001208909',
+  amount: '50.00',
+  currency: 'USD',
+  authCode: '111344',
+  comment: 'Item 1 returned'
+});
+
+// Second refund: $30
+await refundTransaction({
+  relatedTransactionId: '2110000000001208909',
+  amount: '30.00',
+  currency: 'USD',
+  authCode: '111344',
+  comment: 'Item 2 returned'
+});
+
+// Total refunded: $80 of $200
+```
+
+<Note>
+  The sum of all refunds cannot exceed the original transaction amount.
+</Note>
+
+## Refund Timing
+
+| Card Network | Typical Processing Time |
+|--------------|------------------------|
+| Visa | 3-5 business days |
+| Mastercard | 3-5 business days |
+| Amex | 5-7 business days |
+| Discover | 3-5 business days |
+
+## Common Errors
+
+| Error Code | Description | Resolution |
+|------------|-------------|------------|
+| -1130 | Transaction not settled | Wait for settlement or use void |
+| -1131 | Refund exceeds limit | Reduce refund amount |
+| -1132 | Already fully refunded | Cannot refund further |
+| -1133 | Invalid related transaction | Check transactionId |
+
+## Code Example
+
+```javascript
+async function processRefund(originalTransaction, refundAmount, reason) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `refund_${Date.now()}`;
+  const clientUniqueId = `REFUND-${originalTransaction.clientUniqueId}`;
+  
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/refundTransaction',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientUniqueId,
+      clientRequestId,
+      relatedTransactionId: originalTransaction.transactionId,
+      amount: refundAmount,
+      currency: originalTransaction.currency,
+      authCode: originalTransaction.authCode,
+      comment: reason,
+      urlDetails: {
+        notificationUrl: 'https://example.com/webhook/refund'
+      },
+      timeStamp,
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+
+  if (response.data.transactionStatus === 'APPROVED') {
+    console.log('Refund successful:', response.data.transactionId);
+    // Update order status, notify customer, etc.
+  } else {
+    console.error('Refund failed:', response.data.gwErrorReason);
+  }
+  
+  return response.data;
+}
+
+// Usage
+await processRefund(
+  { transactionId: '2110000000001208909', authCode: '111344', currency: 'USD' },
+  '50.00',
+  'Customer requested return'
+);
+```
+
+## APM Refunds
+
+For Alternative Payment Methods, refund availability varies:
+
+| APM | Refund Support |
+|-----|----------------|
+| PayPal | Full & Partial |
+| iDEAL | Full only |
+| SOFORT | Full only |
+| Giropay | Full only |
+| SEPA Direct Debit | Full & Partial |
+
+<Note>
+  Some APMs may have refund windows (e.g., 180 days for PayPal).
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Void Transaction" icon="ban" href="/api-reference/rest-1/payments/void-transaction">
+    Cancel unsettled auth
+  </Card>
+  <Card title="Get Status" icon="magnifying-glass" href="/api-reference/rest-1/payments/get-payment-status">
+    Check refund status
+  </Card>
+</CardGroup>

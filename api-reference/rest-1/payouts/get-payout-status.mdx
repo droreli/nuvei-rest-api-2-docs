@@ -1,0 +1,114 @@
+---
+title: 'getPayoutStatus'
+openapi: 'POST /getPayoutStatus'
+---
+
+<Info>
+  Retrieves the status of a payout transaction. Essential for tracking withdrawal requests and reconciliation.
+</Info>
+
+## When to Use
+
+- Checking payout/withdrawal status
+- Reconciling payouts with your system
+- Verifying pending payouts
+- Customer support inquiries
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + timeStamp + merchantSecretKey)
+```
+
+## Example Request (by Transaction ID)
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientRequestId": "1C6CT7V1L",
+  "transactionId": "2110000000001208920",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Request (by Client Unique ID)
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientRequestId": "1C6CT7V1L",
+  "clientUniqueId": "PAYOUT-12345",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "transactionStatus": "APPROVED",
+  "transactionId": "2110000000001208920",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Payout Status Values
+
+| Status | Description | Funds Status |
+|--------|-------------|--------------|
+| `APPROVED` | Payout successful | Sent to recipient |
+| `PENDING` | Processing | In transit |
+| `DECLINED` | Payout rejected | Not sent |
+| `ERROR` | Processing error | Not sent |
+
+## Code Example
+
+```javascript
+async function getPayoutStatus(transactionId) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `status_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(MERCHANT_ID + SITE_ID + clientRequestId + timeStamp + SECRET_KEY)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/getPayoutStatus',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientRequestId,
+      transactionId,
+      timeStamp,
+      checksum
+    }
+  );
+
+  return response.data;
+}
+
+// Check status
+const status = await getPayoutStatus('2110000000001208920');
+console.log(`Payout status: ${status.transactionStatus}`);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Payout API" icon="money-bill-transfer" href="/api-reference/rest-1/payouts/payout">
+    Process payouts
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/webhooks/overview">
+    Set up notifications
+  </Card>
+</CardGroup>

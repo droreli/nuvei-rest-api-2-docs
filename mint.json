@@ -87,7 +87,10 @@
       "group": "Simply Connect",
       "pages": [
         "integrations/simply-connect/overview",
-        "integrations/simply-connect/quickstart"
+        "integrations/simply-connect/quickstart",
+        "integrations/simply-connect/customization",
+        "integrations/simply-connect/events",
+        "integrations/simply-connect/methods"
       ]
     },
     {
@@ -102,6 +105,12 @@
       "pages": [
         "integrations/web-sdk-2/overview",
         "integrations/web-sdk-2/quickstart"
+      ]
+    },
+    {
+      "group": "Web SDK Methods",
+      "pages": [
+        "integrations/web-sdk/methods"
       ]
     },
     {
@@ -193,11 +202,12 @@
     {
       "group": "API Reference",
       "pages": [
-        "api-reference/overview"
+        "api-reference/overview",
+        "api-reference/class-objects"
       ]
     },
     {
-      "group": "Payments",
+      "group": "REST API 2.0",
       "pages": [
         "api-reference/payments/create-payment",
         "api-reference/payments/fingerprint",
@@ -208,9 +218,56 @@
       ]
     },
     {
-      "group": "Accounts",
+      "group": "REST API 2.0 Accounts",
       "pages": [
         "api-reference/accounts/get-payment-tokens"
+      ]
+    },
+    {
+      "group": "REST API 1.0",
+      "pages": [
+        "api-reference/rest-1/overview"
+      ]
+    },
+    {
+      "group": "REST 1.0 Session",
+      "pages": [
+        "api-reference/rest-1/session/get-session-token",
+        "api-reference/rest-1/session/open-order",
+        "api-reference/rest-1/session/update-order"
+      ]
+    },
+    {
+      "group": "REST 1.0 Payments",
+      "pages": [
+        "api-reference/rest-1/payments/payment",
+        "api-reference/rest-1/payments/init-payment",
+        "api-reference/rest-1/payments/settle-transaction",
+        "api-reference/rest-1/payments/refund-transaction",
+        "api-reference/rest-1/payments/void-transaction",
+        "api-reference/rest-1/payments/get-payment-status"
+      ]
+    },
+    {
+      "group": "REST 1.0 3D Secure",
+      "pages": [
+        "api-reference/rest-1/3ds/authorize3d",
+        "api-reference/rest-1/3ds/verify3d"
+      ]
+    },
+    {
+      "group": "REST 1.0 Tokenization",
+      "pages": [
+        "api-reference/rest-1/tokenization/get-user-upos",
+        "api-reference/rest-1/tokenization/add-upo-credit-card",
+        "api-reference/rest-1/tokenization/delete-upo"
+      ]
+    },
+    {
+      "group": "REST 1.0 Payouts",
+      "pages": [
+        "api-reference/rest-1/payouts/payout",
+        "api-reference/rest-1/payouts/get-payout-status"
       ]
     },
     {
@@ -326,5 +383,6 @@
       "method": "key",
       "name": "x-api-key"
     }
-  }
+  },
+  "openapi": ["api-reference/openapi-rest-1.json"]
 }

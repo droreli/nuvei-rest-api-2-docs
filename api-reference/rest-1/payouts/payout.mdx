@@ -1,0 +1,267 @@
+---
+title: 'payout'
+openapi: 'POST /payout'
+---
+
+<Info>
+  Initiates a payout (also known as withdrawal or disbursement) to a user's payment method. Supports payouts to cards, bank accounts, and supported APMs.
+</Info>
+
+## When to Use
+
+- Sending winnings to users (gaming/gambling)
+- Processing refunds outside the normal refund flow
+- Paying affiliates or partners
+- Marketplace seller payouts
+- Insurance claim disbursements
+
+## Supported Payout Methods
+
+| Method | Regions | Notes |
+|--------|---------|-------|
+| Visa Direct | Global | Real-time to Visa cards |
+| Mastercard Send | Global | Real-time to Mastercard |
+| Bank Transfer | Regional | 1-3 business days |
+| PayPal | Global | Instant to PayPal balance |
+| Skrill | Global | Instant |
+| Neteller | Global | Instant |
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + clientUniqueId + amount + currency + userTokenId + timeStamp + merchantSecretKey)
+```
+
+## Example Request (Card Payout)
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientUniqueId": "PAYOUT-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "100.00",
+  "currency": "USD",
+  "userPaymentOption": {
+    "userPaymentOptionId": "87654321"
+  },
+  "comment": "Weekly earnings payout",
+  "urlDetails": {
+    "notificationUrl": "https://example.com/webhook/payout"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Request (New Card - No UPO)
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientUniqueId": "PAYOUT-12346",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "100.00",
+  "currency": "USD",
+  "cardData": {
+    "cardNumber": "4111111111111111",
+    "cardHolderName": "John Smith",
+    "expirationMonth": "12",
+    "expirationYear": "2030"
+  },
+  "comment": "Withdrawal request #W12345",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "transactionId": "2110000000001208920",
+  "transactionStatus": "APPROVED",
+  "authCode": "112233",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Transaction Status Values
+
+| Status | Description | Action |
+|--------|-------------|--------|
+| `APPROVED` | Payout successful | Funds sent |
+| `PENDING` | Processing | Wait for webhook |
+| `DECLINED` | Payout rejected | Check error codes |
+| `ERROR` | Processing error | Review and retry |
+
+## Payout to Stored Payment Method (UPO)
+
+For returning users with stored payment methods:
+
+```javascript
+async function payoutToStoredCard(userTokenId, upoId, amount, currency) {
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/payout',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      userTokenId,
+      clientUniqueId: `PAYOUT-${Date.now()}`,
+      clientRequestId: `req_${Date.now()}`,
+      amount,
+      currency,
+      userPaymentOption: {
+        userPaymentOptionId: upoId
+      },
+      urlDetails: {
+        notificationUrl: 'https://example.com/webhook/payout'
+      },
+      timeStamp: getTimestamp(),
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+
+  return response.data;
+}
+```
+
+## Payout to New Card
+
+For one-time payouts to cards not stored in the system:
+
+```javascript
+async function payoutToNewCard(userTokenId, cardDetails, amount, currency) {
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/payout',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      userTokenId,
+      clientUniqueId: `PAYOUT-${Date.now()}`,
+      clientRequestId: `req_${Date.now()}`,
+      amount,
+      currency,
+      cardData: {
+        cardNumber: cardDetails.number,
+        cardHolderName: cardDetails.name,
+        expirationMonth: cardDetails.expMonth,
+        expirationYear: cardDetails.expYear
+      },
+      urlDetails: {
+        notificationUrl: 'https://example.com/webhook/payout'
+      },
+      timeStamp: getTimestamp(),
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+
+  return response.data;
+}
+```
+
+## Withdrawal Flow (Gaming/iGaming)
+
+For gaming platforms, withdrawals typically follow this flow:
+
+```javascript
+class WithdrawalService {
+  async processWithdrawal(userId, amount, currency) {
+    // 1. Verify user has sufficient balance
+    const userBalance = await this.getUserBalance(userId);
+    if (userBalance < amount) {
+      throw new Error('Insufficient balance');
+    }
+    
+    // 2. Get user's payout methods
+    const payoutMethods = await this.getUserPayoutMethods(userId);
+    const preferredMethod = payoutMethods.find(m => m.isDefault);
+    
+    if (!preferredMethod) {
+      throw new Error('No payout method configured');
+    }
+    
+    // 3. Lock the funds
+    await this.lockFunds(userId, amount);
+    
+    // 4. Process payout
+    try {
+      const result = await this.payout({
+        userTokenId: userId,
+        userPaymentOptionId: preferredMethod.upoId,
+        amount,
+        currency
+      });
+      
+      if (result.transactionStatus === 'APPROVED') {
+        // 5. Deduct from balance
+        await this.deductBalance(userId, amount);
+        return { success: true, transactionId: result.transactionId };
+      } else if (result.transactionStatus === 'PENDING') {
+        // 5b. Keep funds locked, wait for webhook
+        return { pending: true, transactionId: result.transactionId };
+      } else {
+        // 5c. Release locked funds
+        await this.unlockFunds(userId, amount);
+        return { success: false, reason: result.gwErrorReason };
+      }
+    } catch (error) {
+      // Release locked funds on error
+      await this.unlockFunds(userId, amount);
+      throw error;
+    }
+  }
+  
+  async handlePayoutWebhook(webhook) {
+    const { transactionId, status, ppp_status } = webhook;
+    
+    if (ppp_status === 'OK' || status === 'APPROVED') {
+      // Payout completed - funds already deducted
+      await this.markWithdrawalComplete(transactionId);
+    } else {
+      // Payout failed - return funds to user
+      const withdrawal = await this.getWithdrawalByTransactionId(transactionId);
+      await this.unlockFunds(withdrawal.userId, withdrawal.amount);
+      await this.markWithdrawalFailed(transactionId);
+    }
+  }
+}
+```
+
+## Common Errors
+
+| Error Code | Description | Resolution |
+|------------|-------------|------------|
+| -1200 | User not found | Verify userTokenId |
+| -1201 | UPO not found | Verify userPaymentOptionId |
+| -1202 | Card not eligible for payout | Use different card/method |
+| -1203 | Amount exceeds limits | Reduce payout amount |
+| -1204 | Currency not supported | Use supported currency |
+
+## Payout Limits
+
+Payout limits vary by:
+- Card network (Visa/MC limits)
+- Country regulations
+- Merchant configuration
+
+Check with your account manager for specific limits.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Get Payout Status" icon="magnifying-glass" href="/api-reference/rest-1/payouts/get-payout-status">
+    Check payout status
+  </Card>
+  <Card title="User UPOs" icon="wallet" href="/api-reference/rest-1/tokenization/get-user-upos">
+    List user payment methods
+  </Card>
+</CardGroup>

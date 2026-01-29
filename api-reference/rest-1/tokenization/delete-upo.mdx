@@ -1,0 +1,93 @@
+---
+title: 'deleteUPO'
+openapi: 'POST /deleteUPO'
+---
+
+<Info>
+  Deletes a User Payment Option (card or APM) from the system. The UPO can no longer be used for payments after deletion.
+</Info>
+
+## When to Use
+
+- User requests to remove saved card
+- Card expired and user wants it removed
+- Compliance with data deletion requests (GDPR)
+- Cleaning up unused payment methods
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + userTokenId + userPaymentOptionId + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientRequestId": "1C6CT7V1L",
+  "userPaymentOptionId": "87654321",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Code Example
+
+```javascript
+async function deleteUPO(userTokenId, userPaymentOptionId) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `del_upo_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(MERCHANT_ID + SITE_ID + clientRequestId + userTokenId + 
+            userPaymentOptionId + timeStamp + SECRET_KEY)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/deleteUPO',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      userTokenId,
+      clientRequestId,
+      userPaymentOptionId,
+      timeStamp,
+      checksum
+    }
+  );
+
+  return response.data;
+}
+```
+
+## Soft Delete vs Hard Delete
+
+By default, `deleteUPO` performs a soft delete - the UPO is marked as deleted but data is retained for compliance/audit purposes.
+
+For complete data removal (GDPR right to erasure), contact Nuvei support.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Get User UPOs" icon="list" href="/api-reference/rest-1/tokenization/get-user-upos">
+    List remaining cards
+  </Card>
+  <Card title="Add Card" icon="plus" href="/api-reference/rest-1/tokenization/add-upo-credit-card">
+    Add new card
+  </Card>
+</CardGroup>

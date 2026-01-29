@@ -1,0 +1,620 @@
+---
+title: 'Methods'
+description: 'Programmatically control Simply Connect payment forms'
+---
+
+# Simply Connect Methods
+
+Simply Connect provides methods to programmatically control the payment form, update transactions, and handle withdrawals.
+
+## Checkout Methods
+
+### checkout()
+
+Initialize and display the payment form.
+
+```javascript
+const checkoutInstance = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+// Initialize checkout
+checkoutInstance.checkout({
+  sessionToken: sessionToken,
+  amount: '99.99',
+  currency: 'USD',
+  renderTo: '#payment-container',
+  onResult: handleResult
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionToken` | string | Yes | Session token from openOrder |
+| `amount` | string | Yes | Transaction amount |
+| `currency` | string | Yes | ISO currency code |
+| `renderTo` | string | No | CSS selector for container (default: auto-generated modal) |
+| `onResult` | function | Yes | Result callback handler |
+| `onError` | function | No | Error callback handler |
+| ... | - | - | See [Customization](/integrations/simply-connect/customization) for all options |
+
+### checkout.destroy()
+
+Remove the payment form and clean up resources.
+
+```javascript
+// Destroy checkout instance
+checkoutInstance.checkout.destroy();
+
+// Useful when:
+// - User navigates away
+// - Session expires
+// - Error requires form reset
+```
+
+### checkout.updateAmount()
+
+Update the transaction amount dynamically (e.g., for promo codes, shipping changes).
+
+```javascript
+// User applied a discount code
+const newAmount = originalAmount - discountAmount;
+
+checkoutInstance.checkout.updateAmount({
+  amount: newAmount.toString(),
+  currency: 'USD'
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Amount updated to:', newAmount);
+    updatePriceDisplay(newAmount);
+  } else {
+    console.error('Failed to update amount:', response.errorDescription);
+  }
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `amount` | string | Yes | New amount |
+| `currency` | string | Yes | Currency code |
+| `callback` | function | No | Response callback |
+
+<Warning>
+  Amount can only be updated before the user submits payment. Once payment processing starts, amount cannot be changed.
+</Warning>
+
+### checkout.updateOrderItems()
+
+Update order items for display purposes.
+
+```javascript
+checkoutInstance.checkout.updateOrderItems({
+  items: [
+    {
+      name: 'Product A',
+      price: '49.99',
+      quantity: 2
+    },
+    {
+      name: 'Shipping',
+      price: '9.99',
+      quantity: 1
+    }
+  ],
+  subtotal: '99.98',
+  tax: '8.00',
+  shipping: '9.99',
+  total: '117.97'
+});
+```
+
+### checkout.submit()
+
+Programmatically submit the payment form.
+
+```javascript
+// Custom submit button
+document.getElementById('custom-pay-btn').addEventListener('click', function() {
+  checkoutInstance.checkout.submit();
+});
+```
+
+<Note>
+  `submit()` will trigger form validation. If validation fails, appropriate error events will fire.
+</Note>
+
+### checkout.validate()
+
+Validate the form without submitting.
+
+```javascript
+const validationResult = checkoutInstance.checkout.validate();
+
+if (validationResult.isValid) {
+  console.log('Form is valid, ready to submit');
+  enableSubmitButton();
+} else {
+  console.log('Invalid fields:', validationResult.invalidFields);
+  highlightInvalidFields(validationResult.invalidFields);
+}
+```
+
+**Response:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isValid` | boolean | Overall form validity |
+| `invalidFields` | array | List of invalid field names |
+| `errors` | object | Field-specific error messages |
+
+### checkout.getPaymentMethod()
+
+Get the currently selected payment method.
+
+```javascript
+const selectedMethod = checkoutInstance.checkout.getPaymentMethod();
+
+console.log('Selected:', selectedMethod.paymentMethod);
+// Output: "cc_card" or "apmgw_PayPal" etc.
+```
+
+**Response:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `paymentMethod` | string | Payment method identifier |
+| `paymentMethodName` | string | Display name |
+| `isStored` | boolean | Whether it's a saved method |
+| `upoId` | string | UPO ID if saved method |
+
+### checkout.setPaymentMethod()
+
+Programmatically select a payment method.
+
+```javascript
+// Select PayPal
+checkoutInstance.checkout.setPaymentMethod('apmgw_PayPal');
+
+// Select a saved card by UPO ID
+checkoutInstance.checkout.setPaymentMethod('cc_card', {
+  upoId: '12345678'
+});
+```
+
+### checkout.getFieldValue()
+
+Get the current value of a form field (for non-sensitive fields only).
+
+```javascript
+const cardholderName = checkoutInstance.checkout.getFieldValue('cardholderName');
+const email = checkoutInstance.checkout.getFieldValue('email');
+```
+
+<Warning>
+  For PCI compliance, sensitive fields like card number and CVV cannot be retrieved.
+</Warning>
+
+### checkout.setFieldValue()
+
+Pre-populate form fields.
+
+```javascript
+// Pre-populate cardholder name from user profile
+checkoutInstance.checkout.setFieldValue('cardholderName', user.fullName);
+
+// Pre-populate email
+checkoutInstance.checkout.setFieldValue('email', user.email);
+```
+
+### checkout.focus()
+
+Set focus to a specific field.
+
+```javascript
+// Focus on card number field
+checkoutInstance.checkout.focus('cardNumber');
+```
+
+### checkout.clear()
+
+Clear form fields.
+
+```javascript
+// Clear all fields
+checkoutInstance.checkout.clear();
+
+// Clear specific field
+checkoutInstance.checkout.clear('cardNumber');
+```
+
+## Withdrawal Methods
+
+Simply Connect supports payouts/withdrawals for gaming and marketplace applications.
+
+### withdrawal()
+
+Initialize a withdrawal/payout flow.
+
+```javascript
+const checkoutInstance = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+// Initialize withdrawal
+checkoutInstance.withdrawal({
+  sessionToken: sessionToken,
+  amount: '100.00',
+  currency: 'USD',
+  userTokenId: 'user_123',
+  renderTo: '#withdrawal-container',
+  
+  // Show only saved payment methods
+  showOnlySavedMethods: true,
+  
+  // Allow adding new methods during withdrawal
+  allowNewMethods: false,
+  
+  onResult: function(result) {
+    if (result.status === 'SUCCESS') {
+      console.log('Withdrawal initiated:', result.transactionId);
+      showWithdrawalConfirmation(result);
+    } else {
+      showWithdrawalError(result.errorDescription);
+    }
+  },
+  
+  onError: function(error) {
+    console.error('Withdrawal error:', error);
+  }
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionToken` | string | Yes | Session token from openOrder |
+| `amount` | string | Yes | Withdrawal amount |
+| `currency` | string | Yes | ISO currency code |
+| `userTokenId` | string | Yes | User identifier (for saved methods) |
+| `renderTo` | string | No | CSS selector for container |
+| `showOnlySavedMethods` | boolean | No | Only show previously used methods |
+| `allowNewMethods` | boolean | No | Allow adding new payout destinations |
+| `onResult` | function | Yes | Result callback handler |
+
+### withdrawal.getSavedMethods()
+
+Get list of user's saved payout methods.
+
+```javascript
+checkoutInstance.withdrawal.getSavedMethods({
+  userTokenId: 'user_123'
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    response.paymentMethods.forEach(method => {
+      console.log(method.upoId, method.paymentMethod, method.upoName);
+    });
+  }
+});
+```
+
+**Response:**
+
+```json
+{
+  "status": "SUCCESS",
+  "paymentMethods": [
+    {
+      "upoId": "123456",
+      "paymentMethod": "cc_card",
+      "upoName": "Visa ending 4242",
+      "cardLastFourDigits": "4242",
+      "cardBrand": "VISA",
+      "expirationDate": "12/26"
+    },
+    {
+      "upoId": "789012",
+      "paymentMethod": "apmgw_PayPal",
+      "upoName": "user@example.com"
+    }
+  ]
+}
+```
+
+### withdrawal.updateAmount()
+
+Update withdrawal amount.
+
+```javascript
+checkoutInstance.withdrawal.updateAmount({
+  amount: '150.00',
+  currency: 'USD'
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Withdrawal amount updated');
+  }
+});
+```
+
+### withdrawal.submit()
+
+Programmatically submit the withdrawal form.
+
+```javascript
+checkoutInstance.withdrawal.submit();
+```
+
+### withdrawal.destroy()
+
+Remove the withdrawal form and clean up.
+
+```javascript
+checkoutInstance.withdrawal.destroy();
+```
+
+## Session Methods
+
+### getSessionToken()
+
+Request a new session token (typically handled server-side).
+
+```javascript
+// Note: This should typically be done server-side
+// Client-side example for testing only
+SafeCharge.getSessionToken({
+  merchantId: '1234567890',
+  merchantSiteId: '123456',
+  clientRequestId: 'unique_request_id',
+  timeStamp: new Date().toISOString(),
+  checksum: calculatedChecksum  // Must be calculated server-side
+}, function(response) {
+  if (response.sessionToken) {
+    initializeCheckout(response.sessionToken);
+  }
+});
+```
+
+<Warning>
+  Never expose your merchant secret key on the client side. Session token generation should always be done server-side.
+</Warning>
+
+## Utility Methods
+
+### getVersion()
+
+Get Simply Connect SDK version.
+
+```javascript
+const version = SafeCharge.getVersion();
+console.log('SDK Version:', version);  // e.g., "1.2.3"
+```
+
+### isSupported()
+
+Check browser compatibility.
+
+```javascript
+if (SafeCharge.isSupported()) {
+  initializeCheckout();
+} else {
+  showBrowserNotSupportedMessage();
+}
+```
+
+### setLocale()
+
+Change language/locale at runtime.
+
+```javascript
+SafeCharge.setLocale('de_DE');
+```
+
+**Supported Locales:**
+
+| Locale | Language |
+|--------|----------|
+| `en_US` | English (US) |
+| `en_GB` | English (UK) |
+| `de_DE` | German |
+| `fr_FR` | French |
+| `es_ES` | Spanish |
+| `it_IT` | Italian |
+| `pt_PT` | Portuguese |
+| `nl_NL` | Dutch |
+| `pl_PL` | Polish |
+| `ja_JP` | Japanese |
+| `zh_CN` | Chinese (Simplified) |
+
+## Complete Example: Checkout with Dynamic Updates
+
+```javascript
+// Initialize SafeCharge
+const sc = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+// Fetch session token from your server
+fetch('/api/create-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ 
+    amount: orderTotal,
+    currency: 'USD',
+    orderId: orderId
+  })
+})
+.then(response => response.json())
+.then(data => {
+  // Initialize checkout
+  sc.checkout({
+    sessionToken: data.sessionToken,
+    amount: data.amount,
+    currency: 'USD',
+    userTokenId: currentUser.id,
+    renderTo: '#payment-form',
+    
+    // Pre-populate user data
+    billingAddress: {
+      firstName: currentUser.firstName,
+      lastName: currentUser.lastName,
+      email: currentUser.email,
+      country: currentUser.country
+    },
+    
+    // Enable card saving
+    savePM: true,
+    
+    // Result handling
+    onResult: handlePaymentResult,
+    onError: handlePaymentError,
+    
+    // Form events
+    onReady: function() {
+      // Pre-fill cardholder name
+      sc.checkout.setFieldValue('cardholderName', 
+        currentUser.firstName + ' ' + currentUser.lastName
+      );
+    },
+    
+    onFormValidation: function(data) {
+      document.getElementById('pay-btn').disabled = !data.isValid;
+    }
+  });
+});
+
+// Handle promo code application
+document.getElementById('apply-promo').addEventListener('click', function() {
+  const promoCode = document.getElementById('promo-code').value;
+  
+  // Validate promo code with your server
+  fetch('/api/validate-promo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: promoCode, orderId: orderId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.valid) {
+      // Update amount in Simply Connect
+      sc.checkout.updateAmount({
+        amount: data.newAmount,
+        currency: 'USD'
+      }, function(response) {
+        if (response.status === 'SUCCESS') {
+          showDiscountApplied(data.discount);
+        }
+      });
+    }
+  });
+});
+
+// Custom submit button
+document.getElementById('pay-btn').addEventListener('click', function() {
+  // Validate before submit
+  const validation = sc.checkout.validate();
+  
+  if (validation.isValid) {
+    sc.checkout.submit();
+  } else {
+    showValidationErrors(validation.errors);
+  }
+});
+```
+
+## Complete Example: Withdrawal Flow
+
+```javascript
+// Initialize SafeCharge
+const sc = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+// Check user's withdrawal balance
+const userBalance = await fetchUserBalance(currentUser.id);
+
+// Fetch session token for withdrawal
+const sessionData = await fetch('/api/create-withdrawal-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    userId: currentUser.id,
+    maxAmount: userBalance.available
+  })
+}).then(r => r.json());
+
+// Initialize withdrawal
+sc.withdrawal({
+  sessionToken: sessionData.sessionToken,
+  amount: withdrawalAmount,
+  currency: 'USD',
+  userTokenId: currentUser.id,
+  renderTo: '#withdrawal-container',
+  
+  // Only show methods user has deposited with
+  showOnlySavedMethods: true,
+  
+  onResult: function(result) {
+    if (result.status === 'SUCCESS') {
+      // Update user's balance locally
+      updateBalanceDisplay(userBalance.available - parseFloat(withdrawalAmount));
+      
+      // Show confirmation
+      showWithdrawalSuccess({
+        amount: withdrawalAmount,
+        method: result.paymentMethodName,
+        transactionId: result.transactionId,
+        estimatedArrival: getEstimatedArrival(result.paymentMethod)
+      });
+    } else {
+      showWithdrawalFailed(result.errorDescription);
+    }
+  },
+  
+  onError: function(error) {
+    showWithdrawalError(error.errorDescription);
+  }
+});
+
+// Amount quick select buttons
+document.querySelectorAll('.amount-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const amount = this.dataset.amount;
+    
+    if (parseFloat(amount) <= userBalance.available) {
+      sc.withdrawal.updateAmount({
+        amount: amount,
+        currency: 'USD'
+      });
+      updateSelectedAmount(amount);
+    } else {
+      showInsufficientFunds();
+    }
+  });
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Events" icon="bell" href="/integrations/simply-connect/events">
+    Handle Simply Connect events
+  </Card>
+  <Card title="Customization" icon="palette" href="/integrations/simply-connect/customization">
+    Configure the payment form
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/webhooks/overview">
+    Server-side notifications
+  </Card>
+</CardGroup>

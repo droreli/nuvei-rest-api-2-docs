@@ -1,0 +1,177 @@
+---
+title: 'voidTransaction'
+openapi: 'POST /voidTransaction'
+---
+
+<Info>
+  Voids (cancels) a previously authorized but **not yet settled** transaction. This releases the hold on the customer's funds immediately.
+</Info>
+
+## When to Use
+
+- Canceling orders before fulfillment
+- Authorization was created in error
+- Customer changes their mind before shipment
+- Inventory issues discovered after authorization
+
+<Warning>
+  Void can only be performed on **Auth** transactions that have not been settled. For settled transactions, use [refundTransaction](/api-reference/rest-1/payments/refund-transaction).
+</Warning>
+
+## Sale vs Auth: Void Timing
+
+| Transaction Type | Can Void? |
+|------------------|-----------|
+| Sale (before batch close) | Yes |
+| Sale (after batch close) | No - use refund |
+| Auth (before settle) | Yes |
+| Auth (after settle) | No - use refund |
+
+<Note>
+  Batch close typically occurs once daily. Check with your account manager for your specific batch time.
+</Note>
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + clientUniqueId + amount + currency + relatedTransactionId + authCode + comment + urlDetails + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "VOID-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "200.00",
+  "currency": "USD",
+  "authCode": "111344",
+  "comment": "Order cancelled by customer",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "transactionId": "2110000000001208912",
+  "transactionStatus": "APPROVED",
+  "authCode": "111346",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Void vs Refund: Quick Reference
+
+| Action | Void | Refund |
+|--------|------|--------|
+| **Transaction State** | Unsettled | Settled |
+| **Customer Impact** | Hold released immediately | Funds returned in 3-5 days |
+| **Interchange Fees** | Usually avoided | May still apply |
+| **Use Case** | Before shipment | After fulfillment |
+
+## Common Errors
+
+| Error Code | Description | Resolution |
+|------------|-------------|------------|
+| -1140 | Transaction already settled | Use refundTransaction |
+| -1141 | Invalid related transaction | Check transactionId |
+| -1142 | Already voided | Transaction was already cancelled |
+| -1143 | Void window expired | Use refundTransaction |
+
+## Code Example
+
+```javascript
+async function voidTransaction(authTransaction, reason) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `void_${Date.now()}`;
+  
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/voidTransaction',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientUniqueId: `VOID-${authTransaction.clientUniqueId}`,
+      clientRequestId,
+      relatedTransactionId: authTransaction.transactionId,
+      amount: authTransaction.amount,
+      currency: authTransaction.currency,
+      authCode: authTransaction.authCode,
+      comment: reason,
+      timeStamp,
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+
+  if (response.data.transactionStatus === 'APPROVED') {
+    console.log('Void successful:', response.data.transactionId);
+    // Update order status to cancelled
+  } else {
+    console.error('Void failed:', response.data.gwErrorReason);
+    
+    // If void fails because already settled, try refund instead
+    if (response.data.gwErrorCode === -1140) {
+      console.log('Transaction already settled, attempting refund...');
+      return await refundTransaction(authTransaction, authTransaction.amount, reason);
+    }
+  }
+  
+  return response.data;
+}
+
+// Usage
+await voidTransaction(
+  { 
+    transactionId: '2110000000001208909', 
+    authCode: '111344', 
+    amount: '200.00',
+    currency: 'USD',
+    clientUniqueId: 'ORDER-12345'
+  },
+  'Customer cancelled order'
+);
+```
+
+## Automatic Void Handling
+
+For a seamless experience, implement automatic void/refund logic:
+
+```javascript
+async function cancelTransaction(transaction, reason) {
+  // First, try to void (cheaper, faster)
+  try {
+    const voidResult = await voidTransaction(transaction, reason);
+    if (voidResult.transactionStatus === 'APPROVED') {
+      return { type: 'VOID', result: voidResult };
+    }
+  } catch (error) {
+    // Void failed, likely because already settled
+  }
+  
+  // Fall back to refund
+  const refundResult = await refundTransaction(transaction, transaction.amount, reason);
+  return { type: 'REFUND', result: refundResult };
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Refund" icon="rotate-left" href="/api-reference/rest-1/payments/refund-transaction">
+    For settled transactions
+  </Card>
+  <Card title="Get Status" icon="magnifying-glass" href="/api-reference/rest-1/payments/get-payment-status">
+    Check transaction status
+  </Card>
+</CardGroup>

@@ -1,0 +1,148 @@
+---
+title: 'settleTransaction'
+openapi: 'POST /settleTransaction'
+---
+
+<Info>
+  Settles (captures) a previously authorized transaction. Use this when you initially created an **Auth** transaction and are now ready to capture funds (e.g., after shipping goods).
+</Info>
+
+## When to Use
+
+- Capturing an Auth transaction after goods are shipped
+- Partial capture (capturing less than the authorized amount)
+- Physical goods fulfillment workflow
+
+<Warning>
+  Settlements must be performed within the authorization validity period:
+  - **Visa/Mastercard**: 7-30 days (varies by issuer)
+  - **Amex**: Up to 7 days
+  
+  Expired authorizations cannot be settled.
+</Warning>
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + clientUniqueId + amount + currency + relatedTransactionId + authCode + comment + urlDetails + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "200.00",
+  "currency": "USD",
+  "authCode": "111344",
+  "descriptorMerchantName": "MyStore",
+  "descriptorMerchantPhone": "1234567890",
+  "comment": "Order shipped - tracking: 1Z999AA10123456784",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "transactionId": "2110000000001208910",
+  "transactionStatus": "APPROVED",
+  "authCode": "111344",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Key Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `relatedTransactionId` | Yes | Original Auth transaction ID |
+| `amount` | Yes | Amount to capture (≤ auth amount) |
+| `currency` | Yes | Must match original currency |
+| `authCode` | Yes | Auth code from original transaction |
+| `descriptorMerchantName` | No | Statement descriptor name |
+| `descriptorMerchantPhone` | No | Statement descriptor phone |
+
+## Partial Captures
+
+You can capture less than the original authorization:
+
+```json
+{
+  "relatedTransactionId": "2110000000001208909",
+  "amount": "150.00",  // Original auth was $200
+  "currency": "USD",
+  "authCode": "111344",
+  "comment": "Partial shipment - 3 of 4 items"
+}
+```
+
+<Note>
+  The remaining authorization amount is typically released back to the cardholder within 7-10 business days.
+</Note>
+
+## Common Errors
+
+| Error Code | Description | Resolution |
+|------------|-------------|------------|
+| -1120 | Auth expired | Cannot capture - create new transaction |
+| -1121 | Already settled | Transaction was already captured |
+| -1122 | Amount exceeds auth | Reduce capture amount |
+| -1123 | Currency mismatch | Use original currency |
+
+## Code Example
+
+```javascript
+async function settleTransaction(authTransaction, shipmentDetails) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `settle_${Date.now()}`;
+  
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/settleTransaction',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientUniqueId: authTransaction.clientUniqueId,
+      clientRequestId,
+      relatedTransactionId: authTransaction.transactionId,
+      amount: authTransaction.amount,
+      currency: authTransaction.currency,
+      authCode: authTransaction.authCode,
+      comment: `Shipped via ${shipmentDetails.carrier}: ${shipmentDetails.tracking}`,
+      timeStamp,
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+
+  if (response.data.transactionStatus === 'APPROVED') {
+    console.log('Settlement successful:', response.data.transactionId);
+  } else {
+    console.error('Settlement failed:', response.data.gwErrorReason);
+  }
+  
+  return response.data;
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Refund" icon="rotate-left" href="/api-reference/rest-1/payments/refund-transaction">
+    Refund settled transactions
+  </Card>
+  <Card title="Void" icon="ban" href="/api-reference/rest-1/payments/void-transaction">
+    Cancel before settlement
+  </Card>
+</CardGroup>

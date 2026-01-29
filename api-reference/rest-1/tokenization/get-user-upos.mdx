@@ -1,0 +1,213 @@
+---
+title: 'getUserUPOs'
+openapi: 'POST /getUserUPOs'
+---
+
+<Info>
+  Retrieves all stored User Payment Options (UPOs) for a user. Returns cards and APMs that can be used for one-click payments.
+</Info>
+
+## When to Use
+
+- Displaying saved payment methods to returning users
+- Building a "saved cards" dropdown
+- Checking what payment methods a user has stored
+- Implementing one-click checkout
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + userTokenId + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientRequestId": "1C6CT7V1L",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "paymentMethods": [
+    {
+      "userPaymentOptionId": "87654321",
+      "paymentMethodName": "cc_card",
+      "ccCardNumber": "4****1111",
+      "ccExpMonth": "12",
+      "ccExpYear": "2030",
+      "ccNameOnCard": "John Smith",
+      "brand": "VISA",
+      "uniqueCC": "jCgn6MqN1M/xo1SOLW1qxcOk3Mxk=",
+      "bin": "411111",
+      "last4Digits": "1111",
+      "cardType": "Credit",
+      "issuerCountry": "US",
+      "upoStatus": "enabled",
+      "billingAddress": {
+        "firstName": "John",
+        "lastName": "Smith",
+        "email": "john@email.com",
+        "country": "US"
+      }
+    },
+    {
+      "userPaymentOptionId": "87654322",
+      "paymentMethodName": "cc_card",
+      "ccCardNumber": "5****1234",
+      "ccExpMonth": "06",
+      "ccExpYear": "2028",
+      "ccNameOnCard": "John Smith",
+      "brand": "MASTERCARD",
+      "bin": "510027",
+      "last4Digits": "1234",
+      "cardType": "Debit",
+      "issuerCountry": "US",
+      "upoStatus": "enabled"
+    },
+    {
+      "userPaymentOptionId": "87654323",
+      "paymentMethodName": "apmgw_PayPal",
+      "upoStatus": "enabled",
+      "upoData": {
+        "email": "john.smith@paypal.com"
+      }
+    }
+  ],
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## UPO Status Values
+
+| Status | Description |
+|--------|-------------|
+| `enabled` | Active and usable |
+| `disabled` | Temporarily disabled |
+| `deleted` | Soft deleted |
+
+## Building a Payment Method Selector
+
+```javascript
+async function displaySavedPaymentMethods(userTokenId) {
+  const response = await getUserUPOs(userTokenId);
+  const methods = response.paymentMethods;
+  
+  // Separate cards and APMs
+  const cards = methods.filter(m => m.paymentMethodName === 'cc_card');
+  const apms = methods.filter(m => m.paymentMethodName !== 'cc_card');
+  
+  // Build card options
+  const cardOptions = cards.map(card => ({
+    id: card.userPaymentOptionId,
+    label: `${card.brand} •••• ${card.last4Digits}`,
+    sublabel: `Expires ${card.ccExpMonth}/${card.ccExpYear}`,
+    icon: getCardIcon(card.brand),
+    isExpired: isCardExpired(card.ccExpMonth, card.ccExpYear)
+  }));
+  
+  // Build APM options
+  const apmOptions = apms.map(apm => ({
+    id: apm.userPaymentOptionId,
+    label: getApmDisplayName(apm.paymentMethodName),
+    sublabel: apm.upoData?.email || '',
+    icon: getApmIcon(apm.paymentMethodName)
+  }));
+  
+  return {
+    cards: cardOptions.filter(c => !c.isExpired),
+    apms: apmOptions,
+    expiredCards: cardOptions.filter(c => c.isExpired)
+  };
+}
+
+function isCardExpired(month, year) {
+  const now = new Date();
+  const expiry = new Date(year, parseInt(month), 0); // Last day of exp month
+  return now > expiry;
+}
+```
+
+## Using Saved Payment Method
+
+Once you have the `userPaymentOptionId`, use it for one-click payments:
+
+```javascript
+async function oneClickPayment(userTokenId, upoId, orderDetails) {
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/payment',
+    {
+      sessionToken: orderDetails.sessionToken,
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientUniqueId: orderDetails.orderId,
+      clientRequestId: `req_${Date.now()}`,
+      amount: orderDetails.amount,
+      currency: orderDetails.currency,
+      transactionType: 'Sale',
+      userTokenId,
+      paymentOption: {
+        userPaymentOptionId: upoId
+      },
+      // No need to send card details!
+      timeStamp: getTimestamp(),
+      checksum: generateChecksum(/* ... */)
+    }
+  );
+  
+  return response.data;
+}
+```
+
+## Code Example
+
+```javascript
+async function getUserUPOs(userTokenId) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `upo_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(MERCHANT_ID + SITE_ID + clientRequestId + userTokenId + timeStamp + SECRET_KEY)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/getUserUPOs',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      userTokenId,
+      clientRequestId,
+      timeStamp,
+      checksum
+    }
+  );
+
+  return response.data;
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Add Card UPO" icon="plus" href="/api-reference/rest-1/tokenization/add-upo-credit-card">
+    Store a new card
+  </Card>
+  <Card title="Delete UPO" icon="trash" href="/api-reference/rest-1/tokenization/delete-upo">
+    Remove payment method
+  </Card>
+  <Card title="Payment" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Use stored card
+  </Card>
+</CardGroup>

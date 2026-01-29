@@ -1,0 +1,352 @@
+---
+title: 'REST API 1.0 Overview'
+description: 'Complete server-to-server integration using Nuvei REST API 1.0'
+---
+
+# REST API 1.0 Overview
+
+Nuvei's REST API 1.0 is a comprehensive server-to-server API that provides full control over the payment flow. It uses POST requests with JSON payloads and supports all payment operations including transactions, tokenization, subscriptions, and payouts.
+
+<Info>
+  REST API 1.0 is the original Nuvei server API and is fully supported. For new integrations, consider [REST API 2.0](/api-reference/rest-2/overview) for a more RESTful approach with simplified endpoints.
+</Info>
+
+## Base URLs
+
+<CodeGroup>
+```text Sandbox
+https://ppp-test.nuvei.com/ppp/api/v1
+```
+
+```text Production
+https://secure.safecharge.com/ppp/api/v1
+```
+</CodeGroup>
+
+## Authentication
+
+All REST API 1.0 requests require authentication using:
+- **merchantId**: Your unique merchant identifier
+- **merchantSiteId**: Your site identifier
+- **timeStamp**: Request timestamp in `YYYYMMDDHHmmss` format
+- **checksum**: SHA256 hash for request validation
+
+### Checksum Calculation
+
+The checksum is a SHA256 hash of concatenated values. The exact values depend on the endpoint.
+
+**For getSessionToken:**
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + timeStamp + merchantSecretKey)
+```
+
+**For payment operations:**
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey)
+```
+
+<Tip>
+  The `merchantSecretKey` should never be exposed in client-side code. Always calculate the checksum on your server.
+</Tip>
+
+## Response Format
+
+All responses include common status fields:
+
+```json
+{
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `status` | Overall request status: `SUCCESS` or `ERROR` |
+| `errCode` | Error code (0 for success) |
+| `reason` | Error description if status is `ERROR` |
+| `internalRequestId` | Nuvei's internal request identifier |
+
+## API Categories
+
+### Session Management
+Initialize payment sessions and manage orders.
+
+| Endpoint | Description |
+|----------|-------------|
+| [getSessionToken](/api-reference/rest-1/session/get-session-token) | Create a session token for API calls |
+| [openOrder](/api-reference/rest-1/session/open-order) | Create an order with session token |
+| [updateOrder](/api-reference/rest-1/session/update-order) | Update an existing order |
+
+### Payment Operations
+Process payments and manage transaction lifecycle.
+
+| Endpoint | Description |
+|----------|-------------|
+| [payment](/api-reference/rest-1/payments/payment) | Execute Sale or Auth transaction |
+| [initPayment](/api-reference/rest-1/payments/init-payment) | Initialize payment for 3DS |
+| [settleTransaction](/api-reference/rest-1/payments/settle-transaction) | Capture an authorized payment |
+| [refundTransaction](/api-reference/rest-1/payments/refund-transaction) | Refund a settled transaction |
+| [voidTransaction](/api-reference/rest-1/payments/void-transaction) | Cancel an authorization |
+| [getPaymentStatus](/api-reference/rest-1/payments/get-payment-status) | Check transaction status |
+
+### 3D Secure
+Handle 3D Secure authentication.
+
+| Endpoint | Description |
+|----------|-------------|
+| [authorize3d](/api-reference/rest-1/3ds/authorize3d) | Initiate 3DS authentication |
+| [verify3d](/api-reference/rest-1/3ds/verify3d) | Verify 3DS result |
+
+### Tokenization (UPO)
+Manage User Payment Options for returning customers.
+
+| Endpoint | Description |
+|----------|-------------|
+| [addUPOCreditCard](/api-reference/rest-1/tokenization/add-upo-credit-card) | Store a credit card |
+| [addUPOCreditCardByToken](/api-reference/rest-1/tokenization/add-upo-credit-card-by-token) | Store card from temp token |
+| [addUPOAPM](/api-reference/rest-1/tokenization/add-upo-apm) | Store an APM |
+| [editUPOCreditCard](/api-reference/rest-1/tokenization/edit-upo-credit-card) | Update card details |
+| [editUPOAPM](/api-reference/rest-1/tokenization/edit-upo-apm) | Update APM details |
+| [deleteUPO](/api-reference/rest-1/tokenization/delete-upo) | Remove a stored payment method |
+| [getUserUPOs](/api-reference/rest-1/tokenization/get-user-upos) | List user's payment methods |
+
+### Subscriptions
+Set up recurring billing.
+
+| Endpoint | Description |
+|----------|-------------|
+| [createSubscription](/api-reference/rest-1/subscriptions/create-subscription) | Start a subscription |
+| [cancelSubscription](/api-reference/rest-1/subscriptions/cancel-subscription) | Cancel subscription |
+| [getSubscriptionsList](/api-reference/rest-1/subscriptions/get-subscriptions-list) | List subscriptions |
+| [createPlan](/api-reference/rest-1/subscriptions/create-plan) | Create billing plan |
+| [getPlansList](/api-reference/rest-1/subscriptions/get-plans-list) | List available plans |
+
+### User Management
+Manage customer accounts.
+
+| Endpoint | Description |
+|----------|-------------|
+| [createUser](/api-reference/rest-1/users/create-user) | Create user account |
+| [updateUser](/api-reference/rest-1/users/update-user) | Update user details |
+| [getUserDetails](/api-reference/rest-1/users/get-user-details) | Get user information |
+
+### Payouts & Withdrawals
+Send funds to customers.
+
+| Endpoint | Description |
+|----------|-------------|
+| [payout](/api-reference/rest-1/payouts/payout) | Initiate a payout/withdrawal |
+| [getPayoutStatus](/api-reference/rest-1/payouts/get-payout-status) | Check payout status |
+
+### Utility
+Helper methods for integration.
+
+| Endpoint | Description |
+|----------|-------------|
+| [getCardDetails](/api-reference/rest-1/utility/get-card-details) | BIN lookup |
+| [getMerchantPaymentMethods](/api-reference/rest-1/utility/get-merchant-payment-methods) | Available payment methods |
+| [getDccDetails](/api-reference/rest-1/utility/get-dcc-details) | Currency conversion rates |
+| [getMcpRates](/api-reference/rest-1/utility/get-mcp-rates) | Multi-currency pricing |
+| [accountCapture](/api-reference/rest-1/utility/account-capture) | Capture bank account |
+
+## Typical Payment Flow
+
+<Steps>
+  <Step title="Open Order">
+    Call `/openOrder` to create an order and get a session token.
+  </Step>
+  <Step title="Initialize Payment (Optional)">
+    For 3DS, call `/initPayment` to fingerprint the card and check if 3DS is required.
+  </Step>
+  <Step title="Execute Payment">
+    Call `/payment` with the session token and payment details.
+  </Step>
+  <Step title="Handle 3DS (If Required)">
+    If the response requires 3DS, call `/authorize3d` and redirect the user. After completion, call `/verify3d`.
+  </Step>
+  <Step title="Capture (If Auth)">
+    For Auth transactions, call `/settleTransaction` to capture when ready to ship.
+  </Step>
+</Steps>
+
+## Error Handling
+
+### Transaction Status Values
+
+| Status | Description |
+|--------|-------------|
+| `APPROVED` | Transaction successful |
+| `DECLINED` | Transaction declined by issuer |
+| `ERROR` | Processing error occurred |
+| `PENDING` | Awaiting async response (APMs) |
+| `REDIRECT` | Customer redirect required |
+
+### Common Error Codes
+
+| Code | Description |
+|------|-------------|
+| 0 | Success |
+| -1 | Invalid checksum |
+| -5 | Invalid parameter |
+| -6 | Missing required field |
+| -7 | Session expired |
+| -1100 | Insufficient funds |
+| -1101 | Card expired |
+| -1102 | CVV mismatch |
+
+## Test Cards
+
+Use these cards in the sandbox environment:
+
+| Card Number | Result |
+|-------------|--------|
+| 4000020951595032 | Approved (3DS v2) |
+| 4000027891380961 | Approved (3DS v2 frictionless) |
+| 4111111111111111 | Approved (non-3DS) |
+| 4000023104662535 | Declined |
+| 5100270000001234 | Mastercard Approved |
+
+All test cards use:
+- **Expiry**: Any future date
+- **CVV**: Any 3 digits
+
+## Code Examples
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+const merchantId = 'YOUR_MERCHANT_ID';
+const merchantSiteId = 'YOUR_SITE_ID';
+const secretKey = 'YOUR_SECRET_KEY';
+
+// Generate checksum
+function generateChecksum(params) {
+  const concatenated = params.join('');
+  return crypto.createHash('sha256').update(concatenated).digest('hex');
+}
+
+// Get session token
+async function getSessionToken() {
+  const timeStamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `req_${Date.now()}`;
+  
+  const checksum = generateChecksum([
+    merchantId, merchantSiteId, clientRequestId, timeStamp, secretKey
+  ]);
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken',
+    {
+      merchantId,
+      merchantSiteId,
+      clientRequestId,
+      timeStamp,
+      checksum
+    }
+  );
+
+  return response.data.sessionToken;
+}
+```
+
+```python Python
+import hashlib
+import requests
+from datetime import datetime
+
+MERCHANT_ID = 'YOUR_MERCHANT_ID'
+SITE_ID = 'YOUR_SITE_ID'
+SECRET_KEY = 'YOUR_SECRET_KEY'
+
+def generate_checksum(*args):
+    concatenated = ''.join(args)
+    return hashlib.sha256(concatenated.encode()).hexdigest()
+
+def get_session_token():
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    client_request_id = f'req_{int(datetime.now().timestamp())}'
+    
+    checksum = generate_checksum(
+        MERCHANT_ID, SITE_ID, client_request_id, timestamp, SECRET_KEY
+    )
+
+    response = requests.post(
+        'https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken',
+        json={
+            'merchantId': MERCHANT_ID,
+            'merchantSiteId': SITE_ID,
+            'clientRequestId': client_request_id,
+            'timeStamp': timestamp,
+            'checksum': checksum
+        }
+    )
+
+    return response.json()['sessionToken']
+```
+
+```php PHP
+<?php
+$merchantId = 'YOUR_MERCHANT_ID';
+$merchantSiteId = 'YOUR_SITE_ID';
+$secretKey = 'YOUR_SECRET_KEY';
+
+function generateChecksum(...$params) {
+    $concatenated = implode('', $params);
+    return hash('sha256', $concatenated);
+}
+
+function getSessionToken() {
+    global $merchantId, $merchantSiteId, $secretKey;
+    
+    $timeStamp = date('YmdHis');
+    $clientRequestId = 'req_' . time();
+    
+    $checksum = generateChecksum(
+        $merchantId, $merchantSiteId, $clientRequestId, $timeStamp, $secretKey
+    );
+
+    $data = [
+        'merchantId' => $merchantId,
+        'merchantSiteId' => $merchantSiteId,
+        'clientRequestId' => $clientRequestId,
+        'timeStamp' => $timeStamp,
+        'checksum' => $checksum
+    ];
+
+    $ch = curl_init('https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+    
+    return $response['sessionToken'];
+}
+?>
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/integration/server-to-server">
+    Complete integration guide
+  </Card>
+  <Card title="Session APIs" icon="key" href="/api-reference/rest-1/session/get-session-token">
+    Start with session management
+  </Card>
+  <Card title="Payment APIs" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Process your first payment
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/webhooks/overview">
+    Set up notifications
+  </Card>
+</CardGroup>

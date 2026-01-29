@@ -1,0 +1,129 @@
+---
+title: 'addUPOCreditCard'
+openapi: 'POST /addUPOCreditCard'
+---
+
+<Info>
+  Adds a credit card as a User Payment Option (UPO) for future use. The card is tokenized and stored securely for the specified user.
+</Info>
+
+## When to Use
+
+- Saving cards for returning customers
+- Setting up card-on-file for subscriptions
+- Enabling one-click checkout
+- Pre-registering payment methods
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + userTokenId + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientRequestId": "1C6CT7V1L",
+  "ccCardNumber": "4111111111111111",
+  "ccExpMonth": "12",
+  "ccExpYear": "2030",
+  "ccNameOnCard": "John Smith",
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john@email.com",
+    "address": "123 Main St",
+    "city": "New York",
+    "zip": "10001",
+    "country": "US"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response
+
+```json
+{
+  "userPaymentOptionId": "87654321",
+  "ccToken": "ODc2NTQzMjE=",
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Storing Card During Payment
+
+You can also store cards automatically during payment by including `userTokenId`:
+
+```json
+{
+  "userTokenId": "user_123",
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4111111111111111",
+      "cardHolderName": "John Smith",
+      "expirationMonth": "12",
+      "expirationYear": "2030",
+      "CVV": "217"
+    }
+  }
+}
+```
+
+The response will include `userPaymentOptionId` if successfully stored.
+
+## Code Example
+
+```javascript
+async function addCardUPO(userTokenId, cardDetails, billingAddress) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `add_upo_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(MERCHANT_ID + SITE_ID + clientRequestId + userTokenId + timeStamp + SECRET_KEY)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/addUPOCreditCard',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      userTokenId,
+      clientRequestId,
+      ccCardNumber: cardDetails.number,
+      ccExpMonth: cardDetails.expMonth,
+      ccExpYear: cardDetails.expYear,
+      ccNameOnCard: cardDetails.name,
+      billingAddress,
+      timeStamp,
+      checksum
+    }
+  );
+
+  if (response.data.status === 'SUCCESS') {
+    console.log('Card stored. UPO ID:', response.data.userPaymentOptionId);
+  }
+  
+  return response.data;
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Get User UPOs" icon="list" href="/api-reference/rest-1/tokenization/get-user-upos">
+    List stored cards
+  </Card>
+  <Card title="Payment" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Use stored card
+  </Card>
+</CardGroup>

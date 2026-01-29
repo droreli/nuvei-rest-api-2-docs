@@ -1,0 +1,199 @@
+---
+title: 'getPaymentStatus'
+openapi: 'POST /getPaymentStatus'
+---
+
+<Info>
+  Retrieves the status of a payment transaction using the session token. Essential for checking transaction outcomes, especially for async payments like APMs.
+</Info>
+
+## When to Use
+
+- Checking final transaction status after redirect
+- Confirming APM payment completion
+- Verifying payment outcome when webhook is delayed
+- Reconciliation and reporting
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientRequestId": "1C6CT7V1L",
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response (Approved Card)
+
+```json
+{
+  "transactionStatus": "APPROVED",
+  "transactionId": "2110000000001208909",
+  "orderId": "39272123",
+  "authCode": "111344",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "paymentOption": {
+    "card": {
+      "ccCardNumber": "4****1111",
+      "bin": "411111",
+      "last4Digits": "1111",
+      "cardType": "Credit",
+      "cardBrand": "VISA",
+      "threeD": {
+        "eci": "05",
+        "result": "Y",
+        "authenticationStatus": "Y"
+      }
+    }
+  },
+  "transactionType": "Sale",
+  "clientUniqueId": "ORDER-12345",
+  "customData": "",
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Example Response (Pending APM)
+
+```json
+{
+  "transactionStatus": "PENDING",
+  "transactionId": "2110000000001208910",
+  "orderId": "39272124",
+  "paymentOption": {
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_iDEAL"
+    }
+  },
+  "transactionType": "Sale",
+  "internalRequestId": 12345679,
+  "status": "SUCCESS",
+  "errCode": 0
+}
+```
+
+## Transaction Status Values
+
+| Status | Description | Recommended Action |
+|--------|-------------|-------------------|
+| `APPROVED` | Payment successful | Fulfill order |
+| `DECLINED` | Payment declined | Show error, offer retry |
+| `PENDING` | Awaiting confirmation | Wait for webhook |
+| `ERROR` | Processing error | Review error codes |
+
+## Polling Strategy for APMs
+
+For APM payments that remain in PENDING status:
+
+```javascript
+async function pollPaymentStatus(sessionToken, maxAttempts = 10) {
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    const status = await getPaymentStatus(sessionToken);
+    
+    if (status.transactionStatus !== 'PENDING') {
+      return status;  // Final status reached
+    }
+    
+    attempts++;
+    
+    // Exponential backoff: 2s, 4s, 8s, 16s...
+    const delay = Math.min(2000 * Math.pow(2, attempts), 30000);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  
+  throw new Error('Payment status check timed out');
+}
+
+// Usage after APM redirect
+const finalStatus = await pollPaymentStatus(sessionToken);
+if (finalStatus.transactionStatus === 'APPROVED') {
+  // Order confirmed
+} else {
+  // Handle failure
+}
+```
+
+<Tip>
+  While polling works, webhooks are more reliable for APM status updates. Use `getPaymentStatus` as a fallback or for immediate checks after redirect.
+</Tip>
+
+## Code Example
+
+```javascript
+async function getPaymentStatus(sessionToken) {
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `status_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(MERCHANT_ID + SITE_ID + clientRequestId + timeStamp + SECRET_KEY)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/getPaymentStatus',
+    {
+      merchantId: MERCHANT_ID,
+      merchantSiteId: SITE_ID,
+      clientRequestId,
+      sessionToken,
+      timeStamp,
+      checksum
+    }
+  );
+
+  const data = response.data;
+  
+  console.log(`Transaction ${data.transactionId}: ${data.transactionStatus}`);
+  
+  return data;
+}
+```
+
+## Integration with Return URLs
+
+After APM redirect, check status on your success/failure page:
+
+```javascript
+// success.js - Your success URL handler
+app.get('/payment/success', async (req, res) => {
+  const { sessionToken } = req.query;
+  
+  // Don't trust the redirect alone - verify with API
+  const status = await getPaymentStatus(sessionToken);
+  
+  if (status.transactionStatus === 'APPROVED') {
+    // Update order, show confirmation
+    res.render('confirmation', { orderId: status.clientUniqueId });
+  } else {
+    // Payment not actually approved
+    res.redirect('/payment/failure');
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="bell" href="/webhooks/overview">
+    Set up real-time notifications
+  </Card>
+  <Card title="Payment API" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Process payments
+  </Card>
+</CardGroup>

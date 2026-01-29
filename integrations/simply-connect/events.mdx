@@ -1,0 +1,582 @@
+---
+title: 'Events'
+description: 'Handle Simply Connect events for payment flow control'
+---
+
+# Simply Connect Events
+
+Simply Connect emits events throughout the payment lifecycle. Subscribe to these events to build reactive UIs, track user behavior, and handle payment outcomes.
+
+## Event Registration
+
+### Using Callback Parameters
+
+Pass event handlers when initializing checkout:
+
+```javascript
+const checkout = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+checkout({
+  sessionToken: sessionToken,
+  
+  // Event handlers as callbacks
+  onReady: function() {
+    console.log('Payment form ready');
+  },
+  onResult: function(result) {
+    handlePaymentResult(result);
+  },
+  onError: function(error) {
+    handleError(error);
+  }
+});
+```
+
+### Using addEventListener
+
+Subscribe to events after initialization:
+
+```javascript
+const checkoutInstance = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+// Add event listeners
+checkoutInstance.addEventListener('ready', () => {
+  console.log('Form ready');
+});
+
+checkoutInstance.addEventListener('paymentStarted', (data) => {
+  showLoadingSpinner();
+});
+
+checkoutInstance.addEventListener('result', (result) => {
+  handlePaymentResult(result);
+});
+
+// Remove listener when needed
+checkoutInstance.removeEventListener('ready', readyHandler);
+```
+
+## Lifecycle Events
+
+### onReady
+
+Fired when the payment form has fully loaded and is ready for user input.
+
+```javascript
+onReady: function() {
+  // Hide loading spinner
+  document.getElementById('loading').style.display = 'none';
+  // Enable submit button
+  document.getElementById('submit-btn').disabled = false;
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| N/A | - | No payload |
+
+<Tip>
+  Use `onReady` to show the payment form and hide loading states.
+</Tip>
+
+### onPaymentStarted
+
+Fired when the user initiates payment (clicks pay button).
+
+```javascript
+onPaymentStarted: function(data) {
+  console.log('Payment started for:', data.paymentMethod);
+  
+  // Show processing state
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').innerText = 'Processing...';
+  
+  // Start timeout timer
+  startPaymentTimeout();
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `paymentMethod` | string | Selected payment method (e.g., `cc_card`, `apmgw_PayPal`) |
+| `amount` | string | Transaction amount |
+| `currency` | string | Transaction currency |
+
+### onResult
+
+Fired when payment completes (success or failure).
+
+```javascript
+onResult: function(result) {
+  console.log('Payment result:', result);
+  
+  if (result.result === 'APPROVED') {
+    // Payment successful
+    window.location.href = '/order-confirmation?orderId=' + result.orderId;
+  } else if (result.result === 'DECLINED') {
+    // Payment declined
+    showDeclineMessage(result.errorDescription);
+  } else if (result.result === 'PENDING') {
+    // APM pending (redirect completed)
+    showPendingMessage();
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `result` | string | `APPROVED`, `DECLINED`, `PENDING`, `ERROR` |
+| `transactionId` | string | Nuvei transaction ID |
+| `orderId` | string | Your order ID |
+| `authCode` | string | Authorization code (if approved) |
+| `transactionStatus` | string | Detailed status |
+| `transactionType` | string | `Sale`, `Auth`, etc. |
+| `errorCode` | string | Error code (if declined) |
+| `errorDescription` | string | Error message (if declined) |
+| `paymentMethod` | string | Payment method used |
+| `amount` | string | Charged amount |
+| `currency` | string | Transaction currency |
+
+**Result Values:**
+
+| Result | Description | Action |
+|--------|-------------|--------|
+| `APPROVED` | Payment successful | Show confirmation |
+| `DECLINED` | Payment declined | Show error, allow retry |
+| `PENDING` | APM processing | Show pending message |
+| `ERROR` | System error | Show error, allow retry |
+
+### onError
+
+Fired when an error occurs during payment processing.
+
+```javascript
+onError: function(error) {
+  console.error('Payment error:', error);
+  
+  // Log for debugging
+  logError({
+    code: error.errorCode,
+    message: error.errorDescription,
+    sessionToken: sessionToken
+  });
+  
+  // Show user-friendly message
+  if (error.errorCode === 'FORM_VALIDATION') {
+    showValidationError(error.errorDescription);
+  } else {
+    showGenericError('Payment could not be processed. Please try again.');
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `errorCode` | string | Error identifier |
+| `errorDescription` | string | Human-readable error message |
+| `errorSource` | string | `validation`, `api`, `network`, `timeout` |
+
+**Common Error Codes:**
+
+| Code | Description |
+|------|-------------|
+| `FORM_VALIDATION` | Form validation failed |
+| `SESSION_EXPIRED` | Session token expired |
+| `NETWORK_ERROR` | Network connectivity issue |
+| `TIMEOUT` | Request timed out |
+| `3DS_FAILED` | 3D Secure authentication failed |
+| `APM_ERROR` | APM-specific error |
+
+## Form Events
+
+### onFieldFocus
+
+Fired when a form field receives focus.
+
+```javascript
+onFieldFocus: function(data) {
+  console.log('Field focused:', data.fieldName);
+  
+  // Show field-specific help
+  showFieldHelp(data.fieldName);
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fieldName` | string | `cardNumber`, `cardholderName`, `expirationDate`, `cvv` |
+
+### onFieldBlur
+
+Fired when a form field loses focus.
+
+```javascript
+onFieldBlur: function(data) {
+  console.log('Field blurred:', data.fieldName);
+  
+  // Hide field help
+  hideFieldHelp(data.fieldName);
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fieldName` | string | Field that lost focus |
+| `isEmpty` | boolean | Whether field is empty |
+| `isValid` | boolean | Whether field value is valid |
+
+### onFieldChange
+
+Fired when field value changes.
+
+```javascript
+onFieldChange: function(data) {
+  if (data.fieldName === 'cardNumber' && data.cardBrand) {
+    // Show card brand icon
+    showCardBrandIcon(data.cardBrand);
+  }
+  
+  // Update form validity state
+  updateFormValidity();
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fieldName` | string | Changed field name |
+| `isEmpty` | boolean | Whether field is empty |
+| `isValid` | boolean | Whether value is valid |
+| `cardBrand` | string | Detected card brand (for cardNumber field) |
+| `cardType` | string | `credit`, `debit`, `prepaid` (when detectable) |
+
+### onFormValidation
+
+Fired when overall form validity changes.
+
+```javascript
+onFormValidation: function(data) {
+  // Enable/disable submit button based on form validity
+  document.getElementById('submit-btn').disabled = !data.isValid;
+  
+  if (!data.isValid) {
+    console.log('Invalid fields:', data.invalidFields);
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isValid` | boolean | Overall form validity |
+| `invalidFields` | array | List of invalid field names |
+| `errors` | object | Field-specific error messages |
+
+## Payment Method Events
+
+### onPaymentMethodSelected
+
+Fired when user selects a payment method.
+
+```javascript
+onPaymentMethodSelected: function(data) {
+  console.log('Payment method selected:', data.paymentMethod);
+  
+  // Update UI based on payment method
+  if (data.paymentMethod === 'cc_card') {
+    showCardFields();
+  } else if (data.paymentMethod.startsWith('apmgw_')) {
+    showAPMInfo(data.paymentMethod);
+  }
+  
+  // Track analytics
+  analytics.track('Payment Method Selected', {
+    method: data.paymentMethod
+  });
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `paymentMethod` | string | Selected payment method ID |
+| `paymentMethodName` | string | Display name |
+| `isAPM` | boolean | Whether it's an APM |
+| `isStored` | boolean | Whether it's a saved payment method |
+
+### onSavedCardSelected
+
+Fired when user selects a previously saved card.
+
+```javascript
+onSavedCardSelected: function(data) {
+  console.log('Saved card selected:', data.cardLastFour);
+  
+  // Show CVV field for saved card
+  showCvvField();
+  
+  // Pre-populate any saved info
+  if (data.cardholderName) {
+    document.getElementById('confirm-name').innerText = data.cardholderName;
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `upoId` | string | User payment option ID |
+| `cardLastFour` | string | Last 4 digits of card |
+| `cardBrand` | string | Card brand |
+| `expirationDate` | string | Expiry (MM/YY) |
+| `cardholderName` | string | Stored cardholder name |
+
+## 3D Secure Events
+
+### on3DSStarted
+
+Fired when 3D Secure authentication begins.
+
+```javascript
+on3DSStarted: function(data) {
+  console.log('3DS authentication started');
+  
+  // Show 3DS notification to user
+  showNotification('Verifying your card with your bank...');
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `version` | string | 3DS version (`1.0`, `2.1`, `2.2`) |
+| `transactionId` | string | Transaction ID |
+
+### on3DSChallengeDisplayed
+
+Fired when 3DS challenge is shown to user.
+
+```javascript
+on3DSChallengeDisplayed: function(data) {
+  console.log('3DS challenge displayed, size:', data.windowSize);
+  
+  // Track 3DS challenge shown
+  analytics.track('3DS Challenge Displayed', {
+    version: data.version,
+    windowSize: data.windowSize
+  });
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `version` | string | 3DS version |
+| `windowSize` | string | Challenge window size code |
+
+### on3DSComplete
+
+Fired when 3D Secure authentication completes.
+
+```javascript
+on3DSComplete: function(data) {
+  console.log('3DS complete:', data.authenticationStatus);
+  
+  if (data.authenticationStatus === 'Y') {
+    // Fully authenticated - liability shift
+  } else if (data.authenticationStatus === 'A') {
+    // Attempted authentication
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `authenticationStatus` | string | `Y` (success), `N` (failed), `A` (attempted), `U` (unavailable) |
+| `version` | string | 3DS version used |
+| `eci` | string | Electronic Commerce Indicator |
+
+## APM Events
+
+### onAPMRedirectStarted
+
+Fired when user is about to be redirected to APM.
+
+```javascript
+onAPMRedirectStarted: function(data) {
+  console.log('Redirecting to:', data.paymentMethod);
+  
+  // Store state for return
+  localStorage.setItem('pendingOrder', JSON.stringify({
+    orderId: currentOrderId,
+    timestamp: Date.now()
+  }));
+  
+  // Show redirect message
+  showNotification('Redirecting to ' + data.paymentMethodName + '...');
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `paymentMethod` | string | APM identifier |
+| `paymentMethodName` | string | Display name |
+| `redirectUrl` | string | Target URL |
+
+### onAPMPopupOpened
+
+Fired when APM popup window opens.
+
+```javascript
+onAPMPopupOpened: function(data) {
+  console.log('APM popup opened for:', data.paymentMethod);
+  
+  // Show instruction to complete in popup
+  showNotification('Please complete payment in the popup window');
+}
+```
+
+### onAPMPopupClosed
+
+Fired when APM popup window closes (user closes or completes).
+
+```javascript
+onAPMPopupClosed: function(data) {
+  console.log('APM popup closed, completed:', data.completed);
+  
+  if (!data.completed) {
+    // User closed without completing
+    showNotification('Payment cancelled');
+    enablePaymentForm();
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `completed` | boolean | Whether payment completed |
+| `paymentMethod` | string | APM identifier |
+
+## Complete Event Handler Example
+
+```javascript
+const checkout = SafeCharge({
+  env: 'int',
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+checkout({
+  sessionToken: sessionToken,
+  amount: '99.99',
+  currency: 'USD',
+  
+  // Lifecycle events
+  onReady: function() {
+    hideLoading();
+    showPaymentForm();
+  },
+  
+  onPaymentStarted: function(data) {
+    showProcessingOverlay();
+    disableFormInputs();
+    analytics.track('Payment Started', { method: data.paymentMethod });
+  },
+  
+  onResult: function(result) {
+    hideProcessingOverlay();
+    
+    switch (result.result) {
+      case 'APPROVED':
+        analytics.track('Payment Success', { 
+          transactionId: result.transactionId 
+        });
+        redirectToConfirmation(result);
+        break;
+        
+      case 'DECLINED':
+        analytics.track('Payment Declined', { 
+          errorCode: result.errorCode 
+        });
+        showDeclineError(result.errorDescription);
+        enableFormInputs();
+        break;
+        
+      case 'PENDING':
+        showPendingMessage();
+        pollForResult(result.transactionId);
+        break;
+        
+      case 'ERROR':
+        showGenericError();
+        enableFormInputs();
+        break;
+    }
+  },
+  
+  onError: function(error) {
+    hideProcessingOverlay();
+    logError(error);
+    showErrorMessage(error.errorDescription);
+    enableFormInputs();
+  },
+  
+  // Form events
+  onFieldChange: function(data) {
+    if (data.fieldName === 'cardNumber' && data.cardBrand) {
+      updateCardBrandIcon(data.cardBrand);
+    }
+  },
+  
+  onFormValidation: function(data) {
+    updateSubmitButton(data.isValid);
+  },
+  
+  // Payment method events
+  onPaymentMethodSelected: function(data) {
+    updatePaymentMethodUI(data);
+    analytics.track('Payment Method Selected', { method: data.paymentMethod });
+  },
+  
+  // 3DS events
+  on3DSStarted: function(data) {
+    showSecurityVerification();
+  },
+  
+  on3DSComplete: function(data) {
+    hideSecurityVerification();
+    if (data.authenticationStatus === 'N') {
+      showAuthenticationFailed();
+    }
+  },
+  
+  // APM events
+  onAPMRedirectStarted: function(data) {
+    saveOrderState();
+    showRedirectMessage(data.paymentMethodName);
+  },
+  
+  onAPMPopupClosed: function(data) {
+    if (!data.completed) {
+      showCancelledMessage();
+      enableFormInputs();
+    }
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Methods" icon="code" href="/integrations/simply-connect/methods">
+    Programmatic control methods
+  </Card>
+  <Card title="Customization" icon="palette" href="/integrations/simply-connect/customization">
+    Configure the payment form
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/webhooks/overview">
+    Server-side notifications
+  </Card>
+</CardGroup>

@@ -1,0 +1,107 @@
+---
+title: 'updateOrder'
+openapi: 'POST /updateOrder'
+---
+
+<Info>
+  Updates an existing order with new amount, currency, or items. Useful for dynamic pricing scenarios like adding shipping costs or applying discounts.
+</Info>
+
+## When to Use
+
+- Adding shipping costs after address entry
+- Applying coupon/discount codes
+- Updating cart items
+- Changing the transaction amount
+- Modifying order details before payment
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "orderId": "39272123",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "220.00",
+  "currency": "USD",
+  "items": [
+    {
+      "name": "Product A",
+      "price": "100.00",
+      "quantity": 2
+    },
+    {
+      "name": "Shipping",
+      "price": "20.00",
+      "quantity": 1
+    }
+  ],
+  "timeStamp": "20260129143045",
+  "checksum": "b7a2e66d5c5c85d8d3e5b5c5e5f5a5b5c5d5e5f5a5b5c5d5e5f5a5b5c5d5e5f5"
+}
+```
+
+## Example Response
+
+```json
+{
+  "orderId": "39272123",
+  "internalRequestId": 12345679,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+## Common Use Cases
+
+### Adding Shipping Costs
+
+```javascript
+// After user enters shipping address
+await updateOrder({
+  sessionToken: sessionToken,
+  orderId: orderId,
+  amount: (productTotal + shippingCost).toFixed(2),
+  currency: 'USD',
+  items: [
+    ...cartItems,
+    { name: 'Express Shipping', price: shippingCost.toFixed(2), quantity: 1 }
+  ]
+});
+```
+
+### Applying Discount
+
+```javascript
+// After user applies coupon
+const discount = calculateDiscount(couponCode);
+const newTotal = Math.max(0, originalTotal - discount);
+
+await updateOrder({
+  sessionToken: sessionToken,
+  orderId: orderId,
+  amount: newTotal.toFixed(2),
+  currency: 'USD'
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Process Payment" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Execute the payment
+  </Card>
+  <Card title="Init Payment" icon="fingerprint" href="/api-reference/rest-1/payments/init-payment">
+    Start 3DS flow
+  </Card>
+</CardGroup>

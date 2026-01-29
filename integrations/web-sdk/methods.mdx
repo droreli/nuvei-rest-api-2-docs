@@ -1,0 +1,653 @@
+---
+title: 'Web SDK Methods'
+description: 'Complete reference for Nuvei Web SDK JavaScript methods'
+---
+
+# Web SDK Methods
+
+The Nuvei Web SDK provides JavaScript methods for building custom payment integrations with full control over the UI and payment flow.
+
+## Initialization
+
+### SafeCharge()
+
+Initialize the Web SDK.
+
+```javascript
+// Initialize with configuration
+const safecharge = SafeCharge({
+  env: 'int',              // 'int' for sandbox, 'prod' for production
+  merchantId: '1234567890',
+  merchantSiteId: '123456'
+});
+```
+
+**Configuration Options:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `env` | string | Yes | Environment: `int` (sandbox) or `prod` (production) |
+| `merchantId` | string | Yes | Your Nuvei merchant ID |
+| `merchantSiteId` | string | Yes | Your Nuvei merchant site ID |
+
+**Environment URLs:**
+| Environment | URL |
+|-------------|-----|
+| `int` (Sandbox) | `https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js` |
+| `prod` (Production) | `https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js` |
+
+## Payment Methods
+
+### createPayment()
+
+Create a payment using card data or an APM.
+
+```javascript
+safecharge.createPayment({
+  sessionToken: sessionToken,
+  
+  // Card payment
+  paymentOption: {
+    card: {
+      cardNumber: '4111111111111111',
+      cardHolderName: 'John Smith',
+      expirationMonth: '12',
+      expirationYear: '2025',
+      CVV: '217'
+    }
+  },
+  
+  // Billing address
+  billingAddress: {
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'john@example.com',
+    country: 'US'
+  }
+  
+}, function(response) {
+  if (response.result === 'APPROVED') {
+    console.log('Payment successful:', response.transactionId);
+  } else {
+    console.log('Payment failed:', response.errorDescription);
+  }
+});
+```
+
+**Using User Payment Option (Saved Card):**
+
+```javascript
+safecharge.createPayment({
+  sessionToken: sessionToken,
+  
+  paymentOption: {
+    userPaymentOptionId: '1234567890',  // UPO ID
+    card: {
+      CVV: '217'  // CVV still required
+    }
+  }
+  
+}, handleResponse);
+```
+
+**Using Alternative Payment Method:**
+
+```javascript
+safecharge.createPayment({
+  sessionToken: sessionToken,
+  
+  paymentOption: {
+    alternativePaymentMethod: {
+      paymentMethod: 'apmgw_PayPal'
+    }
+  }
+  
+}, handleResponse);
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionToken` | string | Yes | Session token from openOrder |
+| `paymentOption` | object | Yes | Payment details (card, UPO, or APM) |
+| `billingAddress` | object | No | Customer billing address |
+| `deviceDetails` | object | No | Device fingerprinting data |
+| `urlDetails` | object | No | Redirect URLs for APMs |
+
+**Response:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `result` | string | `APPROVED`, `DECLINED`, `PENDING`, `ERROR` |
+| `transactionId` | string | Nuvei transaction ID |
+| `authCode` | string | Authorization code |
+| `transactionStatus` | string | Detailed status |
+| `errorCode` | string | Error code if failed |
+| `errorDescription` | string | Error message if failed |
+
+### authenticate3d()
+
+Perform 3D Secure authentication.
+
+```javascript
+// Step 1: Initialize 3DS
+safecharge.createPayment({
+  sessionToken: sessionToken,
+  paymentOption: {
+    card: cardData
+  },
+  // Request 3DS
+  relatedTransactionId: null,  // First call
+  
+}, function(initResponse) {
+  if (initResponse.transactionStatus === 'REDIRECT') {
+    // 3DS required - Step 2: Authenticate
+    safecharge.authenticate3d({
+      sessionToken: sessionToken,
+      transactionId: initResponse.transactionId,
+      
+      // 3DS challenge will render here
+      challengeWindowSize: '05',  // Full screen
+      container: '#challenge-container'
+      
+    }, function(authResponse) {
+      if (authResponse.result === 'APPROVED') {
+        // 3DS complete, payment processed
+        console.log('Payment approved:', authResponse.transactionId);
+      } else if (authResponse.result === 'DECLINED') {
+        // 3DS or payment failed
+        console.log('Payment declined:', authResponse.errorDescription);
+      }
+    });
+  }
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionToken` | string | Yes | Session token |
+| `transactionId` | string | Yes | Transaction ID from createPayment |
+| `challengeWindowSize` | string | No | Size of 3DS challenge window |
+| `container` | string | No | CSS selector for challenge iframe |
+
+**Challenge Window Sizes:**
+
+| Code | Dimensions |
+|------|------------|
+| `01` | 250 x 400 |
+| `02` | 390 x 400 |
+| `03` | 500 x 600 |
+| `04` | 600 x 400 |
+| `05` | Full screen |
+
+### getAPMs()
+
+Retrieve available alternative payment methods.
+
+```javascript
+safecharge.getAPMs({
+  sessionToken: sessionToken,
+  currencyCode: 'EUR',
+  countryCode: 'DE',
+  languageCode: 'en'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    response.paymentMethods.forEach(apm => {
+      console.log(apm.paymentMethod, apm.paymentMethodDisplayName);
+      // Render APM button/option
+    });
+  }
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionToken` | string | Yes | Session token |
+| `currencyCode` | string | Yes | ISO currency code |
+| `countryCode` | string | Yes | ISO country code |
+| `languageCode` | string | No | Language for display names |
+
+**Response:**
+
+```json
+{
+  "status": "SUCCESS",
+  "paymentMethods": [
+    {
+      "paymentMethod": "apmgw_PayPal",
+      "paymentMethodDisplayName": "PayPal",
+      "logoURL": "https://cdn.../paypal.png",
+      "countries": ["DE", "US", "GB"],
+      "currencies": ["EUR", "USD", "GBP"]
+    },
+    {
+      "paymentMethod": "apmgw_Sofort",
+      "paymentMethodDisplayName": "Sofort",
+      "fields": [
+        {
+          "name": "iban",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Tokenization Methods
+
+### getCardDetails()
+
+Get card details including BIN information (for UI updates like showing card brand).
+
+```javascript
+safecharge.getCardDetails({
+  sessionToken: sessionToken,
+  cardNumber: '411111'  // At least 6 digits (BIN)
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Card Brand:', response.brand);      // VISA
+    console.log('Card Type:', response.cardType);    // credit/debit
+    console.log('Issuing Country:', response.issuingCountry);
+    
+    // Update UI with card brand icon
+    updateCardBrandIcon(response.brand);
+  }
+});
+```
+
+**Response:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `brand` | string | Card brand (VISA, MASTERCARD, etc.) |
+| `cardType` | string | `credit`, `debit`, `prepaid` |
+| `issuingCountry` | string | ISO country code |
+| `issuingBank` | string | Issuing bank name |
+
+### getUserUPOs()
+
+Retrieve user's saved payment methods.
+
+```javascript
+safecharge.getUserUPOs({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    response.paymentMethods.forEach(upo => {
+      console.log(upo.userPaymentOptionId, upo.upoName);
+      
+      if (upo.paymentMethodName === 'cc_card') {
+        console.log('Card:', upo.ccCardNumber);  // Masked
+      }
+    });
+  }
+});
+```
+
+**Response:**
+
+```json
+{
+  "status": "SUCCESS",
+  "paymentMethods": [
+    {
+      "userPaymentOptionId": "123456789",
+      "paymentMethodName": "cc_card",
+      "upoName": "Visa ending 4242",
+      "upoStatus": "enabled",
+      "ccCardNumber": "4***4242",
+      "ccExpMonth": "12",
+      "ccExpYear": "26",
+      "brand": "VISA"
+    },
+    {
+      "userPaymentOptionId": "987654321",
+      "paymentMethodName": "apmgw_PayPal",
+      "upoName": "user@example.com"
+    }
+  ]
+}
+```
+
+### deleteUPO()
+
+Delete a saved payment method.
+
+```javascript
+safecharge.deleteUPO({
+  sessionToken: sessionToken,
+  userTokenId: 'user_123',
+  userPaymentOptionId: '123456789'
+  
+}, function(response) {
+  if (response.status === 'SUCCESS') {
+    console.log('Payment method deleted');
+    // Update UI to remove the card
+  }
+});
+```
+
+## Apple Pay Methods
+
+### setupApplePay()
+
+Initialize Apple Pay on the page.
+
+```javascript
+// Check if Apple Pay is available
+if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+  safecharge.setupApplePay({
+    sessionToken: sessionToken,
+    merchantId: 'merchant.com.example',
+    
+    // Button configuration
+    buttonType: 'buy',     // 'buy', 'pay', 'donate', etc.
+    buttonStyle: 'black',  // 'black', 'white', 'white-outline'
+    buttonContainer: '#apple-pay-button'
+  });
+}
+```
+
+### createApplePayPayment()
+
+Process an Apple Pay payment.
+
+```javascript
+safecharge.createApplePayPayment({
+  sessionToken: sessionToken,
+  
+  // Payment request
+  paymentRequest: {
+    countryCode: 'US',
+    currencyCode: 'USD',
+    total: {
+      label: 'Your Store',
+      amount: '99.99'
+    },
+    merchantCapabilities: ['supports3DS'],
+    supportedNetworks: ['visa', 'masterCard', 'amex']
+  }
+  
+}, function(response) {
+  if (response.result === 'APPROVED') {
+    console.log('Apple Pay payment successful');
+  }
+});
+```
+
+## Google Pay Methods
+
+### setupGooglePay()
+
+Initialize Google Pay button.
+
+```javascript
+safecharge.setupGooglePay({
+  sessionToken: sessionToken,
+  
+  // Google Pay configuration
+  environment: 'TEST',  // 'TEST' or 'PRODUCTION'
+  merchantId: 'BCR2DN6xxxxxx',
+  merchantName: 'Your Store',
+  
+  // Button configuration
+  buttonColor: 'black',
+  buttonType: 'pay',
+  buttonContainer: '#google-pay-button',
+  
+  // Payment data
+  allowedCardNetworks: ['VISA', 'MASTERCARD'],
+  allowedCardAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS']
+});
+```
+
+### createGooglePayPayment()
+
+Process a Google Pay payment.
+
+```javascript
+safecharge.createGooglePayPayment({
+  sessionToken: sessionToken,
+  
+  transactionInfo: {
+    totalPriceStatus: 'FINAL',
+    totalPrice: '99.99',
+    currencyCode: 'USD',
+    countryCode: 'US'
+  }
+  
+}, function(response) {
+  if (response.result === 'APPROVED') {
+    console.log('Google Pay payment successful');
+  }
+});
+```
+
+## Secure Fields (PCI SAQ A)
+
+For merchants who want to minimize PCI scope while maintaining UI control.
+
+### createFields()
+
+Create secure hosted fields for card input.
+
+```javascript
+const fields = safecharge.createFields({
+  sessionToken: sessionToken,
+  
+  // Field styling
+  style: {
+    base: {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '16px',
+      color: '#333'
+    },
+    invalid: {
+      color: '#ff0000'
+    }
+  }
+});
+
+// Mount individual fields
+fields.create('cardNumber').mount('#card-number');
+fields.create('cardExpiry').mount('#card-expiry');
+fields.create('cardCvc').mount('#card-cvc');
+
+// Listen for events
+fields.on('ready', () => {
+  console.log('Fields ready');
+});
+
+fields.on('change', (event) => {
+  if (event.error) {
+    showError(event.field, event.error.message);
+  } else {
+    clearError(event.field);
+  }
+  
+  // Update card brand
+  if (event.field === 'cardNumber' && event.brand) {
+    updateBrandIcon(event.brand);
+  }
+});
+
+fields.on('submit', (event) => {
+  if (event.complete) {
+    processPayment();
+  }
+});
+```
+
+### fields.tokenize()
+
+Tokenize card data from secure fields.
+
+```javascript
+fields.tokenize({
+  cardHolderName: document.getElementById('name').value
+  
+}).then(result => {
+  if (result.error) {
+    console.error('Tokenization failed:', result.error);
+  } else {
+    // Use the temporary token for payment
+    safecharge.createPayment({
+      sessionToken: sessionToken,
+      paymentOption: {
+        card: {
+          ccTempToken: result.ccTempToken
+        }
+      }
+    }, handleResponse);
+  }
+});
+```
+
+## Full Integration Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment</title>
+  <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js"></script>
+</head>
+<body>
+  <div id="card-form">
+    <div id="card-number"></div>
+    <div id="card-expiry"></div>
+    <div id="card-cvc"></div>
+    <input type="text" id="cardholder-name" placeholder="Name on Card">
+    <button id="pay-button">Pay $99.99</button>
+  </div>
+  
+  <div id="saved-cards"></div>
+  <div id="apm-buttons"></div>
+  
+  <script>
+    // Initialize SDK
+    const safecharge = SafeCharge({
+      env: 'int',
+      merchantId: '1234567890',
+      merchantSiteId: '123456'
+    });
+    
+    // Get session token from your server
+    fetch('/api/create-session')
+      .then(r => r.json())
+      .then(data => initPayment(data.sessionToken));
+    
+    function initPayment(sessionToken) {
+      // Setup secure fields
+      const fields = safecharge.createFields({
+        sessionToken: sessionToken,
+        style: {
+          base: { fontSize: '16px', color: '#333' }
+        }
+      });
+      
+      fields.create('cardNumber').mount('#card-number');
+      fields.create('cardExpiry').mount('#card-expiry');
+      fields.create('cardCvc').mount('#card-cvc');
+      
+      // Get saved cards
+      safecharge.getUserUPOs({
+        sessionToken: sessionToken,
+        userTokenId: 'user_123'
+      }, renderSavedCards);
+      
+      // Get available APMs
+      safecharge.getAPMs({
+        sessionToken: sessionToken,
+        currencyCode: 'USD',
+        countryCode: 'US'
+      }, renderAPMs);
+      
+      // Handle payment
+      document.getElementById('pay-button').onclick = async () => {
+        // Tokenize card data
+        const tokenResult = await fields.tokenize({
+          cardHolderName: document.getElementById('cardholder-name').value
+        });
+        
+        if (tokenResult.error) {
+          showError(tokenResult.error);
+          return;
+        }
+        
+        // Create payment
+        safecharge.createPayment({
+          sessionToken: sessionToken,
+          paymentOption: {
+            card: {
+              ccTempToken: tokenResult.ccTempToken
+            }
+          },
+          billingAddress: collectBillingAddress()
+        }, handlePaymentResponse);
+      };
+    }
+    
+    function handlePaymentResponse(response) {
+      if (response.result === 'APPROVED') {
+        window.location.href = '/success?txId=' + response.transactionId;
+      } else if (response.transactionStatus === 'REDIRECT') {
+        // Handle 3DS
+        safecharge.authenticate3d({
+          sessionToken: sessionToken,
+          transactionId: response.transactionId,
+          challengeWindowSize: '05'
+        }, handlePaymentResponse);
+      } else {
+        showError(response.errorDescription);
+      }
+    }
+    
+    function renderSavedCards(response) {
+      const container = document.getElementById('saved-cards');
+      response.paymentMethods.forEach(upo => {
+        const btn = document.createElement('button');
+        btn.textContent = upo.upoName;
+        btn.onclick = () => payWithUPO(upo.userPaymentOptionId);
+        container.appendChild(btn);
+      });
+    }
+    
+    function renderAPMs(response) {
+      const container = document.getElementById('apm-buttons');
+      response.paymentMethods.forEach(apm => {
+        const btn = document.createElement('button');
+        btn.innerHTML = `<img src="${apm.logoURL}"> ${apm.paymentMethodDisplayName}`;
+        btn.onclick = () => payWithAPM(apm.paymentMethod);
+        container.appendChild(btn);
+      });
+    }
+  </script>
+</body>
+</html>
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Simply Connect" icon="square-check" href="/integrations/simply-connect/quickstart">
+    Pre-built payment UI
+  </Card>
+  <Card title="3D Secure" icon="shield" href="/api-reference/rest-1/3ds/authorize3d">
+    3DS authentication details
+  </Card>
+  <Card title="REST API" icon="code" href="/api-reference/rest-1/overview">
+    Server-side API reference
+  </Card>
+</CardGroup>

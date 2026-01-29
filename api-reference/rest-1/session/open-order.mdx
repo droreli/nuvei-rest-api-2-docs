@@ -1,0 +1,277 @@
+---
+title: 'openOrder'
+openapi: 'POST /openOrder'
+---
+
+<Info>
+  This is the **recommended method** for initializing a payment session. It creates an order in Nuvei's system and returns a session token in a single call.
+</Info>
+
+## When to Use
+
+- Starting a new payment flow (recommended for all integrations)
+- When you know the payment amount and currency upfront
+- For Simply Connect and Web SDK integrations
+- When you need to associate user details with the order
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey)
+```
+
+## Key Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `amount` | Yes | Transaction amount (e.g., "100.00") |
+| `currency` | Yes | ISO 4217 currency code (USD, EUR, etc.) |
+| `clientUniqueId` | Recommended | Your order reference ID |
+| `userTokenId` | For returning users | User identifier for tokenized payments |
+| `transactionType` | Optional | "Sale" (default) or "Auth" |
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "currency": "USD",
+  "amount": "200.00",
+  "transactionType": "Sale",
+  "userTokenId": "user_123",
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@email.com",
+    "country": "US",
+    "city": "New York",
+    "zip": "10001"
+  },
+  "deviceDetails": {
+    "ipAddress": "192.168.1.1"
+  },
+  "urlDetails": {
+    "notificationUrl": "https://example.com/webhook",
+    "successUrl": "https://example.com/success",
+    "failureUrl": "https://example.com/failure"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "b7a2e66d5c5c85d8d3e5b5c5e5f5a5b5c5d5e5f5a5b5c5d5e5f5a5b5c5d5e5f5"
+}
+```
+
+## Example Response
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "orderId": "39272123",
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "userTokenId": "user_123",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+## Transaction Types
+
+| Type | Description | Capture |
+|------|-------------|---------|
+| `Sale` | Authorize and capture immediately | Automatic |
+| `Auth` | Authorize only, capture later | Manual via settleTransaction |
+
+<Warning>
+  Auth transactions must be captured within the authorization validity period (typically 7-30 days depending on card network) or they will expire.
+</Warning>
+
+## Returning Users
+
+For returning customers, include `userTokenId` to:
+- Retrieve their stored payment methods
+- Enable one-click payments
+- Associate the transaction with their account
+
+```json
+{
+  "userTokenId": "user_123",
+  "// other fields..."
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+async function openOrder(amount, currency, clientUniqueId) {
+  const merchantId = 'YOUR_MERCHANT_ID';
+  const merchantSiteId = 'YOUR_SITE_ID';
+  const secretKey = 'YOUR_SECRET_KEY';
+  
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `req_${Date.now()}`;
+  
+  // Checksum includes amount and currency
+  const checksum = crypto.createHash('sha256')
+    .update(merchantId + merchantSiteId + clientRequestId + 
+            amount + currency + timeStamp + secretKey)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/openOrder',
+    {
+      merchantId,
+      merchantSiteId,
+      clientUniqueId,
+      clientRequestId,
+      amount,
+      currency,
+      transactionType: 'Sale',
+      billingAddress: {
+        firstName: 'John',
+        lastName: 'Smith',
+        email: 'john@email.com',
+        country: 'US'
+      },
+      urlDetails: {
+        notificationUrl: 'https://example.com/webhook'
+      },
+      timeStamp,
+      checksum
+    }
+  );
+
+  console.log('Session Token:', response.data.sessionToken);
+  console.log('Order ID:', response.data.orderId);
+  return response.data;
+}
+
+openOrder('100.00', 'USD', 'ORDER-12345');
+```
+
+```python Python
+import hashlib
+import requests
+from datetime import datetime
+
+def open_order(amount, currency, client_unique_id):
+    merchant_id = 'YOUR_MERCHANT_ID'
+    site_id = 'YOUR_SITE_ID'
+    secret_key = 'YOUR_SECRET_KEY'
+    
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    client_request_id = f'req_{int(datetime.now().timestamp())}'
+    
+    # Checksum includes amount and currency
+    raw = merchant_id + site_id + client_request_id + amount + currency + timestamp + secret_key
+    checksum = hashlib.sha256(raw.encode()).hexdigest()
+
+    response = requests.post(
+        'https://ppp-test.nuvei.com/ppp/api/v1/openOrder',
+        json={
+            'merchantId': merchant_id,
+            'merchantSiteId': site_id,
+            'clientUniqueId': client_unique_id,
+            'clientRequestId': client_request_id,
+            'amount': amount,
+            'currency': currency,
+            'transactionType': 'Sale',
+            'billingAddress': {
+                'firstName': 'John',
+                'lastName': 'Smith',
+                'email': 'john@email.com',
+                'country': 'US'
+            },
+            'urlDetails': {
+                'notificationUrl': 'https://example.com/webhook'
+            },
+            'timeStamp': timestamp,
+            'checksum': checksum
+        }
+    )
+
+    data = response.json()
+    print(f"Session Token: {data['sessionToken']}")
+    print(f"Order ID: {data['orderId']}")
+    return data
+
+open_order('100.00', 'USD', 'ORDER-12345')
+```
+
+```php PHP
+<?php
+function openOrder($amount, $currency, $clientUniqueId) {
+    $merchantId = 'YOUR_MERCHANT_ID';
+    $merchantSiteId = 'YOUR_SITE_ID';
+    $secretKey = 'YOUR_SECRET_KEY';
+    
+    $timeStamp = date('YmdHis');
+    $clientRequestId = 'req_' . time();
+    
+    // Checksum includes amount and currency
+    $raw = $merchantId . $merchantSiteId . $clientRequestId . 
+           $amount . $currency . $timeStamp . $secretKey;
+    $checksum = hash('sha256', $raw);
+
+    $data = [
+        'merchantId' => $merchantId,
+        'merchantSiteId' => $merchantSiteId,
+        'clientUniqueId' => $clientUniqueId,
+        'clientRequestId' => $clientRequestId,
+        'amount' => $amount,
+        'currency' => $currency,
+        'transactionType' => 'Sale',
+        'billingAddress' => [
+            'firstName' => 'John',
+            'lastName' => 'Smith',
+            'email' => 'john@email.com',
+            'country' => 'US'
+        ],
+        'urlDetails' => [
+            'notificationUrl' => 'https://example.com/webhook'
+        ],
+        'timeStamp' => $timeStamp,
+        'checksum' => $checksum
+    ];
+
+    $ch = curl_init('https://ppp-test.nuvei.com/ppp/api/v1/openOrder');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+    
+    echo "Session Token: " . $response['sessionToken'] . "\n";
+    echo "Order ID: " . $response['orderId'] . "\n";
+    return $response;
+}
+
+openOrder('100.00', 'USD', 'ORDER-12345');
+?>
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Process Payment" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Use the session token to charge
+  </Card>
+  <Card title="Update Order" icon="pen" href="/api-reference/rest-1/session/update-order">
+    Modify order details
+  </Card>
+</CardGroup>

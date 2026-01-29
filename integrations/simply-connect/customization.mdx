@@ -1,0 +1,368 @@
+---
+title: 'Customization Options'
+description: 'Configure Simply Connect payment form behavior and appearance'
+---
+
+# Simply Connect Customization
+
+Simply Connect offers extensive customization options to control the payment experience. Configure payment method visibility, 3DS behavior, card storage, currency conversion, and more.
+
+## Payment Options Configuration
+
+### savePM - Save Payment Method
+
+Control whether customers can save their payment method for future purchases.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // Save payment method options
+  savePM: true,           // Enable checkbox
+  savePMChecked: false,   // Checkbox state (unchecked by default)
+  savePMLabel: 'Save card for future purchases'  // Custom label
+});
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `savePM` | boolean | `false` | Show "save payment method" checkbox |
+| `savePMChecked` | boolean | `false` | Pre-check the save checkbox |
+| `savePMLabel` | string | `"Save this card"` | Custom checkbox label text |
+
+<Info>
+  When `savePM` is enabled, you must include `userTokenId` in the session to associate the saved card with a user.
+</Info>
+
+### useDCC - Dynamic Currency Conversion
+
+Enable DCC to let customers pay in their card's currency.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // DCC options
+  useDCC: true,                    // Enable DCC
+  dccPricingMode: 'auto',          // 'auto', 'always', or 'never'
+  dccCurrency: 'EUR',              // Override detected currency
+  dccAmountDetails: {
+    showConversionDetails: true    // Show exchange rate breakdown
+  }
+});
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `useDCC` | boolean | `false` | Enable dynamic currency conversion |
+| `dccPricingMode` | string | `"auto"` | When to show DCC: `auto`, `always`, `never` |
+| `dccCurrency` | string | - | Force specific DCC currency |
+| `dccAmountDetails.showConversionDetails` | boolean | `true` | Show exchange rate details |
+
+### blockCards - Card Type Restrictions
+
+Block specific card types from being used.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // Block specific card types
+  blockCards: ['amex', 'discover'],        // Block by brand
+  allowedCardBrands: ['visa', 'mastercard'], // Alternative: whitelist
+  blockDebitCards: true,                     // Block all debit cards
+  blockPrepaidCards: true,                   // Block prepaid cards
+  blockCorporateCards: false                 // Allow corporate cards
+});
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `blockCards` | array | `[]` | Card brands to block |
+| `allowedCardBrands` | array | all | Allowed card brands (whitelist) |
+| `blockDebitCards` | boolean | `false` | Block debit cards |
+| `blockPrepaidCards` | boolean | `false` | Block prepaid cards |
+| `blockCorporateCards` | boolean | `false` | Block corporate/business cards |
+
+### cardInstallments - Installment Payments
+
+Enable installment payment options.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // Installments configuration
+  cardInstallments: {
+    enabled: true,
+    options: [3, 6, 12],          // Available installment counts
+    defaultOption: 6,              // Pre-selected option
+    showMonthlyAmount: true        // Display monthly payment
+  }
+});
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `cardInstallments.enabled` | boolean | `false` | Enable installments |
+| `cardInstallments.options` | array | `[3,6,12]` | Available installment options |
+| `cardInstallments.defaultOption` | number | first | Default selected installment |
+| `cardInstallments.showMonthlyAmount` | boolean | `true` | Show per-payment amount |
+
+<Note>
+  Installments availability depends on merchant configuration and card issuer support. Contact your account manager to enable.
+</Note>
+
+## APM Configuration
+
+### apmConfig - APM-Specific Settings
+
+Configure behavior for specific alternative payment methods.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // APM-specific configuration
+  apmConfig: {
+    iDEAL: {
+      showBankDropdown: true,      // Show bank selector inline
+      defaultBank: 'ABNANL2A'      // Pre-select bank
+    },
+    PayPal: {
+      buttonStyle: {
+        layout: 'vertical',
+        color: 'gold',
+        shape: 'rect',
+        label: 'paypal'
+      }
+    },
+    Klarna: {
+      displayMode: 'inline'        // 'inline' or 'redirect'
+    }
+  }
+});
+```
+
+### pmWhitelist / pmBlacklist - Payment Method Filter
+
+Control which payment methods are displayed.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // Whitelist: Only show these methods
+  pmWhitelist: ['cc_card', 'apmgw_PayPal', 'apmgw_iDEAL'],
+  
+  // OR blacklist: Hide these methods
+  pmBlacklist: ['apmgw_SOFORT', 'apmgw_Paysafecard']
+});
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pmWhitelist` | array | Only display these payment methods |
+| `pmBlacklist` | array | Hide these payment methods |
+
+<Warning>
+  Use either `pmWhitelist` or `pmBlacklist`, not both. Whitelist takes precedence if both are provided.
+</Warning>
+
+### apmWindowType - APM Redirect Behavior
+
+Control how APM redirects open.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // APM window configuration
+  apmWindowType: 'popup',         // 'popup', 'redirect', or 'iframe'
+  apmPopupWidth: 600,             // Popup window width
+  apmPopupHeight: 700             // Popup window height
+});
+```
+
+| Value | Description |
+|-------|-------------|
+| `redirect` | Full page redirect (default) |
+| `popup` | Open in popup window |
+| `iframe` | Open in modal iframe |
+
+## 3D Secure Configuration
+
+### threeD - 3DS Behavior
+
+Configure 3D Secure authentication flow.
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // 3DS configuration
+  threeDSecure: {
+    enabled: true,                 // Enable 3DS (required for SCA)
+    challengeWindowSize: '05',     // Challenge window size
+    preferredChallengeFlow: 'native', // 'native' or 'redirect'
+    challengePreference: 'no_preference' // 'no_preference', 'challenge_requested', 'no_challenge_requested'
+  }
+});
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable 3D Secure |
+| `challengeWindowSize` | string | `"05"` | Size of challenge window |
+| `preferredChallengeFlow` | string | `"native"` | Challenge display method |
+| `challengePreference` | string | `"no_preference"` | Request preference |
+
+**Challenge Window Sizes:**
+| Code | Dimensions |
+|------|------------|
+| `01` | 250 x 400 |
+| `02` | 390 x 400 |
+| `03` | 500 x 600 |
+| `04` | 600 x 400 |
+| `05` | Full screen |
+
+## UI Customization
+
+### Style Configuration
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // UI customization
+  renderTo: '#payment-form',       // Container element
+  theme: 'minimal',                // 'default', 'minimal', 'modern'
+  locale: 'en_US',                 // Language/locale
+  
+  // Custom styling
+  customStyle: {
+    primaryColor: '#00D09C',
+    fontFamily: 'Inter, sans-serif',
+    borderRadius: '8px',
+    inputHeight: '44px',
+    buttonStyle: {
+      backgroundColor: '#00D09C',
+      textColor: '#ffffff',
+      borderRadius: '4px'
+    }
+  }
+});
+```
+
+### Field Labels and Placeholders
+
+```javascript
+checkout({
+  sessionToken: sessionToken,
+  merchantSiteId: '123456',
+  merchantId: '1234567890',
+  // Custom text
+  labels: {
+    cardNumber: 'Card Number',
+    cardholderName: 'Name on Card',
+    expirationDate: 'Expiry (MM/YY)',
+    cvv: 'Security Code'
+  },
+  placeholders: {
+    cardNumber: '1234 5678 9012 3456',
+    cardholderName: 'John Smith',
+    expirationDate: 'MM/YY',
+    cvv: 'CVV'
+  },
+  payButtonText: 'Pay Now ${amount}'
+});
+```
+
+## Full Configuration Example
+
+```javascript
+const checkout = SafeCharge({
+  env: 'int',  // 'int' for sandbox, 'prod' for production
+  merchantSiteId: '123456',
+  merchantId: '1234567890'
+});
+
+checkout({
+  sessionToken: sessionToken,
+  
+  // Amount and currency
+  amount: '99.99',
+  currency: 'USD',
+  
+  // User identification (required for saving cards)
+  userTokenId: 'user_123',
+  
+  // Payment method options
+  savePM: true,
+  savePMChecked: false,
+  
+  // Card restrictions
+  blockCards: ['amex'],
+  blockPrepaidCards: true,
+  
+  // Payment method filtering
+  pmWhitelist: ['cc_card', 'apmgw_PayPal', 'apmgw_Apple_Pay'],
+  
+  // APM configuration
+  apmWindowType: 'popup',
+  apmConfig: {
+    PayPal: {
+      buttonStyle: { color: 'gold' }
+    }
+  },
+  
+  // DCC
+  useDCC: true,
+  
+  // 3D Secure
+  threeDSecure: {
+    enabled: true,
+    challengeWindowSize: '05'
+  },
+  
+  // UI
+  renderTo: '#payment-container',
+  locale: 'en_US',
+  customStyle: {
+    primaryColor: '#00D09C'
+  },
+  
+  // Callbacks
+  onResult: function(result) {
+    if (result.status === 'SUCCESS') {
+      console.log('Payment successful:', result.transactionId);
+    }
+  },
+  onError: function(error) {
+    console.error('Payment error:', error);
+  }
+});
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Events" icon="bell" href="/integrations/simply-connect/events">
+    Handle Simply Connect events
+  </Card>
+  <Card title="Methods" icon="code" href="/integrations/simply-connect/methods">
+    Programmatic control
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/integrations/simply-connect/quickstart">
+    Get started guide
+  </Card>
+</CardGroup>

@@ -1,0 +1,3406 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nuvei REST API 1.0",
+    "description": "Nuvei's REST API 1.0 provides a comprehensive set of endpoints for payment processing, tokenization, subscriptions, and user management.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Nuvei Support",
+      "url": "https://support.nuvei.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://ppp-test.nuvei.com/ppp/api/v1",
+      "description": "Sandbox/Integration Environment"
+    },
+    {
+      "url": "https://secure.safecharge.com/ppp/api/v1",
+      "description": "Production Environment"
+    }
+  ],
+  "tags": [
+    {"name": "Session", "description": "Session and order management"},
+    {"name": "Payments", "description": "Payment processing operations"},
+    {"name": "3D Secure", "description": "3D Secure authentication"},
+    {"name": "Tokenization", "description": "User Payment Options (UPO) management"},
+    {"name": "Subscriptions", "description": "Recurring billing and subscription management"},
+    {"name": "Users", "description": "User management"},
+    {"name": "Payouts", "description": "Payout/withdrawal operations"},
+    {"name": "Utility", "description": "Utility and information methods"}
+  ],
+  "paths": {
+    "/getSessionToken": {
+      "post": {
+        "tags": ["Session"],
+        "summary": "Get Session Token",
+        "description": "Creates a session token required for subsequent API calls. The session token is valid for 15 minutes and should be used for a single payment flow.",
+        "operationId": "getSessionToken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSessionTokenRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientRequestId": "1C6CT7V1L",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSessionTokenResponse"
+                },
+                "example": {
+                  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+                  "internalRequestId": 12345678,
+                  "status": "SUCCESS",
+                  "errCode": 0,
+                  "reason": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openOrder": {
+      "post": {
+        "tags": ["Session"],
+        "summary": "Open Order",
+        "description": "Creates an order in Nuvei's system and returns a session token. This is the recommended method for initializing a payment session as it combines session creation with order setup.",
+        "operationId": "openOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenOrderRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientUniqueId": "12345",
+                "clientRequestId": "1C6CT7V1L",
+                "currency": "USD",
+                "amount": "200",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenOrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateOrder": {
+      "post": {
+        "tags": ["Session"],
+        "summary": "Update Order",
+        "description": "Updates an existing order with new amount, currency, or items. Useful for dynamic pricing scenarios like adding shipping costs or applying discounts.",
+        "operationId": "updateOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Payment",
+        "description": "Performs a payment transaction (Sale or Auth). This is the primary endpoint for processing payments with credit cards, APMs, or tokenized payment methods. For 3DS transactions, use initPayment first.",
+        "operationId": "payment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentRequest"
+              },
+              "example": {
+                "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientUniqueId": "12345",
+                "clientRequestId": "1C6CT7V1L",
+                "currency": "USD",
+                "amount": "200",
+                "paymentOption": {
+                  "card": {
+                    "cardNumber": "4111111111111111",
+                    "cardHolderName": "John Smith",
+                    "expirationMonth": "12",
+                    "expirationYear": "2030",
+                    "CVV": "217"
+                  }
+                },
+                "billingAddress": {
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "john.smith@email.com",
+                  "country": "US"
+                },
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/initPayment": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Initialize Payment",
+        "description": "Initializes a payment and performs initial validation, including 3DS fingerprinting. Returns card details and determines if 3DS authentication is required. This should be called before /payment for 3DS flows.",
+        "operationId": "initPayment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitPaymentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitPaymentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settleTransaction": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Settle Transaction",
+        "description": "Settles (captures) a previously authorized transaction. The amount can be equal to or less than the original authorization amount. Must be performed within the authorization validity period (typically 7-30 days).",
+        "operationId": "settleTransaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettleTransactionRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientUniqueId": "12345",
+                "clientRequestId": "1C6CT7V1L",
+                "relatedTransactionId": "2110000000001208909",
+                "amount": "200",
+                "currency": "USD",
+                "authCode": "111344",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettleTransactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refundTransaction": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Refund Transaction",
+        "description": "Refunds a previously settled transaction. Supports full or partial refunds. The refund amount cannot exceed the original transaction amount.",
+        "operationId": "refundTransaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundTransactionRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientUniqueId": "12345",
+                "clientRequestId": "1C6CT7V1L",
+                "relatedTransactionId": "2110000000001208909",
+                "amount": "50",
+                "currency": "USD",
+                "authCode": "111344",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundTransactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voidTransaction": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Void Transaction",
+        "description": "Voids (cancels) a previously authorized but not yet settled transaction. Can only be performed before settlement.",
+        "operationId": "voidTransaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidTransactionRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "clientUniqueId": "12345",
+                "clientRequestId": "1C6CT7V1L",
+                "relatedTransactionId": "2110000000001208909",
+                "amount": "200",
+                "currency": "USD",
+                "authCode": "111344",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoidTransactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getPaymentStatus": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Get Payment Status",
+        "description": "Retrieves the status of a payment transaction using the session token. Useful for checking transaction outcomes and reconciliation.",
+        "operationId": "getPaymentStatus",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPaymentStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPaymentStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authorize3d": {
+      "post": {
+        "tags": ["3D Secure"],
+        "summary": "Authorize 3D",
+        "description": "Initiates 3D Secure authentication for a card payment. This is used after initPayment when 3DS is required. The response may include a redirect URL for the 3DS challenge.",
+        "operationId": "authorize3d",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Authorize3dRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Authorize3dResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify3d": {
+      "post": {
+        "tags": ["3D Secure"],
+        "summary": "Verify 3D",
+        "description": "Verifies the 3D Secure authentication result after the cardholder completes the challenge. Call this after receiving the 3DS callback.",
+        "operationId": "verify3d",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Verify3dRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verify3dResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addUPOCreditCard": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Add Credit Card UPO",
+        "description": "Adds a credit card as a User Payment Option (UPO) for future use. The card is tokenized and stored securely for the specified user.",
+        "operationId": "addUPOCreditCard",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUPOCreditCardRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "userTokenId": "user123",
+                "clientRequestId": "1C6CT7V1L",
+                "ccCardNumber": "4111111111111111",
+                "ccExpMonth": "12",
+                "ccExpYear": "2030",
+                "ccNameOnCard": "John Smith",
+                "billingAddress": {
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "john@email.com",
+                  "country": "US"
+                },
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddUPOCreditCardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addUPOCreditCardByToken": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Add Credit Card UPO by Token",
+        "description": "Adds a credit card UPO using a temporary token obtained from Web SDK or Simply Connect. Used to store cards for returning customers.",
+        "operationId": "addUPOCreditCardByToken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUPOCreditCardByTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddUPOCreditCardByTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/addUPOAPM": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Add APM UPO",
+        "description": "Adds an Alternative Payment Method (APM) as a User Payment Option. Useful for storing PayPal accounts, bank details, or other APM credentials.",
+        "operationId": "addUPOAPM",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUPOAPMRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddUPOAPMResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/editUPOCreditCard": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Edit Credit Card UPO",
+        "description": "Updates an existing credit card UPO. Can be used to update expiration date or billing address.",
+        "operationId": "editUPOCreditCard",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUPOCreditCardRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditUPOCreditCardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/editUPOAPM": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Edit APM UPO",
+        "description": "Updates an existing APM User Payment Option.",
+        "operationId": "editUPOAPM",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUPOAPMRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditUPOAPMResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deleteUPO": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Delete UPO",
+        "description": "Deletes a User Payment Option (card or APM) from the system. The UPO can no longer be used for payments after deletion.",
+        "operationId": "deleteUPO",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteUPORequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "userTokenId": "user123",
+                "clientRequestId": "1C6CT7V1L",
+                "userPaymentOptionId": "12345678",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteUPOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getUserUPOs": {
+      "post": {
+        "tags": ["Tokenization"],
+        "summary": "Get User UPOs",
+        "description": "Retrieves all stored User Payment Options for a user. Returns cards and APMs that can be used for one-click payments.",
+        "operationId": "getUserUPOs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUserUPOsRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "userTokenId": "user123",
+                "clientRequestId": "1C6CT7V1L",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserUPOsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createSubscription": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Create Subscription",
+        "description": "Creates a recurring billing subscription for a user. The subscription will automatically charge the user according to the specified plan.",
+        "operationId": "createSubscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSubscriptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cancelSubscription": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Cancel Subscription",
+        "description": "Cancels an active subscription. No further charges will be made after cancellation.",
+        "operationId": "cancelSubscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelSubscriptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getSubscriptionsList": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Get Subscriptions List",
+        "description": "Retrieves a list of subscriptions for a merchant or user. Supports filtering by status and user.",
+        "operationId": "getSubscriptionsList",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSubscriptionsListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSubscriptionsListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createPlan": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Create Plan",
+        "description": "Creates a subscription plan with defined pricing, billing frequency, and duration. Plans can be used to create subscriptions.",
+        "operationId": "createPlan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePlanResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getPlansList": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Get Plans List",
+        "description": "Retrieves all subscription plans available for the merchant.",
+        "operationId": "getPlansList",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPlansListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlansListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/createUser": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create User",
+        "description": "Creates a new user in the Nuvei system. Users are identified by userTokenId and can have payment methods stored for future use.",
+        "operationId": "createUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "userTokenId": "user123",
+                "clientRequestId": "1C6CT7V1L",
+                "firstName": "John",
+                "lastName": "Smith",
+                "email": "john.smith@email.com",
+                "phone": "+1234567890",
+                "countryCode": "US",
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateUser": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Update User",
+        "description": "Updates an existing user's information.",
+        "operationId": "updateUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getUserDetails": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Get User Details",
+        "description": "Retrieves detailed information about a user including their profile and payment options.",
+        "operationId": "getUserDetails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUserDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payout": {
+      "post": {
+        "tags": ["Payouts"],
+        "summary": "Payout",
+        "description": "Initiates a payout (withdrawal) to a user's payment method. Supports payouts to cards, bank accounts, and supported APMs.",
+        "operationId": "payout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayoutRequest"
+              },
+              "example": {
+                "merchantId": "427583496191624621",
+                "merchantSiteId": "142033",
+                "userTokenId": "user123",
+                "clientUniqueId": "payout123",
+                "clientRequestId": "1C6CT7V1L",
+                "amount": "100",
+                "currency": "USD",
+                "userPaymentOption": {
+                  "userPaymentOptionId": "12345678"
+                },
+                "timeStamp": "20260129143045",
+                "checksum": "b7a2e66..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getPayoutStatus": {
+      "post": {
+        "tags": ["Payouts"],
+        "summary": "Get Payout Status",
+        "description": "Retrieves the status of a payout transaction.",
+        "operationId": "getPayoutStatus",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPayoutStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPayoutStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getCardDetails": {
+      "post": {
+        "tags": ["Utility"],
+        "summary": "Get Card Details",
+        "description": "Retrieves card details including card brand, type (credit/debit), and issuing country based on the card number (BIN lookup).",
+        "operationId": "getCardDetails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetCardDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCardDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getMerchantPaymentMethods": {
+      "post": {
+        "tags": ["Utility"],
+        "summary": "Get Merchant Payment Methods",
+        "description": "Retrieves all payment methods configured and available for the merchant, including cards and APMs.",
+        "operationId": "getMerchantPaymentMethods",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMerchantPaymentMethodsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMerchantPaymentMethodsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getDccDetails": {
+      "post": {
+        "tags": ["Utility"],
+        "summary": "Get DCC Details",
+        "description": "Retrieves Dynamic Currency Conversion (DCC) details for a transaction. Allows cardholders to pay in their home currency.",
+        "operationId": "getDccDetails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDccDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDccDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getMcpRates": {
+      "post": {
+        "tags": ["Utility"],
+        "summary": "Get MCP Rates",
+        "description": "Retrieves Multi-Currency Pricing (MCP) exchange rates for currency conversion.",
+        "operationId": "getMcpRates",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMcpRatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMcpRatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accountCapture": {
+      "post": {
+        "tags": ["Utility"],
+        "summary": "Account Capture",
+        "description": "Captures bank account details from users for ACH or bank transfer payments. Returns account number and routing number in a secure manner.",
+        "operationId": "accountCapture",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountCaptureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountCaptureResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseRequest": {
+        "type": "object",
+        "required": ["merchantId", "merchantSiteId", "timeStamp", "checksum"],
+        "properties": {
+          "merchantId": {
+            "type": "string",
+            "description": "Merchant's unique identifier provided by Nuvei"
+          },
+          "merchantSiteId": {
+            "type": "string",
+            "description": "Merchant's site identifier provided by Nuvei"
+          },
+          "clientRequestId": {
+            "type": "string",
+            "description": "Unique request identifier for idempotency"
+          },
+          "timeStamp": {
+            "type": "string",
+            "description": "Request timestamp in YYYYMMDDHHmmss format"
+          },
+          "checksum": {
+            "type": "string",
+            "description": "SHA256 hash for request validation"
+          }
+        }
+      },
+      "BaseResponse": {
+        "type": "object",
+        "properties": {
+          "internalRequestId": {
+            "type": "integer",
+            "description": "Nuvei's internal request identifier"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["SUCCESS", "ERROR"],
+            "description": "Overall request status"
+          },
+          "errCode": {
+            "type": "integer",
+            "description": "Error code (0 for success)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Error reason if status is ERROR"
+          },
+          "version": {
+            "type": "string",
+            "description": "API version"
+          }
+        }
+      },
+      "GetSessionTokenRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"}
+        ]
+      },
+      "GetSessionTokenResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "sessionToken": {
+                "type": "string",
+                "description": "Session token for subsequent API calls (valid for 15 minutes)"
+              }
+            }
+          }
+        ]
+      },
+      "OpenOrderRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["currency", "amount"],
+            "properties": {
+              "clientUniqueId": {
+                "type": "string",
+                "description": "Unique order identifier in your system"
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code (e.g., USD, EUR)"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Transaction amount"
+              },
+              "userTokenId": {
+                "type": "string",
+                "description": "User identifier for returning customers"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              },
+              "shippingAddress": {
+                "$ref": "#/components/schemas/ShippingAddress"
+              },
+              "userDetails": {
+                "$ref": "#/components/schemas/UserDetails"
+              },
+              "deviceDetails": {
+                "$ref": "#/components/schemas/DeviceDetails"
+              },
+              "urlDetails": {
+                "$ref": "#/components/schemas/UrlDetails"
+              },
+              "transactionType": {
+                "type": "string",
+                "enum": ["Sale", "Auth"],
+                "description": "Transaction type"
+              }
+            }
+          }
+        ]
+      },
+      "OpenOrderResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "sessionToken": {
+                "type": "string",
+                "description": "Session token for subsequent API calls"
+              },
+              "orderId": {
+                "type": "string",
+                "description": "Nuvei's order identifier"
+              },
+              "merchantId": {
+                "type": "string"
+              },
+              "merchantSiteId": {
+                "type": "string"
+              },
+              "userTokenId": {
+                "type": "string"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "clientRequestId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateOrderRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken"],
+            "properties": {
+              "sessionToken": {
+                "type": "string",
+                "description": "Session token from openOrder"
+              },
+              "orderId": {
+                "type": "string",
+                "description": "Order ID to update"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpdateOrderResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "orderId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PaymentRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "currency", "amount", "paymentOption"],
+            "properties": {
+              "sessionToken": {
+                "type": "string",
+                "description": "Session token from openOrder or getSessionToken"
+              },
+              "clientUniqueId": {
+                "type": "string",
+                "description": "Unique order identifier"
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Transaction amount"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOption"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              },
+              "shippingAddress": {
+                "$ref": "#/components/schemas/ShippingAddress"
+              },
+              "userDetails": {
+                "$ref": "#/components/schemas/UserDetails"
+              },
+              "deviceDetails": {
+                "$ref": "#/components/schemas/DeviceDetails"
+              },
+              "urlDetails": {
+                "$ref": "#/components/schemas/UrlDetails"
+              },
+              "transactionType": {
+                "type": "string",
+                "enum": ["Sale", "Auth"],
+                "default": "Sale",
+                "description": "Sale (auth+capture) or Auth (auth only)"
+              },
+              "isRebilling": {
+                "type": "string",
+                "description": "Set to '1' for recurring transactions"
+              },
+              "userTokenId": {
+                "type": "string",
+                "description": "User identifier for tokenized payments"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Original transaction ID for recurring"
+              },
+              "merchantDetails": {
+                "$ref": "#/components/schemas/MerchantDetails"
+              },
+              "addendums": {
+                "$ref": "#/components/schemas/Addendums"
+              }
+            }
+          }
+        ]
+      },
+      "PaymentResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string",
+                "description": "Nuvei's unique transaction identifier"
+              },
+              "orderId": {
+                "type": "string",
+                "description": "Order identifier"
+              },
+              "transactionStatus": {
+                "type": "string",
+                "enum": ["APPROVED", "DECLINED", "ERROR", "REDIRECT", "PENDING"],
+                "description": "Transaction result status"
+              },
+              "authCode": {
+                "type": "string",
+                "description": "Authorization code from issuer"
+              },
+              "gwErrorCode": {
+                "type": "integer",
+                "description": "Gateway error code"
+              },
+              "gwErrorReason": {
+                "type": "string",
+                "description": "Gateway error description"
+              },
+              "gwExtendedErrorCode": {
+                "type": "integer",
+                "description": "Extended gateway error code"
+              },
+              "paymentMethodErrorCode": {
+                "type": "integer",
+                "description": "Payment method specific error"
+              },
+              "paymentMethodErrorReason": {
+                "type": "string",
+                "description": "Payment method error description"
+              },
+              "transactionType": {
+                "type": "string",
+                "description": "Transaction type performed"
+              },
+              "userPaymentOptionId": {
+                "type": "string",
+                "description": "UPO ID if payment method was tokenized"
+              },
+              "externalTransactionId": {
+                "type": "string",
+                "description": "External reference ID"
+              },
+              "partialApproval": {
+                "$ref": "#/components/schemas/PartialApproval"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOptionResponse"
+              }
+            }
+          }
+        ]
+      },
+      "InitPaymentRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "currency", "amount", "paymentOption"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOption"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              },
+              "userTokenId": {
+                "type": "string"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "deviceDetails": {
+                "$ref": "#/components/schemas/DeviceDetails"
+              }
+            }
+          }
+        ]
+      },
+      "InitPaymentResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOptionResponse"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "SettleTransactionRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["relatedTransactionId", "amount", "currency", "authCode"],
+            "properties": {
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Original Auth transaction ID"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Amount to capture (can be less than auth)"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string",
+                "description": "Auth code from original transaction"
+              },
+              "descriptorMerchantName": {
+                "type": "string"
+              },
+              "descriptorMerchantPhone": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "addendums": {
+                "$ref": "#/components/schemas/Addendums"
+              }
+            }
+          }
+        ]
+      },
+      "SettleTransactionResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "RefundTransactionRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["relatedTransactionId", "amount", "currency", "authCode"],
+            "properties": {
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Settled transaction ID to refund"
+              },
+              "amount": {
+                "type": "string",
+                "description": "Refund amount (partial or full)"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "urlDetails": {
+                "$ref": "#/components/schemas/UrlDetails"
+              }
+            }
+          }
+        ]
+      },
+      "RefundTransactionResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "VoidTransactionRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["relatedTransactionId", "amount", "currency", "authCode"],
+            "properties": {
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Auth transaction ID to void"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "VoidTransactionResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetPaymentStatusRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetPaymentStatusResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionStatus": {
+                "type": "string"
+              },
+              "transactionId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOptionResponse"
+              },
+              "customData": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Authorize3dRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "currency", "amount", "paymentOption"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOption"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Transaction ID from initPayment"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              },
+              "deviceDetails": {
+                "$ref": "#/components/schemas/DeviceDetails"
+              },
+              "urlDetails": {
+                "$ref": "#/components/schemas/UrlDetails"
+              },
+              "userTokenId": {
+                "type": "string"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Authorize3dResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "paymentOption": {
+                "$ref": "#/components/schemas/PaymentOptionResponse"
+              },
+              "redirectUrl": {
+                "type": "string",
+                "description": "3DS challenge URL"
+              },
+              "threeD": {
+                "$ref": "#/components/schemas/ThreeDResponse"
+              }
+            }
+          }
+        ]
+      },
+      "Verify3dRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "currency", "amount", "relatedTransactionId"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "relatedTransactionId": {
+                "type": "string",
+                "description": "Transaction ID from authorize3d"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "userTokenId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Verify3dResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "threeD": {
+                "$ref": "#/components/schemas/ThreeDResponse"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOCreditCardRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "ccCardNumber", "ccExpMonth", "ccExpYear"],
+            "properties": {
+              "userTokenId": {
+                "type": "string",
+                "description": "User identifier"
+              },
+              "ccCardNumber": {
+                "type": "string",
+                "description": "Card number"
+              },
+              "ccExpMonth": {
+                "type": "string",
+                "description": "Expiration month (01-12)"
+              },
+              "ccExpYear": {
+                "type": "string",
+                "description": "Expiration year (YYYY)"
+              },
+              "ccNameOnCard": {
+                "type": "string"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOCreditCardResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "userPaymentOptionId": {
+                "type": "string",
+                "description": "Created UPO ID"
+              },
+              "ccToken": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOCreditCardByTokenRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "ccTempToken"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "ccTempToken": {
+                "type": "string",
+                "description": "Temporary token from Web SDK"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOCreditCardByTokenResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "userPaymentOptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOAPMRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "paymentMethodName"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "paymentMethodName": {
+                "type": "string",
+                "description": "APM name (e.g., apmgw_PayPal)"
+              },
+              "apmData": {
+                "type": "object",
+                "description": "APM-specific data"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              }
+            }
+          }
+        ]
+      },
+      "AddUPOAPMResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "userPaymentOptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "EditUPOCreditCardRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "userPaymentOptionId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              },
+              "ccExpMonth": {
+                "type": "string"
+              },
+              "ccExpYear": {
+                "type": "string"
+              },
+              "ccNameOnCard": {
+                "type": "string"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              }
+            }
+          }
+        ]
+      },
+      "EditUPOCreditCardResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"}
+        ]
+      },
+      "EditUPOAPMRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "userPaymentOptionId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              },
+              "apmData": {
+                "type": "object"
+              },
+              "billingAddress": {
+                "$ref": "#/components/schemas/BillingAddress"
+              }
+            }
+          }
+        ]
+      },
+      "EditUPOAPMResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"}
+        ]
+      },
+      "DeleteUPORequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "userPaymentOptionId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "DeleteUPOResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"}
+        ]
+      },
+      "GetUserUPOsRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetUserUPOsResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "paymentMethods": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserPaymentOption"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateSubscriptionRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "planId", "userPaymentOptionId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "planId": {
+                "type": "string",
+                "description": "Subscription plan ID"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              },
+              "initialAmount": {
+                "type": "string",
+                "description": "Initial charge amount (if different)"
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Subscription start date"
+              }
+            }
+          }
+        ]
+      },
+      "CreateSubscriptionResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "subscriptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CancelSubscriptionRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["subscriptionId"],
+            "properties": {
+              "subscriptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CancelSubscriptionResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"}
+        ]
+      },
+      "GetSubscriptionsListRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "subscriptionStatus": {
+                "type": "string",
+                "enum": ["ACTIVE", "CANCELLED", "EXPIRED", "SUSPENDED"]
+              }
+            }
+          }
+        ]
+      },
+      "GetSubscriptionsListResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "subscriptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              },
+              "totalCount": {
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "CreatePlanRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["planName", "amount", "currency", "recurringPeriod"],
+            "properties": {
+              "planName": {
+                "type": "string"
+              },
+              "planDescription": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "recurringPeriod": {
+                "type": "object",
+                "properties": {
+                  "period": {
+                    "type": "string",
+                    "enum": ["day", "week", "month", "year"]
+                  },
+                  "frequency": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "trialPeriod": {
+                "type": "object",
+                "properties": {
+                  "period": {
+                    "type": "string"
+                  },
+                  "frequency": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "endAfterPeriods": {
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "CreatePlanResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "planId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetPlansListRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "properties": {
+              "planStatus": {
+                "type": "string",
+                "enum": ["ACTIVE", "INACTIVE"]
+              }
+            }
+          }
+        ]
+      },
+      "GetPlansListResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "plans": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              },
+              "totalCount": {
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "CreateUserRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "countryCode": {
+                "type": "string"
+              },
+              "locale": {
+                "type": "string"
+              },
+              "dateOfBirth": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "CreateUserResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "countryCode": {
+                "type": "string"
+              },
+              "locale": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"}
+        ]
+      },
+      "GetUserDetailsRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetUserDetailsResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string"
+              },
+              "userTokenId": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "countryCode": {
+                "type": "string"
+              },
+              "dateOfBirth": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PayoutRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["userTokenId", "amount", "currency"],
+            "properties": {
+              "userTokenId": {
+                "type": "string"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "userPaymentOption": {
+                "type": "object",
+                "properties": {
+                  "userPaymentOptionId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "comment": {
+                "type": "string"
+              },
+              "urlDetails": {
+                "$ref": "#/components/schemas/UrlDetails"
+              }
+            }
+          }
+        ]
+      },
+      "PayoutResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "transactionStatus": {
+                "type": "string"
+              },
+              "authCode": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetPayoutStatusRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionId": {
+                "type": "string"
+              },
+              "clientUniqueId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetPayoutStatusResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "transactionStatus": {
+                "type": "string"
+              },
+              "transactionId": {
+                "type": "string"
+              },
+              "gwErrorCode": {
+                "type": "integer"
+              },
+              "gwErrorReason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetCardDetailsRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["cardNumber"],
+            "properties": {
+              "cardNumber": {
+                "type": "string",
+                "description": "Card number (first 6-8 digits sufficient)"
+              }
+            }
+          }
+        ]
+      },
+      "GetCardDetailsResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "brand": {
+                "type": "string",
+                "description": "Card brand (Visa, MC, Amex, etc.)"
+              },
+              "cardType": {
+                "type": "string",
+                "description": "Credit, Debit, Prepaid"
+              },
+              "cardSubType": {
+                "type": "string"
+              },
+              "issuerCountry": {
+                "type": "string",
+                "description": "Card issuing country"
+              },
+              "issuerName": {
+                "type": "string"
+              },
+              "isDccAllowed": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "GetMerchantPaymentMethodsRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "currencyCode": {
+                "type": "string"
+              },
+              "countryCode": {
+                "type": "string"
+              },
+              "languageCode": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["DEPOSIT", "WITHDRAWAL"]
+              }
+            }
+          }
+        ]
+      },
+      "GetMerchantPaymentMethodsResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "paymentMethods": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MerchantPaymentMethod"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GetDccDetailsRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "cardNumber", "originalAmount", "originalCurrency"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "cardNumber": {
+                "type": "string"
+              },
+              "originalAmount": {
+                "type": "string"
+              },
+              "originalCurrency": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetDccDetailsResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "dccAllowed": {
+                "type": "boolean"
+              },
+              "originalAmount": {
+                "type": "string"
+              },
+              "originalCurrency": {
+                "type": "string"
+              },
+              "convertedAmount": {
+                "type": "string"
+              },
+              "convertedCurrency": {
+                "type": "string"
+              },
+              "exchangeRate": {
+                "type": "string"
+              },
+              "rateId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "GetMcpRatesRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "fromCurrency"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "fromCurrency": {
+                "type": "string"
+              },
+              "toCurrency": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GetMcpRatesResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "rates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/McpRate"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AccountCaptureRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["sessionToken", "userTokenId", "paymentMethod"],
+            "properties": {
+              "sessionToken": {
+                "type": "string"
+              },
+              "userTokenId": {
+                "type": "string"
+              },
+              "paymentMethod": {
+                "type": "string"
+              },
+              "currencyCode": {
+                "type": "string"
+              },
+              "countryCode": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "AccountCaptureResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "redirectUrl": {
+                "type": "string"
+              },
+              "userPaymentOptionId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "BillingAddress": {
+        "type": "object",
+        "description": "Customer billing address",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "maxLength": 30,
+            "description": "Customer's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Customer's last name"
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Street address"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 30,
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "State/Province code (US/CA)"
+          },
+          "zip": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Postal/ZIP code"
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "ISO 3166-1 alpha-2 country code"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 18,
+            "description": "Phone number"
+          }
+        }
+      },
+      "ShippingAddress": {
+        "type": "object",
+        "description": "Shipping address",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "shippingMethod": {
+            "type": "string"
+          }
+        }
+      },
+      "UserDetails": {
+        "type": "object",
+        "description": "Additional user information",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "YYYY-MM-DD format"
+          },
+          "county": {
+            "type": "string"
+          }
+        }
+      },
+      "DeviceDetails": {
+        "type": "object",
+        "description": "Device fingerprinting data",
+        "properties": {
+          "deviceType": {
+            "type": "string",
+            "enum": ["DESKTOP", "SMARTPHONE", "TABLET", "TV", "UNKNOWN"],
+            "description": "Type of device"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "deviceOS": {
+            "type": "string"
+          },
+          "browser": {
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string",
+            "description": "Customer IP address"
+          }
+        }
+      },
+      "UrlDetails": {
+        "type": "object",
+        "description": "Redirect and notification URLs",
+        "properties": {
+          "successUrl": {
+            "type": "string",
+            "description": "Redirect URL for successful payment"
+          },
+          "failureUrl": {
+            "type": "string",
+            "description": "Redirect URL for failed payment"
+          },
+          "pendingUrl": {
+            "type": "string",
+            "description": "Redirect URL for pending payment"
+          },
+          "notificationUrl": {
+            "type": "string",
+            "description": "Webhook notification URL"
+          },
+          "backUrl": {
+            "type": "string",
+            "description": "URL for back/cancel button"
+          }
+        }
+      },
+      "PaymentOption": {
+        "type": "object",
+        "description": "Payment method details",
+        "properties": {
+          "card": {
+            "$ref": "#/components/schemas/CardDetails"
+          },
+          "alternativePaymentMethod": {
+            "$ref": "#/components/schemas/AlternativePaymentMethod"
+          },
+          "userPaymentOptionId": {
+            "type": "string",
+            "description": "Stored UPO ID for tokenized payment"
+          }
+        }
+      },
+      "CardDetails": {
+        "type": "object",
+        "description": "Credit card information",
+        "properties": {
+          "cardNumber": {
+            "type": "string",
+            "description": "Card number"
+          },
+          "cardHolderName": {
+            "type": "string",
+            "description": "Name on card"
+          },
+          "expirationMonth": {
+            "type": "string",
+            "description": "Expiration month (01-12)"
+          },
+          "expirationYear": {
+            "type": "string",
+            "description": "Expiration year (YYYY or YY)"
+          },
+          "CVV": {
+            "type": "string",
+            "description": "Card security code"
+          },
+          "threeD": {
+            "$ref": "#/components/schemas/ThreeDInput"
+          }
+        }
+      },
+      "AlternativePaymentMethod": {
+        "type": "object",
+        "description": "APM details",
+        "properties": {
+          "paymentMethod": {
+            "type": "string",
+            "description": "APM name (e.g., apmgw_PayPal, apmgw_iDEAL)"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ThreeDInput": {
+        "type": "object",
+        "description": "3D Secure input parameters",
+        "properties": {
+          "methodCompletionInd": {
+            "type": "string",
+            "enum": ["Y", "N", "U"],
+            "description": "3DS method completion indicator"
+          },
+          "version": {
+            "type": "string",
+            "description": "3DS version"
+          },
+          "notificationURL": {
+            "type": "string",
+            "description": "3DS notification URL"
+          },
+          "merchantURL": {
+            "type": "string"
+          },
+          "platformType": {
+            "type": "string",
+            "enum": ["01", "02"],
+            "description": "01=App, 02=Browser"
+          },
+          "browserDetails": {
+            "$ref": "#/components/schemas/BrowserDetails"
+          },
+          "externalMpi": {
+            "$ref": "#/components/schemas/ExternalMpi"
+          }
+        }
+      },
+      "BrowserDetails": {
+        "type": "object",
+        "description": "Browser information for 3DS",
+        "properties": {
+          "acceptHeader": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "javaEnabled": {
+            "type": "string"
+          },
+          "javaScriptEnabled": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "colorDepth": {
+            "type": "string"
+          },
+          "screenHeight": {
+            "type": "string"
+          },
+          "screenWidth": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          }
+        }
+      },
+      "ExternalMpi": {
+        "type": "object",
+        "description": "External MPI data",
+        "properties": {
+          "isExternalMpi": {
+            "type": "string",
+            "enum": ["0", "1"]
+          },
+          "eci": {
+            "type": "string"
+          },
+          "cavv": {
+            "type": "string"
+          },
+          "dsTransID": {
+            "type": "string"
+          },
+          "xid": {
+            "type": "string"
+          }
+        }
+      },
+      "ThreeDResponse": {
+        "type": "object",
+        "description": "3D Secure response data",
+        "properties": {
+          "threeDFlow": {
+            "type": "string"
+          },
+          "acsUrl": {
+            "type": "string"
+          },
+          "cReq": {
+            "type": "string"
+          },
+          "eci": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "whiteListStatus": {
+            "type": "string"
+          },
+          "cavv": {
+            "type": "string"
+          },
+          "dsTransID": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          },
+          "authenticationStatus": {
+            "type": "string"
+          },
+          "signatureVerification": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentOptionResponse": {
+        "type": "object",
+        "description": "Payment option details in response",
+        "properties": {
+          "card": {
+            "type": "object",
+            "properties": {
+              "ccCardNumber": {
+                "type": "string",
+                "description": "Masked card number"
+              },
+              "bin": {
+                "type": "string"
+              },
+              "last4Digits": {
+                "type": "string"
+              },
+              "ccExpMonth": {
+                "type": "string"
+              },
+              "ccExpYear": {
+                "type": "string"
+              },
+              "acquirerId": {
+                "type": "string"
+              },
+              "cardType": {
+                "type": "string"
+              },
+              "cardBrand": {
+                "type": "string"
+              },
+              "threeD": {
+                "$ref": "#/components/schemas/ThreeDResponse"
+              }
+            }
+          }
+        }
+      },
+      "MerchantDetails": {
+        "type": "object",
+        "description": "Custom merchant fields",
+        "properties": {
+          "customField1": {
+            "type": "string"
+          },
+          "customField2": {
+            "type": "string"
+          },
+          "customField3": {
+            "type": "string"
+          },
+          "customField4": {
+            "type": "string"
+          },
+          "customField5": {
+            "type": "string"
+          },
+          "customField6": {
+            "type": "string"
+          },
+          "customField7": {
+            "type": "string"
+          },
+          "customField8": {
+            "type": "string"
+          },
+          "customField9": {
+            "type": "string"
+          },
+          "customField10": {
+            "type": "string"
+          },
+          "customField11": {
+            "type": "string"
+          },
+          "customField12": {
+            "type": "string"
+          },
+          "customField13": {
+            "type": "string"
+          },
+          "customField14": {
+            "type": "string"
+          },
+          "customField15": {
+            "type": "string"
+          }
+        }
+      },
+      "Addendums": {
+        "type": "object",
+        "description": "Additional data for L2/L3 processing",
+        "properties": {
+          "localPayment": {
+            "type": "object"
+          },
+          "cardPresentPointOfSale": {
+            "type": "object"
+          },
+          "airline": {
+            "type": "object"
+          }
+        }
+      },
+      "PartialApproval": {
+        "type": "object",
+        "description": "Partial approval details",
+        "properties": {
+          "requestedAmount": {
+            "type": "string"
+          },
+          "requestedCurrency": {
+            "type": "string"
+          },
+          "processedAmount": {
+            "type": "string"
+          },
+          "processedCurrency": {
+            "type": "string"
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserPaymentOption": {
+        "type": "object",
+        "properties": {
+          "userPaymentOptionId": {
+            "type": "string"
+          },
+          "paymentMethodName": {
+            "type": "string"
+          },
+          "ccCardNumber": {
+            "type": "string"
+          },
+          "ccExpMonth": {
+            "type": "string"
+          },
+          "ccExpYear": {
+            "type": "string"
+          },
+          "ccNameOnCard": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "userTokenId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "nextBillingDate": {
+            "type": "string"
+          }
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "planDescription": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "recurringPeriod": {
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "MerchantPaymentMethod": {
+        "type": "object",
+        "properties": {
+          "paymentMethod": {
+            "type": "string"
+          },
+          "paymentMethodDisplayName": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "isDirect": {
+            "type": "string"
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logoURL": {
+            "type": "string"
+          }
+        }
+      },
+      "McpRate": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "string"
+          },
+          "rateId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,376 @@
+---
+title: 'payment'
+openapi: 'POST /payment'
+---
+
+<Info>
+  The primary endpoint for processing payments with credit cards, APMs, or tokenized payment methods. Supports both Sale (immediate capture) and Auth (capture later) transactions.
+</Info>
+
+## When to Use
+
+- Processing credit card payments
+- Processing APM payments
+- Charging stored payment methods (UPOs)
+- Completing payments after 3DS authentication
+
+<Warning>
+  For cards that require 3D Secure authentication, use [initPayment](/api-reference/rest-1/payments/init-payment) first to determine if 3DS is needed.
+</Warning>
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + amount + currency + timeStamp + merchantSecretKey)
+```
+
+## Transaction Types
+
+| Type | Description | When to Use |
+|------|-------------|-------------|
+| `Sale` | Authorize and capture immediately | Digital goods, services |
+| `Auth` | Authorize only | Physical goods (capture after shipping) |
+
+## Payment Methods
+
+### Credit Card Payment
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "200.00",
+  "currency": "USD",
+  "transactionType": "Sale",
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4111111111111111",
+      "cardHolderName": "John Smith",
+      "expirationMonth": "12",
+      "expirationYear": "2030",
+      "CVV": "217"
+    }
+  },
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@email.com",
+    "country": "US"
+  },
+  "deviceDetails": {
+    "ipAddress": "192.168.1.1"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+### Tokenized Payment (UPO)
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "200.00",
+  "currency": "USD",
+  "transactionType": "Sale",
+  "userTokenId": "user_123",
+  "paymentOption": {
+    "userPaymentOptionId": "12345678"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+### APM Payment
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientUniqueId": "ORDER-12345",
+  "clientRequestId": "1C6CT7V1L",
+  "amount": "200.00",
+  "currency": "EUR",
+  "transactionType": "Sale",
+  "paymentOption": {
+    "alternativePaymentMethod": {
+      "paymentMethod": "apmgw_iDEAL"
+    }
+  },
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@email.com",
+    "country": "NL"
+  },
+  "urlDetails": {
+    "successUrl": "https://example.com/success",
+    "failureUrl": "https://example.com/failure"
+  },
+  "timeStamp": "20260129143045",
+  "checksum": "..."
+}
+```
+
+## Example Response (Approved)
+
+```json
+{
+  "transactionId": "2110000000001208909",
+  "orderId": "39272123",
+  "transactionStatus": "APPROVED",
+  "authCode": "111344",
+  "transactionType": "Sale",
+  "userPaymentOptionId": "87654321",
+  "gwErrorCode": 0,
+  "gwExtendedErrorCode": 0,
+  "paymentOption": {
+    "card": {
+      "ccCardNumber": "4****1111",
+      "bin": "411111",
+      "last4Digits": "1111",
+      "ccExpMonth": "12",
+      "ccExpYear": "2030",
+      "cardType": "Credit",
+      "cardBrand": "VISA"
+    }
+  },
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Example Response (3DS Required)
+
+```json
+{
+  "transactionId": "2110000000001208910",
+  "orderId": "39272123",
+  "transactionStatus": "REDIRECT",
+  "redirectUrl": "https://3ds.example.com/challenge",
+  "paymentOption": {
+    "card": {
+      "threeD": {
+        "threeDFlow": "challenge",
+        "acsUrl": "https://acs.bank.com/3ds",
+        "cReq": "eyJtZXNzYWdlVHlwZSI6IkNSZXEiLC..."
+      }
+    }
+  },
+  "internalRequestId": 12345679,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": ""
+}
+```
+
+## Transaction Status Values
+
+| Status | Description | Action Required |
+|--------|-------------|-----------------|
+| `APPROVED` | Payment successful | None - complete |
+| `DECLINED` | Issuer declined | Prompt for different card |
+| `PENDING` | Awaiting async response | Wait for webhook |
+| `REDIRECT` | 3DS/APM redirect needed | Redirect customer |
+| `ERROR` | Processing error | Review error codes |
+
+## Handling 3DS Redirect
+
+When `transactionStatus` is `REDIRECT`:
+
+1. Extract `acsUrl` and `cReq` from response
+2. POST the challenge request to `acsUrl`
+3. After customer completes challenge, call [verify3d](/api-reference/rest-1/3ds/verify3d)
+
+```javascript
+if (response.transactionStatus === 'REDIRECT') {
+  const { acsUrl, cReq } = response.paymentOption.card.threeD;
+  
+  // Create a form and POST to acsUrl
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = acsUrl;
+  
+  const input = document.createElement('input');
+  input.name = 'creq';
+  input.value = cReq;
+  form.appendChild(input);
+  
+  document.body.appendChild(form);
+  form.submit();
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+async function processPayment(sessionToken, orderDetails, cardDetails) {
+  const merchantId = 'YOUR_MERCHANT_ID';
+  const merchantSiteId = 'YOUR_SITE_ID';
+  const secretKey = 'YOUR_SECRET_KEY';
+  
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `req_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(merchantId + merchantSiteId + clientRequestId + 
+            orderDetails.amount + orderDetails.currency + 
+            timeStamp + secretKey)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/payment',
+    {
+      sessionToken,
+      merchantId,
+      merchantSiteId,
+      clientUniqueId: orderDetails.clientUniqueId,
+      clientRequestId,
+      amount: orderDetails.amount,
+      currency: orderDetails.currency,
+      transactionType: 'Sale',
+      paymentOption: {
+        card: {
+          cardNumber: cardDetails.number,
+          cardHolderName: cardDetails.name,
+          expirationMonth: cardDetails.expMonth,
+          expirationYear: cardDetails.expYear,
+          CVV: cardDetails.cvv
+        }
+      },
+      billingAddress: orderDetails.billingAddress,
+      deviceDetails: {
+        ipAddress: orderDetails.ipAddress
+      },
+      timeStamp,
+      checksum
+    }
+  );
+
+  const result = response.data;
+  
+  if (result.transactionStatus === 'APPROVED') {
+    console.log('Payment approved!', result.transactionId);
+  } else if (result.transactionStatus === 'REDIRECT') {
+    console.log('3DS required, redirect to:', result.redirectUrl);
+  } else {
+    console.log('Payment failed:', result.gwErrorReason);
+  }
+  
+  return result;
+}
+```
+
+```python Python
+import hashlib
+import requests
+from datetime import datetime
+
+def process_payment(session_token, order_details, card_details):
+    merchant_id = 'YOUR_MERCHANT_ID'
+    site_id = 'YOUR_SITE_ID'
+    secret_key = 'YOUR_SECRET_KEY'
+    
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    client_request_id = f'req_{int(datetime.now().timestamp())}'
+    
+    raw = (merchant_id + site_id + client_request_id + 
+           order_details['amount'] + order_details['currency'] + 
+           timestamp + secret_key)
+    checksum = hashlib.sha256(raw.encode()).hexdigest()
+
+    response = requests.post(
+        'https://ppp-test.nuvei.com/ppp/api/v1/payment',
+        json={
+            'sessionToken': session_token,
+            'merchantId': merchant_id,
+            'merchantSiteId': site_id,
+            'clientUniqueId': order_details['clientUniqueId'],
+            'clientRequestId': client_request_id,
+            'amount': order_details['amount'],
+            'currency': order_details['currency'],
+            'transactionType': 'Sale',
+            'paymentOption': {
+                'card': {
+                    'cardNumber': card_details['number'],
+                    'cardHolderName': card_details['name'],
+                    'expirationMonth': card_details['exp_month'],
+                    'expirationYear': card_details['exp_year'],
+                    'CVV': card_details['cvv']
+                }
+            },
+            'billingAddress': order_details['billing_address'],
+            'deviceDetails': {
+                'ipAddress': order_details['ip_address']
+            },
+            'timeStamp': timestamp,
+            'checksum': checksum
+        }
+    )
+
+    result = response.json()
+    
+    if result['transactionStatus'] == 'APPROVED':
+        print(f"Payment approved! {result['transactionId']}")
+    elif result['transactionStatus'] == 'REDIRECT':
+        print(f"3DS required, redirect to: {result.get('redirectUrl')}")
+    else:
+        print(f"Payment failed: {result.get('gwErrorReason')}")
+    
+    return result
+```
+</CodeGroup>
+
+## Store Card for Future Use
+
+Include `userTokenId` to save the card as a UPO:
+
+```json
+{
+  "userTokenId": "user_123",
+  "paymentOption": {
+    "card": {
+      "cardNumber": "4111111111111111",
+      "cardHolderName": "John Smith",
+      "expirationMonth": "12",
+      "expirationYear": "2030",
+      "CVV": "217"
+    }
+  }
+}
+```
+
+The response will include `userPaymentOptionId` which can be used for future one-click payments.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Init Payment" icon="fingerprint" href="/api-reference/rest-1/payments/init-payment">
+    3DS fingerprinting
+  </Card>
+  <Card title="Settle Transaction" icon="check-circle" href="/api-reference/rest-1/payments/settle-transaction">
+    Capture authorized payments
+  </Card>
+  <Card title="Refund" icon="rotate-left" href="/api-reference/rest-1/payments/refund-transaction">
+    Process refunds
+  </Card>
+  <Card title="Get Status" icon="magnifying-glass" href="/api-reference/rest-1/payments/get-payment-status">
+    Check transaction status
+  </Card>
+</CardGroup>

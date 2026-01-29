@@ -1,0 +1,173 @@
+---
+title: 'getSessionToken'
+openapi: 'POST /getSessionToken'
+---
+
+<Info>
+  This endpoint creates a session token required for subsequent API calls. The session token is valid for **15 minutes** and should be used for a single payment flow.
+</Info>
+
+## When to Use
+
+- When you need only a session token without creating an order
+- For client-side integrations using Web SDK
+- When payment amount is unknown at session start
+
+<Tip>
+  For most integrations, prefer using [openOrder](/api-reference/rest-1/session/open-order) which creates both a session token and an order in one call.
+</Tip>
+
+## Checksum Calculation
+
+```
+SHA256(merchantId + merchantSiteId + clientRequestId + timeStamp + merchantSecretKey)
+```
+
+## Example Request
+
+```json
+{
+  "merchantId": "427583496191624621",
+  "merchantSiteId": "142033",
+  "clientRequestId": "1C6CT7V1L",
+  "timeStamp": "20260129143045",
+  "checksum": "b7a2e66d5c5c85d8d3e5b5c5e5f5a5b5c5d5e5f5a5b5c5d5e5f5a5b5c5d5e5f5"
+}
+```
+
+## Example Response
+
+```json
+{
+  "sessionToken": "9610a8f6-44cf-4c4f-976a-005da69a2a3b",
+  "internalRequestId": 12345678,
+  "status": "SUCCESS",
+  "errCode": 0,
+  "reason": "",
+  "version": "1.0"
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+const axios = require('axios');
+
+async function getSessionToken() {
+  const merchantId = 'YOUR_MERCHANT_ID';
+  const merchantSiteId = 'YOUR_SITE_ID';
+  const secretKey = 'YOUR_SECRET_KEY';
+  
+  const timeStamp = new Date().toISOString()
+    .replace(/[-:T.Z]/g, '').slice(0, 14);
+  const clientRequestId = `req_${Date.now()}`;
+  
+  const checksum = crypto.createHash('sha256')
+    .update(merchantId + merchantSiteId + clientRequestId + timeStamp + secretKey)
+    .digest('hex');
+
+  const response = await axios.post(
+    'https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken',
+    {
+      merchantId,
+      merchantSiteId,
+      clientRequestId,
+      timeStamp,
+      checksum
+    }
+  );
+
+  console.log('Session Token:', response.data.sessionToken);
+  return response.data;
+}
+
+getSessionToken();
+```
+
+```python Python
+import hashlib
+import requests
+from datetime import datetime
+
+def get_session_token():
+    merchant_id = 'YOUR_MERCHANT_ID'
+    site_id = 'YOUR_SITE_ID'
+    secret_key = 'YOUR_SECRET_KEY'
+    
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    client_request_id = f'req_{int(datetime.now().timestamp())}'
+    
+    # Calculate checksum
+    raw = merchant_id + site_id + client_request_id + timestamp + secret_key
+    checksum = hashlib.sha256(raw.encode()).hexdigest()
+
+    response = requests.post(
+        'https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken',
+        json={
+            'merchantId': merchant_id,
+            'merchantSiteId': site_id,
+            'clientRequestId': client_request_id,
+            'timeStamp': timestamp,
+            'checksum': checksum
+        }
+    )
+
+    data = response.json()
+    print(f"Session Token: {data['sessionToken']}")
+    return data
+
+get_session_token()
+```
+
+```php PHP
+<?php
+function getSessionToken() {
+    $merchantId = 'YOUR_MERCHANT_ID';
+    $merchantSiteId = 'YOUR_SITE_ID';
+    $secretKey = 'YOUR_SECRET_KEY';
+    
+    $timeStamp = date('YmdHis');
+    $clientRequestId = 'req_' . time();
+    
+    // Calculate checksum
+    $raw = $merchantId . $merchantSiteId . $clientRequestId . $timeStamp . $secretKey;
+    $checksum = hash('sha256', $raw);
+
+    $data = [
+        'merchantId' => $merchantId,
+        'merchantSiteId' => $merchantSiteId,
+        'clientRequestId' => $clientRequestId,
+        'timeStamp' => $timeStamp,
+        'checksum' => $checksum
+    ];
+
+    $ch = curl_init('https://ppp-test.nuvei.com/ppp/api/v1/getSessionToken');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+    
+    echo "Session Token: " . $response['sessionToken'];
+    return $response;
+}
+
+getSessionToken();
+?>
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Open Order" icon="folder-plus" href="/api-reference/rest-1/session/open-order">
+    Create session with order
+  </Card>
+  <Card title="Process Payment" icon="credit-card" href="/api-reference/rest-1/payments/payment">
+    Use the session token
+  </Card>
+</CardGroup>
